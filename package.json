@@ -1,0 +1,160 @@
+{
+  "name": "testwa",
+  "private": true,
+  "version": "1.1.4",
+  "main": "main/main.js",
+  "description": "Automated test Script recording tool for Apps.",
+  "author": "canfeit <canfeit@qq.com> (http://testwa.com/)",
+  "license": "MIT",
+  "keywords": [
+    "testwa",
+    "appium",
+    "selenium",
+    "webdriver",
+    "automation",
+    "testing"
+  ],
+  "tags": [
+    "testwa",
+    "appium",
+    "selenium",
+    "webdriver",
+    "automation",
+    "testing",
+    "javascript",
+    "ios",
+    "android",
+    "firefoxos"
+  ],
+  "homepage": "https://github.com/canfeit/testwa#readme",
+  "scripts": {
+    "start": "yarn clean&&yarn start-all",
+    "dir": "yarn build-umi&&npm run build -- -c.asar=false",
+    "build": "build --dir",
+    "release": "release-it -n&&yarn build-umi&&npm run build:all",
+    "build:all": "build -w --publish always&&build -m --publish always",
+    "build-cli": "npx build",
+    "build-umi": "cd src/renderer && cross-env COMPRESS=none cross-env CSS_COMPRESS=none umi build",
+    "start-umi": "cd src/renderer && cross-env BROWSER=none umi dev",
+    "start-electron": "cd src&&electron .",
+    "start-all": "concurrently \"yarn start-umi\" \"wait-on http://localhost:8000 && yarn start-electron\"",
+    "clean": "yarn clean-bin&&yarn clean-apk",
+    "clean-bin": "adb shell rm -r /data/local/tmp/mini*&&adb shell ls /data/local/tmp",
+    "clean-apk": "adb uninstall io.appium.uiautomator2.server",
+    "postinstall": "build install-app-deps"
+  },
+  "build": {
+    "productName": "TestwaGen",
+    "appId": "com.testwa.desktop",
+    "copyright": "Copyright © 2018 testwa",
+    "mac": {
+      "target": "dmg"
+    },
+    "files": [
+      {
+        "from": "dist/renderer",
+        "to": "renderer"
+      },
+      {
+        "from": "src/main",
+        "to": "main"
+      },
+      {
+        "from": "src/common",
+        "to": "common"
+      },
+      {
+        "from": "src/public",
+        "to": "renderer"
+      },
+      "!**/{LICENSE,LICENCE,license,*LICENSE,LICENSE*,CHANGELOG*,README*,AUTHORS,.gitmodules,.vscode,.yarnclean}",
+      "!**/*.{png,jpg,JPG,PNG,jpeg,gif,map,un~}",
+      "!static/",
+      "!docs/",
+      "!dist/",
+      "!src/",
+      "!tests/",
+      "!deno*",
+      "!yarn*",
+      "!.git*",
+      "!sleep.js"
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules/minicap-prebuilt",
+        "to": "minicap-prebuilt"
+      },
+      {
+        "from": "node_modules/minitouch-prebuilt",
+        "to": "minitouch-prebuilt"
+      },
+      "static/wappium/lib",
+      "static/wappium/tests/*.txt",
+      "static/wappium/*.js",
+      "static/wappium/node_modules",
+      "static/uiautomator2/apks"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/canfeit/testwa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/canfeit/testwa/issues"
+  },
+  "dependencies": {
+    "adbkit": "^2.11.0",
+    "adbkit-apkreader": "^3.1.1",
+    "electron-updater": "^4.0.6",
+    "request": "^2.88.0",
+    "source-map-support": "^0.5.9"
+  },
+  "devDependencies": {
+    "ansi-to-html": "^0.6.9",
+    "concurrently": "^4.1.0",
+    "conventional-changelog-cli": "^2.0.12",
+    "cross-env": "^5.2.0",
+    "electron": "^2.0.13",
+    "electron-builder": "^20.38.4",
+    "electron-devtools-installer": "^2.2.4",
+    "immutable": "^4.0.0-rc.12",
+    "json-server": "^0.14.2",
+    "less-vars-to-js": "^1.3.0",
+    "mime-types": "^2.1.22",
+    "minicap": "^0.2.1-0",
+    "minicap-prebuilt": "^2.3.0",
+    "minitouch-prebuilt": "^1.2.0",
+    "pouchdb-adapter-idb": "^7.0.0",
+    "react-syntax-highlighter": "^10.1.2",
+    "release": "^5.0.3",
+    "release-it": "^10.1.0",
+    "rxdb": "^8.0.4",
+    "rxjs": "^6.3.3",
+    "standard-version": "^4.4.0",
+    "umi": "^1.3.18",
+    "umi-plugin-dva": "^0.9.1",
+    "wait-on": "^3.2.0",
+    "xpath": "^0.0.27",
+    "yauzl": "^2.10.0"
+  },
+  "release-it": {
+    "increment": "conventional:angular",
+    "scripts": {
+      "beforeStage": "npx conventional-changelog -p angular -i CHANGELOG.md -s"
+    },
+    "github": {
+      "release": true,
+      "draft": true,
+      "tokenRef": "GH_TOKEN"
+    },
+    "npm": {
+      "publish": false,
+      "publishPath": "."
+    },
+    "git": {
+      "commitArgs": "--no-verify",
+      "requireCleanWorkingDir": false,
+      "tagName": "v${version}"
+    }
+  }
+}

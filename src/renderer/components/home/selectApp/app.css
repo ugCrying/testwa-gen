@@ -1,0 +1,106 @@
+.select-app-wrap {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px;
+}
+
+.title-list {
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.title-list p,
+.title-list .refresh-btn {
+  margin: 0 0 0 6px;
+  border: none;
+}
+
+.app-list-wrap {
+  width: 100%;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.app-item {
+  width: 72px;
+  height: 96px;
+  position: relative;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 16px 16px 0;
+}
+
+.app-item-upload {
+}
+
+.app-item-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 72px;
+  width: 72px;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.7);
+  display: none;
+}
+
+.app-item.selected .app-item-mask {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.app-item.selected .app-item-icon {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.app-item.selected .app-item-name {
+  color: #52c41a;
+}
+
+.app-item-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 5px;
+  flex: none;
+  cursor: pointer;
+}
+
+.app-item-icon.item-uploader button {
+  width: 70px;
+  height: 70px;
+  border: none;
+}
+
+.app-item-icon img {
+  width: 72px;
+  height: 72px;
+}
+
+.app-item-icon:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.app-item-name {
+  width: 72px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  margin: 0;
+  font-size: 12px;
+}
+
+.app-control-btn {
+  margin: 16px 0;
+}

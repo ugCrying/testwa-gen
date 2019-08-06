@@ -1,0 +1,16 @@
+.canvas-container canvas {
+  height: 100%;
+  width: 100%;
+}
+.screen-footer {
+  height: 45px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-around;
+  align-items: center;
+  background: #52c41a;
+}
+.screen-footer button {
+  border: none;
+  background: #52c41a;
+}

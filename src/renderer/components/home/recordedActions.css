@@ -1,0 +1,56 @@
+.script-wrap {
+  width: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+}
+
+.script-title {
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 4px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, .12);
+}
+
+.script-title-name {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.script-title-name p {
+  margin: 0 0 0 6px;
+}
+
+.script-title-select .ant-select.ant-select-enabled .ant-select-selection.ant-select-selection--single {
+  background: white;
+  border: 1px solid #d9d9d9;
+}
+
+.script-title-select .ant-select.ant-select-enabled .ant-select-selection.ant-select-selection--single:focus {
+  border: 1px solid #52c41a;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.script-content {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+}
+
+.script-content pre code:nth-child(1) {
+  border-right: 2px solid rgba(0, 0, 0, .34);
+  padding-right: 0 !important;
+  margin-right: 12px !important;
+  color: #999;
+}
+
+.script-wrap .ant-tabs-tab {
+  margin: 0;
+  padding: 10px 32px !important;
+}

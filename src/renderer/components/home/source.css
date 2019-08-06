@@ -1,0 +1,31 @@
+.source-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+}
+
+.source-title {
+  height: 30px;
+  width: 100%;
+  flex: none;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 4px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, .12);
+}
+
+.source-title p {
+  margin: 0 0 0 6px;
+}
+
+.source-tree {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 4px 10px;
+  overflow: auto;
+}

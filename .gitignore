@@ -1,0 +1,11 @@
+.DS_Store
+dist/
+node_modules/
+yarn-error.log
+.idea
+
+# umi
+.umi
+.umi-production
+err.log
+out.log
