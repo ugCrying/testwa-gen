@@ -1177,10 +1177,10 @@
   resolved "https://registry.npm.taobao.org/@types/node/download/@types/node-12.6.9.tgz#ffeee23afdc19ab16e979338e7b536fdebbbaeaf"
   integrity sha1-/+7iOv3BmrFul5M457U2/eu7rq8=
 
-"@types/node@^10.1.4":
-  version "10.14.16"
-  resolved "https://registry.npm.taobao.org/@types/node/download/@types/node-10.14.16.tgz#4d690c96cbb7b2728afea0e260d680501b3da5cf"
-  integrity sha1-TWkMlsu3snKK/qDiYNaAUBs9pc8=
+"@types/node@^10.12.18":
+  version "10.14.17"
+  resolved "https://registry.npm.taobao.org/@types/node/download/@types/node-10.14.17.tgz#b96d4dd3e427382482848948041d3754d40fd5ce"
+  integrity sha1-uW1N0+QnOCSChIlIBB03VNQP1c4=
 
 "@types/prop-types@*":
   version "15.7.1"
@@ -5218,12 +5218,12 @@ electron-updater@^4.0.6:
     pako "^1.0.10"
     semver "^6.2.0"
 
-electron@3:
-  version "3.1.13"
-  resolved "https://registry.npm.taobao.org/electron/download/electron-3.1.13.tgz#aeb276f4cf5e3785078b6495e982ee46d553a5d2"
-  integrity sha1-rrJ29M9eN4UHi2SV6YLuRtVTpdI=
+electron@5:
+  version "5.0.10"
+  resolved "https://registry.npm.taobao.org/electron/download/electron-5.0.10.tgz#a3819c3ff8d05ee57315bfabe2d61d3529f5659c"
+  integrity sha1-o4GcP/jQXuVzFb+r4tYdNSn1ZZw=
   dependencies:
-    "@types/node" "^10.1.4"
+    "@types/node" "^10.12.18"
     electron-download "^4.1.0"
     extract-zip "^1.0.3"
 
@@ -17007,7 +17007,7 @@ xmlbuilder@^9.0.7:
   resolved "https://registry.npm.taobao.org/xmlbuilder/download/xmlbuilder-9.0.7.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fxmlbuilder%2Fdownload%2Fxmlbuilder-9.0.7.tgz#132ee63d2ec5565c557e20f4c22df9aca686b10d"
   integrity sha1-Ey7mPS7FVlxVfiD0wi35rKaGsQ0=
 
-xmldom@0.1.x:
+xmldom@0.1.x, xmldom@^0.1.27:
   version "0.1.27"
   resolved "https://registry.npm.taobao.org/xmldom/download/xmldom-0.1.27.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fxmldom%2Fdownload%2Fxmldom-0.1.27.tgz#d501f97b3bdb403af8ef9ecc20573187aadac0e9"
   integrity sha1-1QH5ezvbQDr4757MIFcxh6rawOk=
