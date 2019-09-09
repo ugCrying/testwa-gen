@@ -26,15 +26,11 @@ class PythonFramework extends Framework {
 # Then you can paste this into a file and simply run with Python
 
 from appium import webdriver
-from time import sleep
 
 caps = {}
 ${capStr}
 
 driver = webdriver.Remote("${this.serverUrl}", caps)
-currentWindow = driver.get_window_size()
-screenRatioX = currentWindow['width']/${this.deviceWindow[0]}
-screenRatioY = currentWindow['height']/${this.deviceWindow[1]}
 
 ${code}
 driver.quit()`;
@@ -83,16 +79,14 @@ driver.quit()`;
     return `driver.back()`;
   }
 
-  codeFor_tap(varNameIgnore, varIndexIgnore, x, y, timeout) {
-    return `sleep(${timeout / 1000})
-    TouchAction(driver).tap(x=${x} * screenRatioX, y=${y} * screenRatioY).perform()`;
+  codeFor_tap(varNameIgnore, varIndexIgnore, x, y) {
+    return `TouchAction(driver).tap(x=${x}, y=${y}).perform()`;
   }
 
-  codeFor_swipe(varNameIgnore, varIndexIgnore, x1, y1, x2, y2, timeout) {
-    return `sleep(${timeout / 1000})
-    TouchAction(driver) \
-  .press(x=${x1} * screenRatioX, y=${y1} * screenRatioY) \
-  .move_to(x=${x2} * screenRatioX, y=${y2} * screenRatioY) \
+  codeFor_swipe(varNameIgnore, varIndexIgnore, x1, y1, x2, y2) {
+    return `TouchAction(driver) \
+  .press(x=${x1}, y=${y1}) \
+  .move_to(x=${x2}, y=${y2}) \
   .release() \
   .perform()
     `;

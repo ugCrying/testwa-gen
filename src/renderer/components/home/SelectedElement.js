@@ -7,10 +7,7 @@ export default class SelectedElement extends Component {
   constructor(props) {
     super(props);
     // this.handleSendKeys = this.handleSendKeys.bind(this);
-    this.state = {
-      selectedElement: {},
-      tap: localStorage.getItem("tap") === "false" ? false : true
-    };
+    this.state = { selectedElement: {} };
     this.text = "";
     ipcRenderer.on("selectedElement", (_, selectedElement) => {
       this.setState({ selectedElement });

@@ -12,6 +12,7 @@ class JsWdFramework extends Framework {
     return `// Requires the admc/wd client library
 // (npm install wd)
 // Then paste this into a .js file and run with Node 7.6+
+
 let RETRY = 5;
 const wd = require('wd');
 const driver = wd.promiseChainRemote("${this.serverUrl}");
@@ -28,35 +29,18 @@ const request = require('request').defaults({
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-function wait(time) {
-  return new Promise(resolve => {
-    while (true) {
-      if (new Date().getTime() >= time) {
-        resolve();
-        break;
-      }
-    }
-  });
-}
 async function main () {
-  let screenRatioX,screenRatioY;
   try {
     await driver.init(caps);
-    await driver.context("NATIVE_APP");
-    const currentWindow=await driver.getWindowSize();
-		screenRatioX = currentWindow['width']/${this.deviceWindow[0]};
-		screenRatioY = currentWindow['height']/${this.deviceWindow[1]};
-    console.log(currentWindow);
   } catch (e) {
     if (!RETRY--) return console.log(e);
     await sleep(2000);
     console.log("wd retry");
     return main().catch(console.log);
   }
+  await sleep(10000);
   try{
-    let time=${this.time}<new Date().getTime()?new Date().getTime():${this.time}
-    ${this.indent(code, 2)}
-    await wait(time+=10000);
+  ${this.indent(code, 2)}
   }catch(e){
     const date = new Date().getTime();
     request.get('/source', (_err, _res, body) => {
@@ -83,14 +67,6 @@ const alive = () => {
     });
 };
 alive();
-process.on("message", ({ type }) => {
-  switch (type) {
-    case "exit":
-      console.log("${this.caps.udid}回放被终止")
-      process.exit(1);
-      break;
-  }
-});
 `;
   }
 
@@ -137,30 +113,23 @@ process.on("message", ({ type }) => {
     )}.sendKeys(${JSON.stringify(text)});`;
   }
 
-  codeFor_activeSendKeys(text) {
-    return `driver.keys(${JSON.stringify(text)});await sleep(3000);`;
-  }
   codeFor_back() {
-    return `await driver.back();await sleep(3000);`;
+    return `await driver.back();`;
   }
 
-  codeFor_tap(varNameIgnore, varIndexIgnore, x, y, timeout = 0) {
-    return `${
-      +timeout !== 0 ? `await wait(time+=${timeout});` : ""
-    }await (new wd.TouchAction(driver))
-  .tap({x: ${x} * screenRatioX, y: ${y} * screenRatioY})
-  .perform();
+  codeFor_tap(varNameIgnore, varIndexIgnore, x, y) {
+    return `await (new wd.TouchAction(driver))
+  .tap({x: ${x}, y: ${y}})
+  .perform()
     `;
   }
 
-  codeFor_swipe(varNameIgnore, varIndexIgnore, x1, y1, x2, y2, timeout = 0) {
-    return `${
-      +timeout !== 0 ? `await wait(time+=${timeout});` : ""
-    }await (new wd.TouchAction(driver))
-  .press({x: ${x1} * screenRatioX, y: ${y1} * screenRatioY})
-  .moveTo({x: ${x2} * screenRatioX, y: ${y2} * screenRatioY})
+  codeFor_swipe(varNameIgnore, varIndexIgnore, x1, y1, x2, y2) {
+    return `await (new wd.TouchAction(driver))
+  .press({x: ${x1}, y: ${y1}})
+  .moveTo({x: ${x2}, y: ${y2}})
   .release()
-  .perform();
+  .perform()
     `;
   }
 }

@@ -108,17 +108,12 @@ class RA extends Component {
         title: "行为",
         dataIndex: "action",
         fixed: "left",
-        width: 100
-        // editable: true
+        width: 100,
+        editable: true
       },
       {
         title: "元素",
-        dataIndex: "params"
-        // editable: true
-      },
-      {
-        title: "等待",
-        dataIndex: "delay",
+        dataIndex: "params",
         editable: true
       },
       {
@@ -156,9 +151,8 @@ class RA extends Component {
     this.setState({ fresh: true });
   };
   handleSave = async row => {
-    // if (row.params.split) row.params = row.params.split(",");
-    // row.params[row.params.length - 1] = row.delay;
-    this.codes[row.key].params[4] = row.delay;
+    if (row.params.split) row.params = row.params.split(",");
+    this.codes[row.key] = row;
     if (this.props.record.code.addTime) {
       const db = await rxdb;
       await db.code
@@ -188,7 +182,6 @@ class RA extends Component {
         datas.push({
           action: data.action,
           params: data.params.filter(d => d).join(","),
-          delay: data.params[4],
           key: i++
         });
         //   data.params[1]

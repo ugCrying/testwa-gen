@@ -1,4 +1,6 @@
 import XPath from "xpath";
+import xpath from 'xpath';
+import { DOMParser as DOMParser2 } from 'xmldom';
 console.log("录制辅助方法模块");
 export const xmlToJSON = source => {
   console.log("xml 转 json");
@@ -101,9 +103,18 @@ function getOptimalXPath(doc, domNode, uniqueAttributes = ["id"]) {
     return null;
   }
 }
+
+export function isUnique(attrName, attrValue, sourceXML) {
+  // If no sourceXML provided, assume it's unique
+  if (!sourceXML) {
+    return true;
+  }
+  const doc = new DOMParser2().parseFromString(sourceXML);
+  return xpath.select(`//*[@${attrName}="${attrValue}"]`, doc).length < 2;
+}
+
 let elVariableCounter = 0;
-export const getRecordedActions = element => {
-  if (!element) return elVariableCounter++;
+export const getRecordedActions = (element, sourceXML) => {
   console.log("获取操作行为");
   const { attributes, xpath } = element;
   const STRATEGY_MAPPINGS = [
@@ -113,8 +124,10 @@ export const getRecordedActions = element => {
     ["rntestid", "id"],
     ["resource-id", "id"]
   ];
+
   for (let [strategyAlias, strategy] of STRATEGY_MAPPINGS) {
-    if (attributes[strategyAlias]) {
+    const value = attributes[strategyAlias];
+    if (value && isUnique(strategyAlias, value, sourceXML)) {
       return {
         variableName: `el${elVariableCounter++}`,
         // variableType: "string",

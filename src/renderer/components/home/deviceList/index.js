@@ -31,7 +31,6 @@ const DeviceList = props => {
                   alert("不支持的设备");
                   return;
                 }
-                console.log("屏幕尺寸adbSize" + device.screen.toString());
                 onSelectDevice(device);
                 props.onSelectDevice(device);
               }}

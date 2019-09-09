@@ -70,8 +70,7 @@ export default class extends Component {
                 tap.width,
                 tap.height,
                 tap.widthEnd,
-                tap.heightEnd,
-                tap.timeout
+                tap.heightEnd
               ]
             }
           ]
@@ -79,14 +78,14 @@ export default class extends Component {
       });
     });
     ipcRenderer.on("taped", (_, tap) => {
-      localStorage.getItem("tap") !== "false" &&
+      localStorage.getItem("tap") === "true" &&
         this.props.dispatch({
           type: "record/addRecordedActions",
           payload: {
             recordedActions: [
               {
                 action: "tap",
-                params: ["", "", tap.width, tap.height, tap.timeout]
+                params: ["", "", tap.width, tap.height]
               }
             ]
           }
@@ -94,7 +93,8 @@ export default class extends Component {
     });
     ipcRenderer.on("recordedActions", (_, recordedActions) => {
       console.log("得到操作行为，更新state", recordedActions);
-      localStorage.getItem("tap") === "false" &&
+      (!localStorage.getItem("tap") ||
+        localStorage.getItem("tap") === "false") &&
         this.props.dispatch({
           type: "record/addRecordedActions",
           payload: {

@@ -33,7 +33,7 @@ class Source extends Component {
       "AXDescription",
       "AXIdentifier"
     ])
-      if (attributes && attributes[attr])
+      if (attributes[attr])
         attrs.push(
           <span key={attr}>
             &nbsp;

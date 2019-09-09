@@ -11,7 +11,6 @@ const request = require("request").defaults({
   baseUrl: "http://localhost:4444/wd/hub/session/1/"
 });
 const ApkReader = require("adbkit-apkreader");
-let devices;
 let device;
 let cp;
 let timer;
@@ -31,32 +30,24 @@ export const downCode = (info, recordedActions) => {
     appPackage: info.packageName,
     appActivity: info.activityName
   };
-  framework.deviceWindow = info.screen.split("x");
   framework.actions = recordedActions;
   return framework.getCodeString(true);
 };
 export const runCode = (info, recordedActions) => {
-  let port = 4723;
-  let time = new Date().getTime() + 10000 * devices.length;
-  for (const device of devices) {
-    if (device.type !== "device") continue;
-    let framework = new frameworks["jsWd"](null, port++);
-    framework.caps = {
-      platformName: "Android",
-      automationName: "UiAutomator2",
-      deviceName: device.id,
-      udid: device.id,
-      appPackage: info.packageName,
-      appActivity: info.activityName,
-      noReset: "True"
-    };
-    framework.actions = recordedActions;
-    framework.time = time;
-    framework.deviceWindow = info.screen.split("x");
-    framework.run_num = localStorage.getItem("run_code_num") || 1;
-    const rawCode = framework.getCodeString(true);
-    ipcRenderer.send("runcode", rawCode, device.id);
-  }
+  let framework = new frameworks["jsWd"]();
+  framework.caps = {
+    platformName: "Android",
+    automationName: "UiAutomator2",
+    deviceName: info.id,
+    udid: info.id,
+    appPackage: info.packageName,
+    appActivity: info.activityName,
+    noReset: "True"
+  };
+  framework.actions = recordedActions;
+  framework.run_num = localStorage.getItem("run_code_num") || 1;
+  const rawCode = framework.getCodeString(true);
+  ipcRenderer.send("runcode", rawCode);
 };
 export const record = () => {
   ipcRenderer.send(
@@ -218,7 +209,7 @@ export const trackDevices = async dispatch => {
       : console.error(`${device.id} 获取分辨率失败`, screen.toString());
     console.log("设备信息", device);
   };
-  devices = await client.listDevices();
+  const devices = await client.listDevices();
   const Promises = [];
   for (const device of devices) {
     if (device.type !== "device") continue;

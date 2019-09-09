@@ -2,6 +2,7 @@ import React from "react";
 import { getRecordedActions, parseCoordinates } from "./lib";
 import { ipcRenderer } from "electron";
 import { emitter } from "../../lib";
+import { sourceXML } from ".";
 // @ts-ignore
 import styles from "./Inspector.css";
 export default ({
@@ -34,24 +35,28 @@ export default ({
         //check
         console.log("输入文本录制", text);
         if (text) {
-          const { variableName } = getRecordedActions(element);
-          ipcRenderer.sendTo(+localStorage.getItem("mainWinId"), "sendKeys", [
-            {
-              action: "findAndAssign",
-              params: ["id", textId, "keys" + variableName]
-            },
-            {
-              action: "sendKeys",
-              params: ["keys" + variableName, "", text]
-            }
-          ]);
+          const { variableName } = getRecordedActions(element, sourceXML);
+          ipcRenderer.send(
+            //+localStorage.getItem("mainWinId"), 
+            "sendKeys", [
+              {
+                action: "findAndAssign",
+                params: ["id", textId, "keys" + variableName]
+              },
+              {
+                action: "sendKeys",
+                params: ["keys" + variableName, "", text]
+              }
+            ]);
         }
         clearText();
         const { variableName, strategy, selector } = getRecordedActions(
-          element
+          element, sourceXML
         );
-        ipcRenderer.sendTo(
-          +localStorage.getItem("mainWinId"),
+        require('electron').remote.BrowserWindow.fromId(+localStorage.getItem("mainWinId")).webContents.send(
+          // ipcRenderer.sendTo(
+          //渲染进程通信消息中转
+          // +localStorage.getItem("mainWinId"),
           "recordedActions",
           [
             {
@@ -68,8 +73,8 @@ export default ({
       onMouseOver={() => {
         timer = setTimeout(() => {
           emitter.emit("selectedElement", element);
-          ipcRenderer.sendTo(
-            +localStorage.getItem("mainWinId"),
+          ipcRenderer.send(
+            // +localStorage.getItem("mainWinId"),
             "selectedElement",
             element
           );
@@ -83,8 +88,8 @@ export default ({
             expandedPaths.push(path);
           }
           emitter.emit("expandedPaths", expandedPaths);
-          ipcRenderer.sendTo(
-            +localStorage.getItem("mainWinId"),
+          ipcRenderer.send(
+            // +localStorage.getItem("mainWinId"),
             "expandedPaths",
             expandedPaths
           );

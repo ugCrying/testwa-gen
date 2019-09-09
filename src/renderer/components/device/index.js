@@ -13,6 +13,7 @@ import shell from "./shell.css";
 import { ipcRenderer } from "electron";
 import { emitter } from "../../lib";
 import { xmlToJSON } from "./lib";
+export let sourceXML = null;
 console.log("屏幕同步组件入口模块");
 const request = require("request").defaults({
   timeout: 3000,
@@ -58,10 +59,8 @@ export default class extends Component {
     });
     ipcRenderer.on("record", () => {
       this.record = true;
-      if (this.recordUI) {
-        this.setState({ loading: true });
-        this.getSource();
-      }
+      this.setState({ loading: true });
+      this.getSource();
     });
     ipcRenderer.on("stoprecord", () => {
       this.setState({ sourceJSON: null });
@@ -79,14 +78,17 @@ export default class extends Component {
   appiumGetSource(cb) {
     request.get("/source", (err, res, sourceJSON) => {
       try {
+        sourceXML = sourceJSON.value
         sourceJSON = xmlToJSON(sourceJSON.value);
         clearTimeout(timer);
         timer = null;
-        ipcRenderer.sendTo(
-          +localStorage.getItem("mainWinId"),
-          "getSourceJSON",
-          sourceJSON
-        );
+        require('electron').remote.BrowserWindow.fromId(+localStorage.getItem("mainWinId")).webContents.send("getSourceJSON",
+          sourceJSON);
+        // ipcRenderer.send(
+        //   // +localStorage.getItem("mainWinId"),
+        //   "getSourceJSON",
+        //   sourceJSON
+        // );
         return this.setState({ sourceJSON, loading: false });
       } catch (e) {
         cb && cb();
@@ -115,13 +117,13 @@ export default class extends Component {
     this.isPressing = true;
     const width = Math.round(
       (evt.clientX - left) *
-        this.ratio *
-        (this.touchSize[2] / this.banner.realWidth)
+      this.ratio *
+      (this.touchSize[2] / this.banner.realWidth)
     );
     const height = Math.round(
       (evt.clientY - top) *
-        this.ratio *
-        (this.touchSize[3] / this.banner.realHeight)
+      this.ratio *
+      (this.touchSize[3] / this.banner.realHeight)
     );
     this.minitouch.write(
       // `d 0 ${evt.nativeEvent.offsetX * 2} ${evt.nativeEvent.offsetY * 2} 50\n` d 触控点个数 x y 压力值
@@ -135,41 +137,25 @@ export default class extends Component {
     this.minitouch.write("u 0\n");
     this.minitouch.write("c\n");
     if (this.record) {
-      // if (this.text) {
-      //   ipcRenderer.sendTo(+localStorage.getItem("mainWinId"), "sendKeys", [
-      //     {
-      //       action: "activeSendKeys",
-      //       params: [this.text]
-      //     }
-      //   ]);
-      // }
-      // this.text = "";
       const widthEnd = Math.round(
         (evt.clientX - left) *
-          this.ratio *
-          (this.touchSize[2] / this.banner.realWidth)
+        this.ratio *
+        (this.touchSize[2] / this.banner.realWidth)
       );
       const heightEnd = Math.round(
         (evt.clientY - top) *
-          this.ratio *
-          (this.touchSize[3] / this.banner.realHeight)
+        this.ratio *
+        (this.touchSize[3] / this.banner.realHeight)
       );
-      this.tap.timeout = 8000;
-      if (this.taptime)
-        this.tap.timeout = new Date().getTime() - this.taptime + 1000;
-      if (this.tap.timeout > 60000) this.tap.timeout = 60000;
-      this.taptime = new Date().getTime();
       if (widthEnd - this.tap.width === 0 && heightEnd - this.tap.height === 0)
         this.isMove = false;
-      ipcRenderer.sendTo(
-        +localStorage.getItem("mainWinId"),
+      ipcRenderer.send(
+        // +localStorage.getItem("mainWinId"),
         this.isMove ? "swiped" : "taped",
         this.isMove ? { ...this.tap, widthEnd, heightEnd } : this.tap
       );
-      if (this.recordUI) {
-        setTimeout(this.getSource.bind(this), 300);
-        this.setState({ loading: true });
-      }
+      setTimeout(this.getSource.bind(this), 300);
+      this.setState({ loading: true });
     }
     this.isMove = false;
   }
@@ -178,13 +164,13 @@ export default class extends Component {
     this.isMove = true;
     const width = Math.round(
       (evt.clientX - left) *
-        this.ratio *
-        (this.touchSize[2] / this.banner.realWidth)
+      this.ratio *
+      (this.touchSize[2] / this.banner.realWidth)
     );
     const height = Math.round(
       (evt.clientY - top) *
-        this.ratio *
-        (this.touchSize[3] / this.banner.realHeight)
+      this.ratio *
+      (this.touchSize[3] / this.banner.realHeight)
     );
     this.minitouch.write(
       // `m 0 ${evt.nativeEvent.offsetX * 2} ${evt.nativeEvent.offsetY * 2}  50\n`
@@ -309,7 +295,6 @@ export default class extends Component {
           const parser = new BannerParser();
           parser.parse(data.splice(0, 24)); //前24个字节是头信息
           this.banner = parser.take();
-          console.log("屏幕尺寸capSize", this.banner);
           // @ts-ignore
           console.log("minicap获取的设备屏幕实际高度", this.banner.realHeight);
           setTimeout(() => {
@@ -337,10 +322,6 @@ export default class extends Component {
         .toString()
         .split("^")[1]
         .split(" ");
-      console.log("屏幕尺寸touchSize", {
-        width: this.touchSize[2],
-        height: this.touchSize[3]
-      });
     });
     this.minitouch.on("connect", () => console.log("minitouch 已连接"));
     this.minitouch.on("close", hadError =>
@@ -485,10 +466,8 @@ export default class extends Component {
                 </Button>
                 <Button
                   onClick={() => {
-                    if (this.recordUI) {
-                      this.setState({ loading: true });
-                      this.getSource();
-                    }
+                    this.setState({ loading: true });
+                    this.getSource();
                   }}
                 >
                   <img

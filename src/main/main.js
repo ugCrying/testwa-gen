@@ -12,8 +12,7 @@ const { client, installUiautomator2, startUiautomator2 } = require("./adb");
 const { startAppium, stopAppium } = require("./lib");
 let mainWindow;
 let deviceWin;
-let cp = [];
-let cpno;
+let cp;
 let _device;
 let baseUrl = process.defaultApp
   ? "http://localhost:8000"
@@ -63,11 +62,14 @@ const openDeviceWindow = (_, device, cb) => {
   const [width, height] = device.screen.split("x");
   console.log("创建设备窗口 Renderer");
   startMini(device);
-  installUiautomator2(device.id, () => {
-    // 重装后启动服务
-    startUiautomator2(device.id); //.then(setTimeout(createSession, 5000));
-  }).then(() => {
+  installUiautomator2(device.id, () =>
+    startUiautomator2(device.id).then(setTimeout(createSession, 5000))
+  ).then(() => {
     createSession();
+    client.shell(
+      device.id,
+      "ime set io.appium.uiautomator2.server/io.appium.uiautomator2.handler.TestwaIME"
+    );
     setTimeout(
       () =>
         client.shell(
@@ -94,6 +96,7 @@ const openDeviceWindow = (_, device, cb) => {
       transparent: true,
       webPreferences: {
         // 生产环境禁用 devTools
+        nodeIntegration: true,
         devTools: true,
         nodeIntegrationInWorker: true
       }
@@ -198,17 +201,25 @@ const openDeviceWindow = (_, device, cb) => {
   });
   deviceWin.loadURL(
     `${baseUrl}#/${device.id}?device=${
-      device.id
+    device.id
     }&width=${width}&height=${height}&testwa_ui=${process.env.testwa_ui}`
   );
 };
 app.commandLine.appendSwitch("enable-experimental-web-platform-features");
 app.once("ready", () => {
   mainWindow = new BrowserWindow({
+    webPreferences: {
+      nodeIntegration: true
+    },
     show: false
     // backgroundColor: "#2e2c29"
   });
   mainWindow.loadURL(baseUrl);
+  mainWindow.once("ready-to-show", async () => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    mainWindow.maximize();
+    mainWindow.show();
+  });
   trackDevices();
   startAppium(mainWindow);
   mainWindow.once("close", () => {
@@ -227,11 +238,6 @@ app.once("ready", () => {
       .catch(err => console.log("An error occurred: ", err));
     // mainWindow.webContents.openDevTools();
   }
-  mainWindow.once("ready-to-show", async () => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    mainWindow.maximize();
-    mainWindow.show();
-  });
 });
 app.once("before-quit", () => {
   console.log("准备退出");
@@ -246,6 +252,19 @@ ipcMain.on("record", (_, device, id) => {
         deviceWin.webContents.send("record", id)
       );
 });
+
+
+
+ipcMain.on('recordedActions', (_, data) => mainWindow.webContents.send("recordedActions", data))
+ipcMain.on('sendKeys', (_, data) => mainWindow.webContents.send("sendKeys", data))
+ipcMain.on('expandedPaths', (_, data) => mainWindow.webContents.send("expandedPaths", data))
+ipcMain.on('selectedElement', (_, data) => mainWindow.webContents.send("selectedElement", data))
+ipcMain.on('getSourceJSON', (_, data) => mainWindow.webContents.send("getSourceJSON", data))
+ipcMain.on('swiped', (_, data) => mainWindow.webContents.send("swiped", data))
+ipcMain.on('taped', (_, data) => mainWindow.webContents.send("taped", data))
+
+
+
 ipcMain.on(
   "stoprecord",
   () => deviceWin && deviceWin.webContents.send("stoprecord")
@@ -258,8 +277,7 @@ ipcMain.on(
 //   appium.on("message", msg => mainWindow.webContents.send("log", msg));
 // }, 3000);
 // });
-let delay = 0;
-ipcMain.on("runcode", (_, rawCode, deviceId) => {
+ipcMain.on("runcode", (_, rawCode) => {
   const path = join(
     __dirname,
     "..",
@@ -267,44 +285,26 @@ ipcMain.on("runcode", (_, rawCode, deviceId) => {
     "static",
     "wappium",
     "tests",
-    deviceId + ".js"
+    "code.js"
   );
   console.log(path, "脚本路径");
   require("fs").writeFile(path, rawCode, () => {
-    setTimeout(() => {
-      let proc = fork(path);
-      cp.push(proc);
-      cpno = cp.length;
-      proc.on("exit", () => {
-        proc = null;
-        cpno--;
-        console.log("回放的进程数", cpno);
-        if (!cpno) {
-          mainWindow.webContents.send("runed");
-          delay = 0;
-        }
-      });
-    }, delay);
-    delay += 4000;
+    cp = fork(path);
+    cp.on("exit", () => {
+      cp = null;
+      mainWindow.webContents.send("runed");
+    });
   });
 });
 ipcMain.on("stopcode", () => {
-  for (let proc of cp) {
-    if (proc) {
-      try {
-        proc.send({ type: "exit" });
-      } catch (e) {}
-      proc.kill();
-      try {
-        proc.disconnect();
-      } catch (e) {}
-    }
-  }
-  cp = [];
   stopAppium();
   setTimeout(() => {
     startAppium(mainWindow);
   }, 1000);
+  if (cp) {
+    cp.kill();
+    cp = null;
+  }
 });
 
 ipcMain.on("close", _ => {
