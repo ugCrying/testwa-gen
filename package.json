@@ -114,7 +114,7 @@
     "concurrently": "^4.1.0",
     "conventional-changelog-cli": "^2.0.12",
     "cross-env": "^5.2.0",
-    "electron": "^2.0.13",
+    "electron": "3",
     "electron-builder": "^20.38.4",
     "electron-devtools-installer": "^2.2.4",
     "immutable": "^4.0.0-rc.12",
