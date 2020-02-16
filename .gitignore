@@ -9,3 +9,6 @@ yarn-error.log
 .umi-production
 err.log
 out.log
+
+# wappium
+static/wappium

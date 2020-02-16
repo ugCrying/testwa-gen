@@ -172,6 +172,10 @@ svg {
   width: 100%;
 }
 
+.side-custom-tabs > div {
+  margin: 0 !important;
+}
+
 .side-custom-tabs-wrap {
   height: calc(100vh - 45px);
   width: 100%;

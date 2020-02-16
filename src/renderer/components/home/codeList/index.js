@@ -3,6 +3,7 @@ import { Tree } from "antd";
 import { getCodes } from "../lib";
 import { connect } from "dva";
 import rxdb from "../../../db";
+import styles from './codeList.css'
 
 class CodeList extends Component {
   constructor(props) {
@@ -26,7 +27,7 @@ class CodeList extends Component {
   }
   render() {
     return (
-      <div style={{ overflow: "scroll", height: "85%" }}>
+      <div className={ styles.codeListBody }>
         <Tree.DirectoryTree
           onSelect={async ([id]) => {
             if (id)

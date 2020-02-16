@@ -1,0 +1,8 @@
+.codeList__tabs-bar {
+  margin: 0 !important;
+}
+
+.codeList__body {
+  overflow: auto;
+  height: 100%;
+}

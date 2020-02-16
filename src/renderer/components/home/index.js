@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Layout, Button, Tabs, Modal } from "antd";
+import { Layout, Button, Tabs, Modal, Tooltip } from "antd";
 import { Select } from "antd";
 import { Subject } from "rxjs";
 import { map, takeUntil, concatAll, withLatestFrom } from "rxjs/operators";
@@ -501,36 +501,42 @@ export default class extends Component {
                   欢迎你，
                   <a>登录/注册</a>
                 </p> */}
-                <Button
-                  className={styles["circle-btn"]}
-                  shape="circle"
-                  icon="menu-fold"
-                  onClick={() =>
-                    this.setState({
-                      codeListDisplay: !this.state.codeListDisplay
-                    })
-                  }
-                />
-                <Button
-                  className={styles["circle-btn"]}
-                  shape="circle"
-                  icon="menu-unfold"
-                  onClick={() =>
-                    this.setState({
-                      terminalShow: !this.state.terminalShow
-                    })
-                  }
-                />
-                <Button
-                  className={styles["circle-btn"]}
-                  shape="circle"
-                  icon="setting"
-                  onClick={() =>
-                    this.setState({
-                      activeKey: "setting"
-                    })
-                  }
-                />
+                <Tooltip title={!this.state.codeListDisplay ? '展开脚本列表' : '收起脚本列表'}>
+                  <Button
+                    className={styles['circle-btn']}
+                    shape="circle"
+                    icon="menu-fold"
+                    onClick={() =>
+                      this.setState({
+                        codeListDisplay: !this.state.codeListDisplay,
+                      })
+                    }
+                  />
+                </Tooltip>
+                <Tooltip title={!this.state.terminalShow ? '展开终端' : '收起终端'}>
+                  <Button
+                    className={styles['circle-btn']}
+                    shape="circle"
+                    icon="menu-unfold"
+                    onClick={() =>
+                      this.setState({
+                        terminalShow: !this.state.terminalShow,
+                      })
+                    }
+                  />
+                </Tooltip>
+                <Tooltip title="设置">
+                  <Button
+                    className={styles['circle-btn']}
+                    shape="circle"
+                    icon="setting"
+                    onClick={() =>
+                      this.setState({
+                        activeKey: 'setting',
+                      })
+                    }
+                  />
+                </Tooltip>
                 {/* <Button icon="poweroff" size={"small"}>
                   退出
                 </Button> */}
@@ -550,16 +556,13 @@ export default class extends Component {
                     <div className={styles["side-custom-tabs-tabpane-header"]}>
                       {/* <Button shape="circle" icon="folder-add" /> */}
                       {/* <Button shape="circle" icon="file-add" /> */}
-                      <Button
-                        shape="circle"
-                        icon="download"
-                        onClick={this.downCode.bind(this)}
-                      />
-                      <Button
-                        shape="circle"
-                        icon="delete"
-                        onClick={this.delCode.bind(this)}
-                      />
+                      <Tooltip title="下载脚本文件至本地">
+                        <Button shape="circle" icon="download" onClick={this.downCode.bind(this)} />
+                      </Tooltip>
+                      {/* <Button shape="circle" icon="download" onClick={ this.downCode.bind(this) } /> */}
+                      <Tooltip title="删除脚本文件">
+                        <Button shape="circle" icon="delete" onClick={this.delCode.bind(this)} />
+                      </Tooltip>
                     </div>
                     <div className={styles["side-custom-tabs-tabpane-content"]}>
                       <div
@@ -612,18 +615,22 @@ export default class extends Component {
                   >
                     <div className={styles["main-terminal-drag-line"]} />
                     <div className={styles["main-terminal-control-bar"]}>
+                    <Tooltip title="清除日志">
                       <Button
                         shape="circle"
                         icon="delete"
                         onClick={() => {
-                          emitter.emit("clearLog");
+                          emitter.emit('clearLog')
                         }}
                       />
+                    </Tooltip>
+                    <Tooltip title={!this.state.terminalDisplay ? '展开UI树' : '收起UI树'}>
                       <Button
                         shape="circle"
-                        icon="to-top"
-                        onClick={this.terminalSwitch}
+                        icon={!this.state.terminalDisplay ? 'arrow-up' : 'arrow-down'}
+                        onClick={this.terminalSwitch.bind(this)}
                       />
+                    </Tooltip>
                     </div>
                     <Tabs
                       className={styles["main-common-tabs"]}
