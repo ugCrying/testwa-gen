@@ -31,9 +31,9 @@ export default class extends Component {
     super(props);
     this.state = {
       activeKey: '',
-      terminalDisplay: false,
+      terminalDisplay: true,
       codeListDisplay: true,
-      terminalShow: true,
+      terminalShow: false,
       sideWidth: 0,
       terminalHeight: 0,
       visible: false
@@ -363,6 +363,15 @@ export default class extends Component {
             </div>
             <div className={styles['main-header-control']}>
               <div className={styles['header-control-buttons']}>
+                <Button
+                  size={'small'}
+                  onClick={() => {
+                    this.setState({ activeKey: '' });
+                  }}
+                >
+                  <Icon type="home" />
+                  主页
+                </Button>
                 <Button
                   size={'small'}
                   disabled={

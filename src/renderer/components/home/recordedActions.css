@@ -1,4 +1,5 @@
 .script-wrap {
+  height: 100%;
   width: 100%;
   display: flex;
   flex-flow: column nowrap;
@@ -37,10 +38,26 @@
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 
+.script-wrap-tabs {
+  height: 100%;
+}
+
 .script-content {
   width: 100%;
   box-sizing: border-box;
   padding: 12px;
+  height: 100%;
+  /* height: calc(100vh - 200px); */
+  overflow: auto;
+}
+
+/* TODO: 固定行号 */
+.script-content pre {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  height: calc(100vh - 210px);
+  overflow: auto;
 }
 
 .script-content pre code:nth-child(1) {
@@ -53,4 +70,23 @@
 .script-wrap .ant-tabs-tab {
   margin: 0;
   padding: 10px 32px !important;
+}
+
+/* FIMXE: css module 按需开启 */
+:global(.ant-table-body) {
+  overflow-x: auto !important;
+}
+
+:global(::-webkit-scrollbar) {
+  width: .5rem;
+  height: .5rem;
+}
+
+:global(::-webkit-scrollbar-thumb) {
+  border-radius: 1px;
+  background: rgba(0,0,0,.2);
+}
+
+:global(::-webkit-scrollbar-track) {
+  border-radius: 1px;
 }

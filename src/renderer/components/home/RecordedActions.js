@@ -1,17 +1,17 @@
-import React, { Component } from "react";
-import { Select, Tabs, Table, Form, Popconfirm, Input } from "antd";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import { vs } from "react-syntax-highlighter/dist/styles/hljs";
-import frameworks from "./client-frameworks";
+import React, { Component } from 'react';
+import { Select, Tabs, Table, Form, Popconfirm, Input } from 'antd';
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { vs } from 'react-syntax-highlighter/dist/styles/hljs';
+import frameworks from './client-frameworks';
 // @ts-ignore
-import InspectorStyles from "./Inspector.css";
+import InspectorStyles from './Inspector.css';
 // @ts-ignore
-import styles from "./recordedActions.css";
-import { connect } from "dva";
-import rxdb from "../../db";
-const { remove } = require("immutable");
+import styles from './recordedActions.css';
+import { connect } from 'dva';
+import rxdb from '../../db';
+const { remove } = require('immutable');
 
-console.log("操作行为组件模块");
+console.log('操作行为组件模块');
 const Option = Select.Option;
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
@@ -99,27 +99,27 @@ class EditableCell extends React.Component {
 class RA extends Component {
   constructor(props) {
     super(props);
-    console.log("操作行为组件实例化");
+    console.log('操作行为组件实例化');
     this.state = {
-      actionFramework: "python"
+      actionFramework: 'python'
     };
     this.columns = [
       {
-        title: "行为",
-        dataIndex: "action",
-        fixed: "left",
-        width: 100,
+        title: '行为',
+        dataIndex: 'action',
+        // fixed: "left",
+        width: 200,
         editable: true
       },
       {
-        title: "元素",
-        dataIndex: "params",
+        title: '元素',
+        dataIndex: 'params',
         editable: true
       },
       {
-        title: "编辑",
-        key: "operation",
-        fixed: "right",
+        title: '编辑',
+        key: 'operation',
+        // fixed: "right",
         width: 100,
         render: (_, record) => {
           return (
@@ -134,6 +134,7 @@ class RA extends Component {
       }
     ];
   }
+
   // TODO
   handleDelete = async row => {
     this.codes = remove(this.codes, row.key);
@@ -144,14 +145,14 @@ class RA extends Component {
         .update({ $set: { value: this.codes } });
     } else {
       this.props.dispatch({
-        type: "record/updateRecordedActions",
+        type: 'record/updateRecordedActions',
         payload: this.codes
       });
     }
     this.setState({ fresh: true });
   };
   handleSave = async row => {
-    if (row.params.split) row.params = row.params.split(",");
+    if (row.params.split) row.params = row.params.split(',');
     this.codes[row.key] = row;
     if (this.props.record.code.addTime) {
       const db = await rxdb;
@@ -160,7 +161,7 @@ class RA extends Component {
         .update({ $set: { value: this.codes } });
     } else {
       this.props.dispatch({
-        type: "record/updateRecordedActions",
+        type: 'record/updateRecordedActions',
         payload: this.codes
       });
     }
@@ -181,7 +182,7 @@ class RA extends Component {
         // data.key = i++;
         datas.push({
           action: data.action,
-          params: data.params.filter(d => d).join(","),
+          params: data.params.filter(d => d).join(','),
           key: i++
         });
         //   data.params[1]
@@ -194,7 +195,7 @@ class RA extends Component {
     // return this.codes;
   }
   getCode() {
-    console.log("脚本代码生成");
+    console.log('脚本代码生成');
     const code =
       this.props.record.code && this.props.record.code.value[0]
         ? this.props.record.code.value
@@ -205,7 +206,7 @@ class RA extends Component {
     return framework.getCodeString();
   }
   render() {
-    console.log("操作行为组件渲染");
+    console.log('操作行为组件渲染');
     const components = {
       body: {
         row: EditableFormRow,
@@ -228,8 +229,8 @@ class RA extends Component {
     this.data = this.getTableData();
 
     return (
-      <div className={styles["script-wrap"]}>
-        <Tabs defaultActiveKey="1">
+      <div className={styles['script-wrap']}>
+        <Tabs defaultActiveKey="1" className={styles['script-wrap-tabs']}>
           <TabPane tab="视图" key="1">
             <Table
               components={components}
@@ -237,19 +238,25 @@ class RA extends Component {
               bordered
               dataSource={this.data}
               columns={columns}
-              // scroll={{ x: 1500, y: 300 }}
+              pagination={false}
+              scroll={{
+                x: columns.filter(e => e.width).reduce((w1, w2) => {
+                  return w1 + w2
+                }),
+                y: 'calc(100vh - 200px)'
+              }}
             />
           </TabPane>
           <TabPane tab="代码" key="2">
-            <div className={styles["script-title"]}>
-              <div className={styles["script-title-select"]}>
+            <div className={styles['script-title']}>
+              <div className={styles['script-title-select']}>
                 <Select
                   defaultValue="python"
                   // @ts-ignore
                   onChange={actionFramework =>
                     this.setState({ actionFramework })
                   }
-                  className={InspectorStyles["framework-dropdown"]}
+                  className={InspectorStyles['framework-dropdown']}
                 >
                   {Object.keys(frameworks).map(f => (
                     <Option key={f} value={f}>
@@ -259,10 +266,10 @@ class RA extends Component {
                 </Select>
               </div>
             </div>
-            <div className={styles["script-content"]}>
+            <div className={styles['script-content']}>
               <SyntaxHighlighter
                 language={this.state.actionFramework}
-                style={vs}
+                style={ vs }
                 showLineNumbers
               >
                 {this.getCode()}

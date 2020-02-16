@@ -27,7 +27,7 @@ class CodeList extends Component {
   }
   render() {
     return (
-      <div className={ styles.codeListBody }>
+      <div className={ styles["codeList__body"] }>
         <Tree.DirectoryTree
           onSelect={async ([id]) => {
             if (id)
