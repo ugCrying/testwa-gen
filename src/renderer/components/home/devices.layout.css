@@ -269,7 +269,8 @@ svg {
 }
 
 .main-route-bar {
-  height: 40px;
+  /* 与脚本列表 header 高度对齐 */
+  height: 44px;
   width: 100%;
   flex: none;
   display: flex;
