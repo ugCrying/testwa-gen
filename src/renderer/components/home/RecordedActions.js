@@ -134,6 +134,8 @@ class RecordActions extends Component {
           return (
             <Popconfirm
               title="确定要删除吗?"
+              okText="确定"
+              cancelText="取消"
               onConfirm={() => this.handleDelete(record)}
             >
               <a href="">删除</a>

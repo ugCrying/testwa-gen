@@ -215,6 +215,8 @@ export default class extends Component {
     confirm({
       title: '确定删除脚本?',
       content: code.name,
+      okText: "确定",
+      cancelText: "取消",
       onOk() {
         rxdb.then(db => {
           db['code'].findOne(code.addTime).remove();
