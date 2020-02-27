@@ -774,6 +774,8 @@ export default class extends Component {
           onOk={this.handleOk.bind(this)}
           onCancel={this.handleCancel.bind(this)}
           width={300}
+          okText="确定"
+          cancelText="取消"
         >
           <input
             ref="input"
