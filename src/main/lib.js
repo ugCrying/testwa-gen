@@ -7,10 +7,18 @@ exports.request = require("request").defaults({
   json: true,
   baseUrl: "http://localhost:4444/wd/hub/session/1/"
 });
+
+/**
+ * 启动 appium
+ */
 exports.startAppium = mainWindow => {
   appium = fork(join(__dirname, "..", "..", "static", "wappium", "start_cp"));
   appium.on("message", msg => mainWindow.webContents.send("log", msg));
 };
+
+/**
+ * 停止 appium
+ */
 exports.stopAppium = () => {
   if (appium) {
     appium.send({ type: "exit" });

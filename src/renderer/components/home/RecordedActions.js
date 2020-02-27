@@ -1,3 +1,6 @@
+/**
+ * 操作行为模块
+ */
 import React, { Component } from 'react';
 import { Select, Tabs, Table, Form, Popconfirm, Input } from 'antd';
 import SyntaxHighlighter from 'react-syntax-highlighter';
@@ -17,6 +20,11 @@ const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
 const EditableContext = React.createContext();
 
+/**
+ * 可编辑行
+ * TODO: 提供下拉框选择
+ * @param {*} param0 
+ */
 const EditableRow = ({ form, index, ...props }) => (
   <EditableContext.Provider value={form}>
     <tr {...props} />
@@ -96,11 +104,12 @@ class EditableCell extends React.Component {
     );
   }
 }
-class RA extends Component {
+class RecordActions extends Component {
   constructor(props) {
     super(props);
     console.log('操作行为组件实例化');
     this.state = {
+      // 当前代码编程语言，可修改
       actionFramework: 'python'
     };
     this.columns = [
@@ -135,7 +144,10 @@ class RA extends Component {
     ];
   }
 
-  // TODO
+  /**
+   * 删除行
+   * TODO:
+   */
   handleDelete = async row => {
     this.codes = remove(this.codes, row.key);
     if (this.props.record.code.addTime) {
@@ -151,6 +163,10 @@ class RA extends Component {
     }
     this.setState({ fresh: true });
   };
+
+  /**
+   * 保存行更改
+   */
   handleSave = async row => {
     if (row.params.split) row.params = row.params.split(',');
     this.codes[row.key] = row;
@@ -168,7 +184,6 @@ class RA extends Component {
     this.setState({ fresh: true });
   };
 
-  componentDidMount() {}
   getTableData() {
     const datas = [];
     // let params;
@@ -194,6 +209,7 @@ class RA extends Component {
     // this.codes = datas;
     // return this.codes;
   }
+
   getCode() {
     console.log('脚本代码生成');
     const code =
@@ -205,6 +221,7 @@ class RA extends Component {
     framework.actions = code || [];
     return framework.getCodeString();
   }
+
   render() {
     console.log('操作行为组件渲染');
     const components = {
@@ -281,4 +298,5 @@ class RA extends Component {
     );
   }
 }
-export default connect(state => state)(RA);
+
+export default connect(state => state)(RecordActions);

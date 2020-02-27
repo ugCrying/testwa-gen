@@ -1,18 +1,24 @@
+/**
+ * （已保存至本地）脚本列表管理
+ */
+// @ts-ignore
+import styles from './codeList.css'
 import React, { Component } from "react";
 import { Tree } from "antd";
 import { getCodes } from "../lib";
 import { connect } from "dva";
 import rxdb from "../../../db";
-import styles from './codeList.css'
 
 class CodeList extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      // 树形结构，仅两层：app文件夹 + app脚本文件
       codes: []
     };
     getCodes(this.setState.bind(this));
   }
+
   codeTag() {
     const codeTree = {};
     for (const code of this.state.codes) {
@@ -25,6 +31,7 @@ class CodeList extends Component {
     }
     return codeTree;
   }
+  
   render() {
     return (
       <div className={ styles["codeList__body"] }>
@@ -68,4 +75,5 @@ class CodeList extends Component {
     );
   }
 }
+
 export default connect()(CodeList);

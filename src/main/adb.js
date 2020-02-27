@@ -3,6 +3,12 @@ const client = (exports.client = adbkit.createClient());
 const ApkReader = require("adbkit-apkreader");
 const { join } = require("path");
 const U2apkPath = join(__dirname, "..", "..", "static", "uiautomator2", "apks");
+
+/**
+ * 安装 Uiautomator2 到设备
+ * @param {*} deviceId
+ * @param {function} cb 安装成功的回调函数
+ */
 exports.installUiautomator2 = async (deviceId, cb) => {
   const packageInfo = await client
     .shell(deviceId, "dumpsys package io.appium.uiautomator2.server")
@@ -63,6 +69,11 @@ exports.installUiautomator2 = async (deviceId, cb) => {
     }
   }
 };
+
+/**
+ * 启动 Uiautomator2
+ * @param {*} deviceId
+ */
 exports.startUiautomator2 = async deviceId => {
   return client
     .shell(

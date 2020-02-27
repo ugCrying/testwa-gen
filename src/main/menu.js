@@ -1,3 +1,7 @@
+/**
+ * 顶部菜单栏
+ */
+
 console.log("菜单栏模块");
 const { app, shell, dialog } = require("electron");
 const { autoUpdater } = require("electron-updater");

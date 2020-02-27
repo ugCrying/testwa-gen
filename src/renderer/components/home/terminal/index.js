@@ -1,8 +1,11 @@
+/**
+ * 日志
+ */
+// @ts-ignore
+import styles from '../devices.layout.css';
 import React, { Component } from 'react';
 import AnsiConverter from 'ansi-to-html';
 import { ipcRenderer } from 'electron';
-// @ts-ignore
-import styles from '../devices.layout.css';
 import { emitter } from '../../../lib';
 const convert = new AnsiConverter({ fg: '#bbb', bg: '#222' });
 
@@ -17,9 +20,11 @@ export default class extends Component {
       this.setState({ logLines: [...this.state.logLines, log] });
     });
   }
+  
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('log');
   }
+  
   render() {
     return (
       <div id={styles['terminal-log-list']}>

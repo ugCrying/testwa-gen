@@ -1,15 +1,17 @@
+/**
+ * 系统设置页面
+ */
 import React from "react";
 import { Form, Input, Row, Col, InputNumber } from "antd";
 import { connect } from "dva";
 const JAVA_HOME = require("electron").remote.process.env.JAVA_HOME || "";
 const ANDROID_HOME = require("electron").remote.process.env.ANDROID_HOME || "";
+
 const Setting = props => {
-  const CURRENT_JAVA_HOME =
-    props.record.JAVA_HOME || localStorage.getItem("JAVA_HOME") || JAVA_HOME;
-  const CURRENT_ANDROID_HOME =
-    props.record.ANDROID_HOME ||
-    localStorage.getItem("ANDROID_HOME") ||
-    ANDROID_HOME;
+  // JAVA_HOME 路径
+  const CURRENT_JAVA_HOME = props.record.JAVA_HOME || localStorage.getItem("JAVA_HOME") || JAVA_HOME;
+  // ANDROID_HOME 路径
+  const CURRENT_ANDROID_HOME = props.record.ANDROID_HOME || localStorage.getItem("ANDROID_HOME") || ANDROID_HOME;
   return (
     <Row>
       <Col push={1} span={8}>
@@ -98,4 +100,5 @@ const Setting = props => {
     </Row>
   );
 };
+
 export default connect(state => state)(Setting);

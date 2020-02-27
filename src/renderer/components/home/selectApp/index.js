@@ -1,3 +1,6 @@
+/**
+ * 应用列表
+ */
 import React, { Component } from "react";
 import {
   getApks,
@@ -19,8 +22,11 @@ class APP extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      // FIXME: app 列表?
       packages: [],
+      // 选中的 app
       select: null,
+      // 选中 app 的图标样式
       className: ""
       // loading: true
     };
@@ -28,10 +34,18 @@ class APP extends Component {
     //   this.setState({ packages, loading: false });
     // });
   }
+
+  /**
+   * 选中 app
+   * @param {*} app 
+   * @param {'phone' | 'android'} type 设备类型
+   */
   selectApp(app, type) {
+    // iphone 手机
     type === "phone" ? onSelectPackage(app) : onSelectAPK(app);
     this.setState({ select: app, className: app.name + type });
   }
+
   render() {
     return (
       <Spin

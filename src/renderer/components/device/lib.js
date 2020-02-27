@@ -1,7 +1,18 @@
+/**
+ * 录制辅助方法
+ */
+
 import XPath from "xpath";
 import xpath from 'xpath';
 import { DOMParser as DOMParser2 } from 'xmldom';
+
 console.log("录制辅助方法模块");
+
+/**
+ * xml 转 json
+ * @param {*} source 
+ * @return {string}
+ */
 export const xmlToJSON = source => {
   console.log("xml 转 json");
   let xmlDoc;
@@ -35,10 +46,13 @@ export const xmlToJSON = source => {
   let sourceXML = xmlDoc.children[0];
   return recursive(sourceXML);
 };
+
 /**
+ * 获取元素最佳 XPath 定位方式
  * Get an optimal XPath for a DOMNode
  * @param {*} domNode {DOMNode}
  * @param {string[]} uniqueAttributes Attributes we know are unique (defaults to just 'id')
+ * @return {string} 元素 XPath 路径
  */
 function getOptimalXPath(doc, domNode, uniqueAttributes = ["id"]) {
   try {
@@ -104,6 +118,14 @@ function getOptimalXPath(doc, domNode, uniqueAttributes = ["id"]) {
   }
 }
 
+/**
+ * 判断定位出的元素是否唯一
+ * 比如当用 className 定位元素时可能定位出多个元素
+ * @param {*} attrName 
+ * @param {*} attrValue 
+ * @param {*} sourceXML 
+ * @return {Boolean}
+ */
 export function isUnique(attrName, attrValue, sourceXML) {
   // If no sourceXML provided, assume it's unique
   if (!sourceXML) {
@@ -113,10 +135,20 @@ export function isUnique(attrName, attrValue, sourceXML) {
   return xpath.select(`//*[@${attrName}="${attrValue}"]`, doc).length < 2;
 }
 
+// 元素唯一标识符计数器
+// TODO: 改为闭包实现
 let elVariableCounter = 0;
+/**
+ * 返回选中的元素在页面中的位置、定位方式等信息
+ * @param {*} element 选中的元素
+ * @param {*} sourceXML 选中的元素所属的 sourceXML
+ * @return {{ variableName: string, strategy: string, selector: string}}
+ */
 export const getRecordedActions = (element, sourceXML) => {
   console.log("获取操作行为");
   const { attributes, xpath } = element;
+  // TODO: appium 还提供了更多方式进行元素定位
+  // TODO: appium 有专门针对 IOS 于 Android 的优化定位方式
   const STRATEGY_MAPPINGS = [
     ["name", "accessibility id"],
     ["content-desc", "accessibility id"],
@@ -125,6 +157,7 @@ export const getRecordedActions = (element, sourceXML) => {
     ["resource-id", "id"]
   ];
 
+  // TODO: 是否可以采用多选择器并行定位？
   for (let [strategyAlias, strategy] of STRATEGY_MAPPINGS) {
     const value = attributes[strategyAlias];
     if (value && isUnique(strategyAlias, value, sourceXML)) {
@@ -136,6 +169,7 @@ export const getRecordedActions = (element, sourceXML) => {
       };
     }
   }
+  // doc: 代表最后才选择用 xpath 这种低效率方式获取元素？
   return {
     variableName: `el${elVariableCounter++}`,
     // variableType: "string",
@@ -143,6 +177,12 @@ export const getRecordedActions = (element, sourceXML) => {
     selector: xpath
   };
 };
+
+/**
+ * 格式化坐标？
+ * @param {*} element 
+ * @return {Object} 要高亮元素的绝对坐标？
+ */
 export function parseCoordinates(element) {
   // @ts-ignore
   let { bounds, x, y, width, height } = element.attributes || {};

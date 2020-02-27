@@ -1,3 +1,8 @@
+/**
+ * highlight rectangle ?
+ * 高亮矩形区域
+ */
+
 import React from "react";
 import { getRecordedActions, parseCoordinates } from "./lib";
 import { ipcRenderer } from "electron";
@@ -5,6 +10,7 @@ import { emitter } from "../../lib";
 import { sourceXML } from ".";
 // @ts-ignore
 import styles from "./Inspector.css";
+
 export default ({
   selectedElement,
   element,
@@ -29,6 +35,7 @@ export default ({
           : styles["highlighter-box"]
       }
       onClick={() => {
+        // 非录制状态下不做操作
         if (!record) {
           return;
         }

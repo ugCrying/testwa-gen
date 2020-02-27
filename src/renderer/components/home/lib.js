@@ -14,13 +14,25 @@ const ApkReader = require("adbkit-apkreader");
 let device;
 let cp;
 let timer;
+
+/**
+ * 停止正在执行（回放）的脚本
+ */
 export const codeStop = () => {
   if (cp) {
     cp.kill();
     cp = null;
   }
 };
+
+/**
+ * 返回脚本的内容（供下载）
+ * @param {*} info 
+ * @param {*} recordedActions 
+ * @return {String}
+ */
 export const downCode = (info, recordedActions) => {
+  // FIXME: 为何只提供 python 格式导出？
   let framework = new frameworks["python"]();
   framework.caps = {
     platformName: "Android",
@@ -33,6 +45,12 @@ export const downCode = (info, recordedActions) => {
   framework.actions = recordedActions;
   return framework.getCodeString(true);
 };
+
+/**
+ * 执行（回放）脚本
+ * @param {*} info 
+ * @param {*} recordedActions 
+ */
 export const runCode = (info, recordedActions) => {
   let framework = new frameworks["jsWd"]();
   framework.caps = {
@@ -121,6 +139,11 @@ const getdeviceApp = (dispatch, cb) => {
     }
   });
 };
+
+/**
+ * 获取设备下 app
+ * @param {*} dispatch 
+ */
 export const getPackages = dispatch => {
   getdeviceApp(dispatch, () => {
     ipcRenderer.send("startU2");
@@ -143,6 +166,11 @@ export const getPackages = dispatch => {
     });
   }, 25000);
 };
+
+/**
+ * 选中设备
+ * @param {*} _device 
+ */
 export const onSelectDevice = _device => {
   device = _device;
   console.log("端口映射到", device.id);
@@ -151,6 +179,7 @@ export const onSelectDevice = _device => {
   client.forward(device.id, "tcp:1717", "localabstract:minicap");
   client.forward(device.id, "tcp:1718", "localabstract:minitouch");
   // client.forward(device.id, "tcp:4444", "tcp:4724"); //UI Automator1
+  // 打开设备小窗
   ipcRenderer.send("openDeviceWindow", device);
 };
 
@@ -188,6 +217,10 @@ export const getApks = async cb => {
   });
 };
 
+/**
+ * 监听设备信息
+ * @param {*} dispatch 
+ */
 export const trackDevices = async dispatch => {
   console.log("获取设备列表");
   const getDeviceProperties = async device => {

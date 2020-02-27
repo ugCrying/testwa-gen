@@ -1,8 +1,12 @@
-import React from "react";
-import { onSelectDevice } from "../lib";
+/**
+ * 设备列表
+ */
 // @ts-ignore
 import styles from "../deviceList/deviceList.css";
+import React from "react";
+import { onSelectDevice } from "../lib";
 import { connect } from "dva";
+
 const DeviceList = props => {
   return (
     <div className={styles["equipment-list"]}>
@@ -58,4 +62,5 @@ const DeviceList = props => {
     </div>
   );
 };
+
 export default connect(state => state)(DeviceList);

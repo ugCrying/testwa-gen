@@ -1,3 +1,6 @@
+/**
+ * 主页面
+ */
 import React, { Component } from 'react';
 import { Layout, Button, Tabs, Modal, Tooltip, Icon } from 'antd';
 import { Select } from 'antd';
@@ -17,6 +20,7 @@ import { getPackages, runCode, downCode, trackDevices } from './lib';
 import { ipcRenderer } from 'electron';
 import rxdb from '../../db';
 import SelectedElement from './SelectedElement';
+
 console.log('设备列表组件入口模块');
 const TabPane = Tabs.TabPane;
 const { Header, Sider, Content } = Layout;
@@ -24,18 +28,25 @@ const Option = Select.Option;
 ipcRenderer.on('deviceWinId', (_, id) => {
   localStorage.setItem('deviceWinId', id);
 });
+
 export default class extends Component {
   constructor(props) {
     console.log('设备列表组件实例化');
     console.log(localStorage);
     super(props);
     this.state = {
+      // 当前标签页 key 值
       activeKey: '',
+      // 终端展开 / 收起状态
       terminalDisplay: true,
+      // 左侧（已保存本地）脚本列表是否课件
       codeListDisplay: true,
+      // 终端是否可见
       terminalShow: false,
       sideWidth: 0,
+      // 终端高度（用于鼠标拖动动态调整）
       terminalHeight: 0,
+      // 录制结束时保存脚本模态框是否课件
       visible: false
     };
     this.terminalSwitch = this.terminalSwitch.bind(this);
@@ -104,6 +115,7 @@ export default class extends Component {
     });
     ipcRenderer.on('getSourceJSON', (_, sourceJSON) => {
       this.saved = false;
+      console.log('ipcRenderer getSourceJSON', sourceJSON)
       this.props.dispatch({
         type: 'record/source',
         payload: sourceJSON
@@ -125,14 +137,27 @@ export default class extends Component {
       });
   }
 
+  /**
+   * 保存脚本时点击确定
+   */
   handleOk() {
     // @ts-ignore
     this.saveCode(this.refs.input.value);
   }
 
+  /**
+   * 保存脚本时点击取消
+   */
   handleCancel() {
     this.saveCode();
   }
+
+  /**
+   * 保存脚本至本地并结束录制
+   * 脚本名为空时仅结束录制
+   * TODO: 保存脚本与结束录制拆分为两个方法
+   * @param {String} name 脚本名称
+   */
   saveCode(name) {
     if (
       name &&
@@ -157,6 +182,10 @@ export default class extends Component {
     // @ts-ignore
     this.refs.input.value = '';
   }
+
+  /**
+   * 保存脚本到本地
+   */
   downCode() {
     require('electron').remote.dialog.showSaveDialog(
       { filters: [{ name: 'code', extensions: ['py'] }] },
@@ -174,6 +203,10 @@ export default class extends Component {
   // handleDownCode() {
   //   console.log(this.downCodePath.name, this.downCodePath.path);
   // }
+
+  /**
+   * 删除选中的脚本
+   */
   delCode() {
     console.log(this.props.record.code);
     const confirm = Modal.confirm;
@@ -193,6 +226,10 @@ export default class extends Component {
       }
     });
   }
+
+  /**
+   * 事件绑定：鼠标拖动调整宽高
+   */
   async componentDidMount() {
     const tabs = document.querySelector(
       `.${styles['main-common-tabs']} .ant-tabs-content`
@@ -282,17 +319,32 @@ export default class extends Component {
         ter.style.height = this.state.terminalHeight + 'px';
       });
   }
+
+  /**
+   * 组件销毁时事件解绑
+   */
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('recordedActions');
     ipcRenderer.removeAllListeners('getSourceJSON');
   }
+
+  /**
+   * 展开 / 关闭终端
+   */
   terminalSwitch() {
     this.setState({ terminalDisplay: !this.state.terminalDisplay });
   }
 
+  /**
+   * 展开终端
+   */
   terminalOpen() {
     this.setState({ terminalDisplay: true });
   }
+
+  /**
+   * 标签页切换（此处未使用 router 而是简单的页面切换实现）
+   */
   content() {
     let content;
     switch (this.state.activeKey) {
@@ -347,6 +399,7 @@ export default class extends Component {
     }
     return content;
   }
+
   render() {
     console.log('首页渲染');
 

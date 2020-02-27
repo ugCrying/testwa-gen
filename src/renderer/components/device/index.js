@@ -1,3 +1,7 @@
+/**
+ * 设备（小窗）
+ */
+
 import React, { Component } from "react";
 import { Button, Spin } from "antd";
 import { BannerParser } from "minicap";
@@ -13,6 +17,7 @@ import shell from "./shell.css";
 import { ipcRenderer } from "electron";
 import { emitter } from "../../lib";
 import { xmlToJSON } from "./lib";
+
 export let sourceXML = null;
 console.log("屏幕同步组件入口模块");
 const request = require("request").defaults({
@@ -37,7 +42,9 @@ ipcRenderer.once("mainWinId", (_, { mainWinId }) => {
 });
 let top, left;
 let timer;
+
 export const client = adbkit.createClient();
+
 export default class extends Component {
   constructor(props) {
     console.log("屏幕同步组件实例化");
@@ -45,9 +52,9 @@ export default class extends Component {
     this.state = {
       loading: false,
       selectedElement: {},
-      canvasHeight: localStorage.getItem("canvasHeight")
-        ? localStorage.getItem("canvasHeight")
-        : 500,
+      // 画布高度
+      canvasHeight: localStorage.getItem("canvasHeight") || 500,
+      // 画布宽度
       canvasWidth: 300
     };
     // this.canvas = null;
@@ -59,6 +66,7 @@ export default class extends Component {
     });
     ipcRenderer.on("record", () => {
       this.record = true;
+      console.log('ipcRenderer.on("record", loading true')
       this.setState({ loading: true });
       this.getSource();
     });
@@ -68,6 +76,10 @@ export default class extends Component {
     });
   }
 
+  /**
+   * 键盘输入同步至设备
+   * @param {String} text 
+   */
   doTypeText(text) {
     if (!keyboard) {
       console.log("连接keyboard");
@@ -75,13 +87,20 @@ export default class extends Component {
     }
     keyboard.write(text + "\n");
   }
+
   appiumGetSource(cb) {
+    console.log('appiumGetSource')
     request.get("/source", (err, res, sourceJSON) => {
+      let start = (new Date()).getTime()
+      console.log('sourceJSON', sourceJSON);
       try {
         sourceXML = sourceJSON.value
         sourceJSON = xmlToJSON(sourceJSON.value);
         clearTimeout(timer);
         timer = null;
+        console.log(
+          'will send main getSourceJSON'
+        )
         require('electron').remote.BrowserWindow.fromId(+localStorage.getItem("mainWinId")).webContents.send("getSourceJSON",
           sourceJSON);
         // ipcRenderer.send(
@@ -89,16 +108,28 @@ export default class extends Component {
         //   "getSourceJSON",
         //   sourceJSON
         // );
+        let end = (new Date()).getTime()
+        console.log(
+          'getSource成功',
+          (end - start) / 1000
+        )
         return this.setState({ sourceJSON, loading: false });
       } catch (e) {
         cb && cb();
         console.log("getSource", err || sourceJSON || res);
+        let end = (new Date()).getTime()
+        console.log(
+          'getSource失败',
+          (end - start) / 1000,
+          e
+        )
         return setTimeout(() => {
           this.appiumGetSource();
         }, 2000);
       }
     });
   }
+
   getSource() {
     console.log("sourceJSON");
     this.appiumGetSource(() => {
@@ -109,10 +140,16 @@ export default class extends Component {
       this.setState({ loading: false });
     }, 15000);
   }
+
   componentWillUnmount() {
     ipcRenderer.removeAllListeners("stoprecord");
     ipcRenderer.removeAllListeners("record");
   }
+
+  /**
+   * 鼠标按下同步至设备
+   * @param {*} evt 
+   */
   onMouseDown(evt) {
     this.isPressing = true;
     const width = Math.round(
@@ -132,6 +169,11 @@ export default class extends Component {
     this.minitouch.write("c\n");
     this.tap = { width, height };
   }
+
+  /**
+   * 鼠标抬起同步至设备
+   * @param {*} evt 
+   */
   onMouseUp(evt) {
     this.isPressing = false;
     this.minitouch.write("u 0\n");
@@ -155,12 +197,23 @@ export default class extends Component {
         this.isMove ? { ...this.tap, widthEnd, heightEnd } : this.tap
       );
       setTimeout(this.getSource.bind(this), 300);
+      console.log(
+        'onmouseup loading true'
+      )
       this.setState({ loading: true });
     }
     this.isMove = false;
   }
+
+  /**
+   * 鼠标滑动同步至设备
+   * @param {*} evt 
+   */
   onMouseMove(evt) {
-    if (!this.isPressing) return;
+    // 当鼠标按下时，滑动才有效
+    if (!this.isPressing) {
+      return;
+    }
     this.isMove = true;
     const width = Math.round(
       (evt.clientX - left) *
@@ -178,6 +231,10 @@ export default class extends Component {
     );
     this.minitouch.write("c\n");
   }
+
+  /**
+   * 初始化画布、并打印设备宽高信息
+   */
   info() {
     // 原始拟定高度
     const DEVICE_ORIGINAL_HEIGHT = window.screen.availHeight - 50;
@@ -231,6 +288,7 @@ export default class extends Component {
       });
     });
   }
+
   componentDidMount() {
     this.info();
     // 接受来自main，更改样式大小
@@ -331,6 +389,9 @@ export default class extends Component {
   }
 
   highlighterRects() {
+    console.log(
+      '进入highlighterRects'
+    )
     const highlighterRects = [];
     let recursive = (element, zIndex = 0) => {
       highlighterRects.push(
@@ -351,6 +412,7 @@ export default class extends Component {
     this.state.sourceJSON && recursive(this.state.sourceJSON);
     return highlighterRects;
   }
+
   render() {
     console.log("屏幕组件渲染");
     return (

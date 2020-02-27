@@ -1,3 +1,8 @@
+/**
+ * 生成脚本代码基类，要求后代必须实现其方法
+ * 不同的编程语言模版类需要继承该基类
+ */
+
 export default class Framework {
 
   constructor (host, port, path, https, caps) {
