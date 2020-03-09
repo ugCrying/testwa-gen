@@ -9,7 +9,7 @@ import { ipcRenderer } from 'electron';
 import { emitter } from '../../../lib';
 const convert = new AnsiConverter({ fg: '#bbb', bg: '#222' });
 
-export default class extends Component {
+export default class Terminal extends Component {
   constructor(props) {
     super(props);
     this.state = {
