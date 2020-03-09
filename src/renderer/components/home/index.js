@@ -746,7 +746,7 @@ export default class extends Component {
                         <TabPane
                           tab="UI树"
                           key="tree"
-                          // disabled={this.state.recording ? false : true}
+                          disabled={this.state.recording ? false : true}
                           className={styles['main-tree-area']}
                         >
                           <Source recording={this.state.recording} />

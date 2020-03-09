@@ -4,6 +4,9 @@ node_modules/
 yarn-error.log
 .idea
 
+# tmp
+src/ui.xml
+
 # umi
 .umi
 .umi-production

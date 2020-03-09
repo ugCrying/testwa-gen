@@ -2,75 +2,85 @@
  * 设备（小窗）
  */
 
-import React, { Component } from "react";
-import { Button, Spin } from "antd";
-import { BannerParser } from "minicap";
-import HighlighterRect from "./HighlighterRect";
-import adbkit from "adbkit";
+import React, { Component } from 'react';
+import { Button, Spin } from 'antd';
+import { BannerParser } from 'minicap';
+import HighlighterRect from './HighlighterRect';
+import adbkit from 'adbkit';
 // @ts-ignore
-import styles from "./Inspector.css";
+import styles from './Inspector.css';
 // @ts-ignore
-import devices from "./devices.css";
+import devices from './devices.css';
 // @ts-ignore
-import shell from "./shell.css";
+import shell from './shell.css';
 // @ts-ignore
-import { ipcRenderer } from "electron";
-import { emitter } from "../../lib";
-import { xmlToJSON } from "./lib";
+import { ipcRenderer } from 'electron';
+import { emitter } from '../../lib';
+import { xmlToJSON } from './lib';
+import { adbGetsource } from './utils';
+
+const electron = require('electron');
 
 export let sourceXML = null;
-console.log("屏幕同步组件入口模块");
-const request = require("request").defaults({
-  timeout: 3000,
+console.log('屏幕同步组件入口模块');
+const request = require('request').defaults({
+  // FIXME: 此处大小会影响 getPageSource
+  timeout: 5000,
   forever: true,
   json: true,
-  baseUrl: "http://localhost:4444/wd/hub/session/1/"
+  baseUrl: 'http://localhost:4444/wd/hub/session/1/'
 });
 let keyboard;
 const connectKeyboard = () => {
-  keyboard = require("net").connect({ port: 6677 });
-  keyboard.on("connect", () => console.log("keyboard 已连接"));
-  keyboard.on("close", hadError => {
+  keyboard = require('net').connect({ port: 6677 });
+  keyboard.on('connect', () => console.log('keyboard 已连接'));
+  keyboard.on('close', hadError => {
     keyboard = null;
-    console.log(hadError ? "keyboard连接异常关闭" : "keyboard连接关闭");
+    console.log(hadError ? 'keyboard连接异常关闭' : 'keyboard连接关闭');
   });
-  keyboard.on("error", console.log);
+  keyboard.on('error', console.log);
   return keyboard;
 };
-ipcRenderer.once("mainWinId", (_, { mainWinId }) => {
-  localStorage.setItem("mainWinId", mainWinId);
+ipcRenderer.once('mainWinId', (_, { mainWinId }) => {
+  localStorage.setItem('mainWinId', mainWinId);
 });
 let top, left;
 let timer;
 
 export const client = adbkit.createClient();
 
-export default class extends Component {
+export default class Device extends Component {
   constructor(props) {
-    console.log("屏幕同步组件实例化");
+    console.log('屏幕同步组件实例化');
     super(props);
     this.state = {
       loading: false,
       selectedElement: {},
       // 画布高度
-      canvasHeight: localStorage.getItem("canvasHeight") || 500,
+      canvasHeight: localStorage.getItem('canvasHeight') || 500,
       // 画布宽度
       canvasWidth: 300
     };
+    // 是否处于按压状态
+    this.isPressing = false;
+    // 是否处于滑动（滚动）状态
+    this.isMove = false;
+    // 是否处于录制状态
+    this.record = false;
     // this.canvas = null;
     this.banner = null;
     this.touchSize = [];
-    this.minitouch = require("net").connect({ port: 1718 });
-    emitter.on("selectedElement", selectedElement => {
+    this.minitouch = require('net').connect({ port: 1718 });
+    emitter.on('selectedElement', selectedElement => {
       this.setState({ selectedElement });
     });
-    ipcRenderer.on("record", () => {
+    ipcRenderer.on('record', () => {
       this.record = true;
-      console.log('ipcRenderer.on("record", loading true')
+      console.log('ipcRenderer.on("record", loading true');
       this.setState({ loading: true });
       this.getSource();
     });
-    ipcRenderer.on("stoprecord", () => {
+    ipcRenderer.on('stoprecord', () => {
       this.setState({ sourceJSON: null });
       this.record = false;
     });
@@ -78,51 +88,70 @@ export default class extends Component {
 
   /**
    * 键盘输入同步至设备
-   * @param {String} text 
+   * @param {String} text
    */
   doTypeText(text) {
     if (!keyboard) {
-      console.log("连接keyboard");
+      console.log('连接keyboard');
       keyboard = connectKeyboard();
     }
-    keyboard.write(text + "\n");
+    keyboard.write(text + '\n');
   }
 
+  async appiumGetSourceNew() {
+    try {
+      console.log(
+        `获取device ${this.props.device} source信息`,
+        this.props.device
+      )
+      const value = await adbGetsource(this.props.device);
+      sourceXML = value;
+      const sourceJSON = xmlToJSON(value);
+      // FIXME: electron 进程间通信数据流大时可能很慢，但此处用引用传值会议问题
+      const browserWindow = electron.remote.BrowserWindow.fromId(
+        +localStorage.getItem('mainWinId')
+      );
+      browserWindow.webContents.send('getSourceJSON', sourceJSON);
+      this.setState({ sourceJSON, loading: false });
+    } catch (e) {
+      ipcRenderer.send('startU2');
+      throw e;
+    }
+  }
+
+  // FIXME: 为何取名 appium 而不是 selenium
+  // TODO: 接口抽离解耦
   appiumGetSource(cb) {
-    console.log('appiumGetSource')
-    request.get("/source", (err, res, sourceJSON) => {
-      let start = (new Date()).getTime()
+    console.log('appiumGetSource11');
+    let start = new Date().getTime();
+    // https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol#get-sessionsessionidsource
+    // TODO: 此处专门区分 ios、android、web 来获取会不会有改善？
+    request.get('/source', (err, res, sourceJSON) => {
+      let end = new Date().getTime();
+      console.log('getSource成功 ', (end - start) / 1000);
+      // return this.setState({ loading: false });
       console.log('sourceJSON', sourceJSON);
       try {
-        sourceXML = sourceJSON.value
+        sourceXML = sourceJSON.value;
         sourceJSON = xmlToJSON(sourceJSON.value);
         clearTimeout(timer);
         timer = null;
-        console.log(
-          'will send main getSourceJSON'
-        )
-        require('electron').remote.BrowserWindow.fromId(+localStorage.getItem("mainWinId")).webContents.send("getSourceJSON",
-          sourceJSON);
-        // ipcRenderer.send(
-        //   // +localStorage.getItem("mainWinId"),
-        //   "getSourceJSON",
-        //   sourceJSON
-        // );
-        let end = (new Date()).getTime()
-        console.log(
-          'getSource成功',
-          (end - start) / 1000
-        )
+        console.log('will send main getSourceJSON');
+        console.log('准备send');
+        const browserWindow = electron.remote.BrowserWindow.fromId(
+          +localStorage.getItem('mainWinId')
+        );
+        console.log('开始send');
+        browserWindow.webContents.send('getSourceJSON', '');
+        console.log('send完成');
         return this.setState({ sourceJSON, loading: false });
       } catch (e) {
+        // e 可能为 source 异常或 request 超时异常
         cb && cb();
-        console.log("getSource", err || sourceJSON || res);
-        let end = (new Date()).getTime()
-        console.log(
-          'getSource失败',
-          (end - start) / 1000,
-          e
-        )
+        console.log('getSource', err || sourceJSON || res);
+        let end = new Date().getTime();
+        console.log('getSource失败', (end - start) / 1000, e);
+        // 失败后重试
         return setTimeout(() => {
           this.appiumGetSource();
         }, 2000);
@@ -131,9 +160,9 @@ export default class extends Component {
   }
 
   getSource() {
-    console.log("sourceJSON");
+    // console.log("sourceJSON");
     this.appiumGetSource(() => {
-      ipcRenderer.send("startU2");
+      ipcRenderer.send('startU2');
     });
     timer = setTimeout(() => {
       timer = null;
@@ -142,64 +171,66 @@ export default class extends Component {
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeAllListeners("stoprecord");
-    ipcRenderer.removeAllListeners("record");
+    ipcRenderer.removeAllListeners('stoprecord');
+    ipcRenderer.removeAllListeners('record');
+    // TODO: remove eventListener "changeStyle"
   }
 
   /**
    * 鼠标按下同步至设备
-   * @param {*} evt 
+   * @param {*} evt
    */
   onMouseDown(evt) {
     this.isPressing = true;
     const width = Math.round(
       (evt.clientX - left) *
-      this.ratio *
-      (this.touchSize[2] / this.banner.realWidth)
+        this.ratio *
+        (this.touchSize[2] / this.banner.realWidth)
     );
     const height = Math.round(
       (evt.clientY - top) *
-      this.ratio *
-      (this.touchSize[3] / this.banner.realHeight)
+        this.ratio *
+        (this.touchSize[3] / this.banner.realHeight)
     );
     this.minitouch.write(
       // `d 0 ${evt.nativeEvent.offsetX * 2} ${evt.nativeEvent.offsetY * 2} 50\n` d 触控点个数 x y 压力值
       `d 0 ${width} ${height} 50\n`
     );
-    this.minitouch.write("c\n");
+    this.minitouch.write('c\n');
     this.tap = { width, height };
   }
 
   /**
    * 鼠标抬起同步至设备
-   * @param {*} evt 
+   * @param {*} evt
    */
   onMouseUp(evt) {
     this.isPressing = false;
-    this.minitouch.write("u 0\n");
-    this.minitouch.write("c\n");
+    this.minitouch.write('u 0\n');
+    this.minitouch.write('c\n');
+    // 处于录制状态下时录制脚本
     if (this.record) {
       const widthEnd = Math.round(
         (evt.clientX - left) *
-        this.ratio *
-        (this.touchSize[2] / this.banner.realWidth)
+          this.ratio *
+          (this.touchSize[2] / this.banner.realWidth)
       );
       const heightEnd = Math.round(
         (evt.clientY - top) *
-        this.ratio *
-        (this.touchSize[3] / this.banner.realHeight)
+          this.ratio *
+          (this.touchSize[3] / this.banner.realHeight)
       );
       if (widthEnd - this.tap.width === 0 && heightEnd - this.tap.height === 0)
         this.isMove = false;
       ipcRenderer.send(
         // +localStorage.getItem("mainWinId"),
-        this.isMove ? "swiped" : "taped",
+        this.isMove ? 'swiped' : 'taped',
         this.isMove ? { ...this.tap, widthEnd, heightEnd } : this.tap
       );
+      // TODO: 为何要延迟 300ms
       setTimeout(this.getSource.bind(this), 300);
-      console.log(
-        'onmouseup loading true'
-      )
+      console.log('onmouseup loading true');
+      // TODO: loading 控制放到 getSource 方法内？
       this.setState({ loading: true });
     }
     this.isMove = false;
@@ -207,7 +238,7 @@ export default class extends Component {
 
   /**
    * 鼠标滑动同步至设备
-   * @param {*} evt 
+   * @param {*} evt
    */
   onMouseMove(evt) {
     // 当鼠标按下时，滑动才有效
@@ -217,19 +248,19 @@ export default class extends Component {
     this.isMove = true;
     const width = Math.round(
       (evt.clientX - left) *
-      this.ratio *
-      (this.touchSize[2] / this.banner.realWidth)
+        this.ratio *
+        (this.touchSize[2] / this.banner.realWidth)
     );
     const height = Math.round(
       (evt.clientY - top) *
-      this.ratio *
-      (this.touchSize[3] / this.banner.realHeight)
+        this.ratio *
+        (this.touchSize[3] / this.banner.realHeight)
     );
     this.minitouch.write(
       // `m 0 ${evt.nativeEvent.offsetX * 2} ${evt.nativeEvent.offsetY * 2}  50\n`
       `m 0 ${width} ${height} 50\n`
     );
-    this.minitouch.write("c\n");
+    this.minitouch.write('c\n');
   }
 
   /**
@@ -242,47 +273,47 @@ export default class extends Component {
     const DEVICE_ORIGINAL_WIDTH = (DEVICE_ORIGINAL_HEIGHT * 420) / 912;
     // canvas宽度
     this.canvasWidth = (DEVICE_ORIGINAL_WIDTH * 400) / 420;
-    console.log("投屏宽度", this.canvasWidth);
-    ipcRenderer.send("canvasWidth", this.canvasWidth);
+    console.log('投屏宽度', this.canvasWidth);
+    ipcRenderer.send('canvasWidth', this.canvasWidth);
     this.setState({
       canvasWidth: this.canvasWidth
     });
     //test log
-    ipcRenderer.once("deviceWinShowed", (_, { width, height }) => {
-      console.log("屏幕分辨率", {
+    ipcRenderer.once('deviceWinShowed', (_, { width, height }) => {
+      console.log('屏幕分辨率', {
         width: window.screen.width,
         height: window.screen.height
       });
-      console.log("屏幕内容区（去掉win任务栏/mac菜单栏）", {
+      console.log('屏幕内容区（去掉win任务栏/mac菜单栏）', {
         width: window.screen.availWidth,
         height: window.screen.availHeight
       });
-      console.log("设备窗口内容区(除去菜单栏、工具栏等)=body.client+滚动条", {
+      console.log('设备窗口内容区(除去菜单栏、工具栏等)=body.client+滚动条', {
         width: window.innerWidth,
         height: window.innerHeight
       });
-      console.log("设备窗口屏幕大小", {
+      console.log('设备窗口屏幕大小', {
         width: this.canvas.getBoundingClientRect().width,
         height: this.canvas.getBoundingClientRect().height
       });
-      console.log("设备屏幕压缩比例(实际)", {
+      console.log('设备屏幕压缩比例(实际)', {
         width: width / this.canvas.getBoundingClientRect().width,
         height: height / this.canvas.getBoundingClientRect().height
       });
       console.log(
-        "win标题栏/mac红绿灯高度(屏幕内容区高度-最大化浏览器内容区高度)",
+        'win标题栏/mac红绿灯高度(屏幕内容区高度-最大化浏览器内容区高度)',
         window.screen.availHeight - window.innerHeight
       );
       // console.log("底部按钮高度", this.footer.scrollHeight);
-      console.log("body.client，内容＋内边距+边框(height + padding+border)", {
+      console.log('body.client，内容＋内边距+边框(height + padding+border)', {
         width: document.body.clientWidth,
         height: document.body.clientHeight
       });
-      console.log("body.offset，内容＋内边距(height + padding)+溢出部分", {
+      console.log('body.offset，内容＋内边距(height + padding)+溢出部分', {
         width: document.body.offsetWidth,
         height: document.body.offsetHeight
       });
-      console.log("body.scroll，offset+border", {
+      console.log('body.scroll，offset+border', {
         width: document.body.scrollWidth,
         height: document.body.scrollHeight
       });
@@ -292,32 +323,32 @@ export default class extends Component {
   componentDidMount() {
     this.info();
     // 接受来自main，更改样式大小
-    ipcRenderer.on("changeStyle", (_, args) => {
+    ipcRenderer.on('changeStyle', (_, args) => {
       this.canvasHeight = args.canvasHeight;
       this.setState({
         canvasHeight: this.canvasHeight
       });
       top = 45 * args.scale;
       left = 10 * args.scale;
-      this.device.style.height = args.shellHeight + "px";
+      this.device.style.height = args.shellHeight + 'px';
       this.shell.style.transform = `scale3d(${args.scale}, ${args.scale}, 1)`;
-      this.shell.style.height = 822 - args.shellHeightDiff + "px";
-      this.screen.style.width = args.canvasWidth + "px";
-      this.screen.style.height = args.canvasHeight + "px";
-      this.screen.style.top = top + "px";
-      this.screen.style.left = left + "px";
-      this.screen.style.borderRadius = 14 * args.scale + "px";
-      ipcRenderer.send("displayDevice");
+      this.shell.style.height = 822 - args.shellHeightDiff + 'px';
+      this.screen.style.width = args.canvasWidth + 'px';
+      this.screen.style.height = args.canvasHeight + 'px';
+      this.screen.style.top = top + 'px';
+      this.screen.style.left = left + 'px';
+      this.screen.style.borderRadius = 14 * args.scale + 'px';
+      ipcRenderer.send('displayDevice');
     });
-    const g = this.canvas.getContext("2d");
+    const g = this.canvas.getContext('2d');
     let drawing = false;
-    const minicap = require("net").connect({ port: 1717 });
+    const minicap = require('net').connect({ port: 1717 });
     let img = new Image();
     img.onload = () => {
       if (!this.canvas) return (drawing = false);
       this.canvas.width = img.width;
       this.canvas.height = img.height;
-      console.log("投屏尺寸", this.canvas.width, this.canvas.height);
+      console.log('投屏尺寸', this.canvas.width, this.canvas.height);
       g.drawImage(img, 0, 0);
       return (drawing = false);
     };
@@ -336,8 +367,8 @@ export default class extends Component {
           if (drawing === false) {
             drawing = true;
             img.src =
-              "data:image/png;base64," +
-              Buffer.from(data.slice(4, 4 + size)).toString("base64");
+              'data:image/png;base64,' +
+              Buffer.from(data.slice(4, 4 + size)).toString('base64');
           }
           data = data.slice(4 + size);
           return screen();
@@ -345,7 +376,7 @@ export default class extends Component {
         return (compiling = false);
       };
       drawing = false;
-      minicap.on("data", chunk => {
+      minicap.on('data', chunk => {
         // @ts-ignore
         data.push(...chunk);
         if (compiling === false) return screen();
@@ -354,11 +385,11 @@ export default class extends Component {
           parser.parse(data.splice(0, 24)); //前24个字节是头信息
           this.banner = parser.take();
           // @ts-ignore
-          console.log("minicap获取的设备屏幕实际高度", this.banner.realHeight);
+          console.log('minicap获取的设备屏幕实际高度', this.banner.realHeight);
           setTimeout(() => {
             this.ratio = this.banner.realHeight / this.state.canvasHeight;
             console.log(
-              "realHeight&canvasHeight",
+              'realHeight&canvasHeight',
               this.ratio,
               this.banner.realHeight,
               this.state.canvasHeight
@@ -368,30 +399,29 @@ export default class extends Component {
           compiling = false;
         }
       });
-      minicap.on("connect", () => console.log("minicap 已连接"));
-      minicap.on("close", hadError =>
-        console.log(hadError ? "minicap连接异常关闭" : "minicap连接关闭")
+      minicap.on('connect', () => console.log('minicap 已连接'));
+      minicap.on('close', hadError =>
+        console.log(hadError ? 'minicap连接异常关闭' : 'minicap连接关闭')
       );
-      minicap.on("error", console.log);
+      minicap.on('error', console.log);
     };
     connectminicap();
-    this.minitouch.on("data", chunk => {
+    this.minitouch.on('data', chunk => {
       this.touchSize = chunk
         .toString()
-        .split("^")[1]
-        .split(" ");
+        .split('^')[1]
+        .split(' ');
     });
-    this.minitouch.on("connect", () => console.log("minitouch 已连接"));
-    this.minitouch.on("close", hadError =>
-      console.log(hadError ? "minitouch连接异常关闭" : "minitouch连接关闭")
+    this.minitouch.on('connect', () => console.log('minitouch 已连接'));
+    this.minitouch.on('close', hadError =>
+      console.log(hadError ? 'minitouch连接异常关闭' : 'minitouch连接关闭')
     );
-    this.minitouch.on("error", console.log);
+    this.minitouch.on('error', console.log);
   }
 
   highlighterRects() {
-    console.log(
-      '进入highlighterRects'
-    )
+    let start = new Date().getTime();
+    console.log('进入highlighterRects');
     const highlighterRects = [];
     let recursive = (element, zIndex = 0) => {
       highlighterRects.push(
@@ -404,46 +434,48 @@ export default class extends Component {
           text={this.text}
           textId={this.textId}
           record={this.record}
-          clearText={() => (this.text = "")}
+          clearText={() => (this.text = '')}
         />
       );
       for (let childEl of element.children) recursive(childEl, zIndex + 1);
     };
     this.state.sourceJSON && recursive(this.state.sourceJSON);
+    let end = new Date().getTime();
+    console.log('highlighterRects耗时', (end - start) / 1000);
     return highlighterRects;
   }
 
   render() {
-    console.log("屏幕组件渲染");
+    console.log('屏幕组件渲染');
     return (
       <Spin size="large" tip="同步 UI Source..." spinning={this.state.loading}>
         <div
           ref={device => (this.device = device)}
-          className={styles["device-wrap"]}
+          className={styles['device-wrap']}
         >
-          <div className={styles["screen-wrap"]}>
+          <div className={styles['screen-wrap']}>
             <div
               ref={shell => (this.shell = shell)}
-              className={`${shell["marvel-device"]} ${shell["note8"]}`}
+              className={`${shell['marvel-device']} ${shell['note8']}`}
             >
-              <div className={shell["inner"]} />
-              <div className={shell["overflow"]}>
-                <div className={shell["shadow"]} />
+              <div className={shell['inner']} />
+              <div className={shell['overflow']}>
+                <div className={shell['shadow']} />
               </div>
-              <div className={shell["speaker"]} />
-              <div className={shell["sensors"]} />
-              <div className={shell["more-sensors"]} />
-              <div className={shell["sleep"]} />
-              <div className={shell["volume"]} />
-              <div className={shell["camera"]} />
-              <div className={shell["screen"]} />
+              <div className={shell['speaker']} />
+              <div className={shell['sensors']} />
+              <div className={shell['more-sensors']} />
+              <div className={shell['sleep']} />
+              <div className={shell['volume']} />
+              <div className={shell['camera']} />
+              <div className={shell['screen']} />
             </div>
             <div
               ref={screen => (this.screen = screen)}
-              className={styles["screen-canvas"]}
+              className={styles['screen-canvas']}
             >
               <div
-                className={devices["canvas-container"]}
+                className={devices['canvas-container']}
                 style={{
                   height: this.state.canvasHeight
                 }}
@@ -457,13 +489,13 @@ export default class extends Component {
               </div>
             </div>
           </div>
-          <div className={styles["control-wrap"]}>
-            <div className={styles["control-space"]} />
-            <div className={styles["control-container"]}>
-              <div className={styles["control-bar"]}>
+          <div className={styles['control-wrap']}>
+            <div className={styles['control-space']} />
+            <div className={styles['control-container']}>
+              <div className={styles['control-bar']}>
                 <Button
                   onClick={() => {
-                    ipcRenderer.send("close");
+                    ipcRenderer.send('close');
                   }}
                 >
                   <img
@@ -474,7 +506,7 @@ export default class extends Component {
                 </Button>
                 <Button
                   onClick={() => {
-                    ipcRenderer.send("min");
+                    ipcRenderer.send('min');
                   }}
                 >
                   <img
@@ -492,7 +524,7 @@ export default class extends Component {
                   }
                 >
                   <img
-                    className={styles["reply-button"]}
+                    className={styles['reply-button']}
                     // @ts-ignore
                     src={require(`../../../../static/images/reply.svg`)}
                     alt=""
@@ -539,26 +571,26 @@ export default class extends Component {
                   />
                 </Button>
                 <input
-                  className={styles["v-input"]}
+                  className={styles['v-input']}
                   autoFocus
                   onBlur={e => {
                     e.target.focus();
-                    e.target.value = "";
-                    console.log("失去焦点清空文本", e.target.value);
+                    e.target.value = '';
+                    console.log('失去焦点清空文本', e.target.value);
                   }}
                   onChange={e => {
                     this.text = e.target.value;
                     if (this.state.selectedElement.attributes) {
                       this.textId = this.state.selectedElement.attributes[
-                        "resource-id"
+                        'resource-id'
                       ];
                     }
                     this.doTypeText(this.text);
-                    console.log("文本同步输入", this.text);
+                    console.log('文本同步输入', this.text);
                   }}
                 />
               </div>
-              <div className={styles["control-container-space"]} />
+              <div className={styles['control-container-space']} />
             </div>
           </div>
         </div>
