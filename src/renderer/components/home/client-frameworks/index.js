@@ -1,5 +1,6 @@
 /**
  * 脚本生成代码出口
+ * https://github.com/appium/appium-desktop/tree/master/app/renderer/lib/client-frameworks
  */
 
 import JsWdFramework from "./js-wd";

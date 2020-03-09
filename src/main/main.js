@@ -29,6 +29,7 @@ if (process.platform !== "win32") {
   }
 }
 
+// http://appium.io/docs/en/drivers/android-uiautomator/index.html#usage
 const createSession = () => {
   require("request").post(
     "http://localhost:4444/wd/hub/session",
@@ -292,6 +293,10 @@ ipcMain.on("runcode", (_, rawCode) => {
   );
   console.log(path, "脚本路径");
   require("fs").writeFile(path, rawCode, () => {
+    console.log(
+      'rawCode',
+      rawCode
+    )
     cp = fork(path);
     cp.on("exit", () => {
       cp = null;
