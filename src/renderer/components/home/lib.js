@@ -65,6 +65,10 @@ export const runCode = (info, recordedActions) => {
   framework.actions = recordedActions;
   framework.run_num = localStorage.getItem("run_code_num") || 1;
   const rawCode = framework.getCodeString(true);
+  console.log(
+    'rawCode',
+    rawCode
+  )
   ipcRenderer.send("runcode", rawCode);
 };
 export const record = () => {
