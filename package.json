@@ -105,6 +105,8 @@
   "dependencies": {
     "adbkit": "^2.11.0",
     "adbkit-apkreader": "^3.1.1",
+    "await-timeout": "^1.1.1",
+    "axios": "^0.19.2",
     "electron-updater": "^4.0.6",
     "lodash": "^4.17.15",
     "request": "^2.88.0",
