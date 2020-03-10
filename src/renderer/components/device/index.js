@@ -142,7 +142,7 @@ export default class Device extends Component {
           +localStorage.getItem('mainWinId')
         );
         console.log('开始send');
-        browserWindow.webContents.send('getSourceJSON', '');
+        browserWindow.webContents.send('getSourceJSON', sourceJSON);
         console.log('send完成');
         return this.setState({ sourceJSON, loading: false });
       } catch (e) {
