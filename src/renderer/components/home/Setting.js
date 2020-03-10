@@ -14,7 +14,7 @@ const Setting = props => {
   const CURRENT_ANDROID_HOME = props.record.ANDROID_HOME || localStorage.getItem("ANDROID_HOME") || ANDROID_HOME;
   return (
     <Row>
-      <Col push={1} span={16}>
+      <Col push={1} span={16} xs={20} md={16} lg={12} xl={8}>
         {/* <h1>设置</h1> */}
         {/* <Form> */}
         <Form.Item label="脚本回放次数">
