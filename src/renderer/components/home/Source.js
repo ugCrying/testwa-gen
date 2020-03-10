@@ -23,6 +23,7 @@ class Source extends Component {
       this.setState({ expandedPaths });
     });
   }
+
   getFormattedTag(el) {
     const { tagName, attributes } = el;
     let attrs = [];
@@ -54,14 +55,33 @@ class Source extends Component {
       </span>
     );
   }
+
   render() {
     console.log("ui树组件渲染");
+    const mapping = {}
     let recursive = elemObj =>
-      elemObj.children.map(el => (
-        <TreeNode title={this.getFormattedTag(el)} key={el.path}>
-          {recursive(el)}
-        </TreeNode>
-      ));
+      elemObj.children.map(el => {
+        mapping[el.path] = el
+        return (
+          <TreeNode
+            title={
+              // <p onMouseOver={() => {
+              //   console.log(this.getFormattedTag(el))
+              // } }>
+              //   {this.getFormattedTag(el)}
+              // </p>
+              <a onMouseEnter={() => {
+                // TODO: 反向选中
+                // emitter.emit("selectedElement", el);
+                // ipcRenderer.send("selectedElement", el);
+              }}>{this.getFormattedTag(el)}</a>
+            }
+            key={el.path}
+          >
+            {recursive(el)}
+          </TreeNode>
+        )
+      });
     return (
       <div className={styles["source-wrap"]}>
         <div className={styles["source-title"]}>
@@ -83,8 +103,11 @@ class Source extends Component {
                   // TODO: 父组件未处理，是否需要冒泡与处理？
                   emitter.emit("expandedPaths", expandedPaths);
                 }}
-                onSelect={selectedPaths =>
-                  console.log("选中元素", selectedPaths[0])
+                onSelect={(key) => {
+                  console.log("UI树里选中元素", mapping[key])
+                  // emitter.emit("selectedElement", mapping[key]);
+                  // ipcRenderer.send("selectedElement", mapping[key]);
+                }
                 }
               >
                 {recursive(this.props.record.sourceJSON)}
