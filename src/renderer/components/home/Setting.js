@@ -14,7 +14,7 @@ const Setting = props => {
   const CURRENT_ANDROID_HOME = props.record.ANDROID_HOME || localStorage.getItem("ANDROID_HOME") || ANDROID_HOME;
   return (
     <Row>
-      <Col push={1} span={8}>
+      <Col push={1} span={16}>
         {/* <h1>设置</h1> */}
         {/* <Form> */}
         <Form.Item label="脚本回放次数">
@@ -39,10 +39,11 @@ const Setting = props => {
           />
         </Form.Item>
         <Form.Item
+          wrapperCol={{ span: 24 }}
           label={"JAVA_HOME" + (JAVA_HOME && " (Default: " + JAVA_HOME + ")")}
         >
           <Input
-            value={CURRENT_JAVA_HOME}
+          value={CURRENT_JAVA_HOME}
             onClick={() =>
               require("electron").remote.dialog.showOpenDialog(
                 {
