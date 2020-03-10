@@ -284,9 +284,9 @@ svg {
   line-height: 35px;
 }
 
-.main-route-bar p,
-span {
-  margin: 0 6px 0 0;
+.main-route-bar-title {
+  margin: 0;
+  line-height: 1;
 }
 
 .main-business-wrap {

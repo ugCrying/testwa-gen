@@ -29,7 +29,7 @@ ipcRenderer.on('deviceWinId', (_, id) => {
   localStorage.setItem('deviceWinId', id);
 });
 
-export default class extends Component {
+export default class Home extends Component {
   constructor(props) {
     console.log('设备列表组件实例化');
     console.log(localStorage);
@@ -123,6 +123,10 @@ export default class extends Component {
     });
   }
 
+  selectedCode () {
+    return !!this.props.record.code
+  }
+
   showModal() {
     this.saved = true;
     this.setState({
@@ -200,6 +204,14 @@ export default class extends Component {
     );
     // this.setState({ downCode: true });
   }
+
+  /**
+   * 上传脚本到云测平台
+   */
+  uploadCode() {
+    
+  }
+
   // handleDownCode() {
   //   console.log(this.downCodePath.name, this.downCodePath.path);
   // }
@@ -628,14 +640,14 @@ export default class extends Component {
                 className={styles['side-custom-tabs']}
                 tabBarExtraContent={
                   <div>
-                    <Tooltip title="下载脚本文件至本地">
-                      <Icon
-                        type="download"
-                        onClick={this.downCode.bind(this)}
-                      />
+                    <Tooltip title="上传脚本至云测平台">
+                      <Button disabled={ !this.selectedCode.apply(this) } type="link" icon="upload" onClick={this.uploadCode.bind(this)} />
+                    </Tooltip>
+                    <Tooltip title="下载脚本至本地">
+                      <Button disabled={ !this.selectedCode.apply(this) } type="link" icon="download" onClick={this.downCode.bind(this)} />
                     </Tooltip>
                     <Tooltip title="删除脚本文件">
-                      <Icon type="delete" onClick={this.delCode.bind(this)} />
+                      <Button disabled={ !this.selectedCode.apply(this) } type="link" icon="delete" onClick={this.delCode.bind(this)} />
                     </Tooltip>
                   </div>
                 }
@@ -668,8 +680,8 @@ export default class extends Component {
               <Layout className={styles['main-content-layout']}>
                 <div className={styles['main-content-layout-wrap']}>
                   <div className={styles['main-route-bar']}>
-                    <p>User</p> <span> > </span>
-                    <p>{this.state.activeKey || 'Testwa'}</p>
+                    {/* <p>User</p> <span> > </span> */}
+                    <p className={styles['main-route-bar-title']}>{this.state.activeKey || 'Testwa'}</p>
                   </div>
                   <div className={styles['main-business-wrap']}>
                     <div className={styles['main-business-worker-area']}>
