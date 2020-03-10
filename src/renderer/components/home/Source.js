@@ -78,6 +78,9 @@ class Source extends Component {
                 expandedKeys={this.state.expandedPaths}
                 selectedKeys={[this.state.selectedElement.path]}
                 onExpand={expandedPaths => {
+                  // TODO: 反向选中
+                  this.setState({ expandedPaths })
+                  // TODO: 父组件未处理，是否需要冒泡与处理？
                   emitter.emit("expandedPaths", expandedPaths);
                 }}
                 onSelect={selectedPaths =>
