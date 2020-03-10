@@ -15,7 +15,7 @@ const Setting = props => {
   return (
     <Row>
       <Col push={1} span={8}>
-        <h1>设置</h1>
+        {/* <h1>设置</h1> */}
         {/* <Form> */}
         <Form.Item label="脚本回放次数">
           <InputNumber

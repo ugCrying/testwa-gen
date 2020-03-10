@@ -36,7 +36,7 @@ export default class Home extends Component {
     super(props);
     this.state = {
       // 当前标签页 key 值
-      activeKey: '',
+      activeKey: '主页',
       // 终端展开 / 收起状态
       terminalDisplay: true,
       // 左侧（已保存本地）脚本列表是否课件
@@ -395,10 +395,10 @@ export default class Home extends Component {
           <RecordedActions addTime={this.addTime} device={this.state.device} />
         );
         break;
-      case 'setting':
+      case '设置':
         content = <Setting />;
         break;
-      default:
+      case '主页':
         content = (
           <div className={styles.welcome}>
             <img
@@ -410,6 +410,9 @@ export default class Home extends Component {
             />
           </div>
         );
+        break;
+      default:
+        throw new Error(`unknown activeKey: ${this.state.activeKey}`)
     }
     return content;
   }
@@ -433,7 +436,7 @@ export default class Home extends Component {
                 <Button
                   size={'small'}
                   onClick={() => {
-                    this.setState({ activeKey: '' });
+                    this.setState({ activeKey: '主页' });
                   }}
                 >
                   <Icon type="home" />
@@ -617,7 +620,7 @@ export default class Home extends Component {
                     icon="setting"
                     onClick={() =>
                       this.setState({
-                        activeKey: 'setting'
+                        activeKey: '设置'
                       })
                     }
                   />
