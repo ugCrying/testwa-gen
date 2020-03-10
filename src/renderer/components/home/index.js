@@ -14,6 +14,7 @@ import Setting from './Setting';
 import RecordedActions from './RecordedActions';
 import CodeList from './codeList';
 import CodeUpload from './codeUpload';
+import Login from './auth/Login'
 // @ts-ignore
 import styles from './devices.layout.css';
 import { emitter } from '../../lib';
@@ -803,6 +804,7 @@ export default class Home extends Component {
           />
         </Modal>
         <CodeUpload />
+        <Login />
       </div>
     );
   }

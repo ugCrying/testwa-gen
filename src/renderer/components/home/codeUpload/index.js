@@ -18,9 +18,11 @@ export default class CodeUpload extends Component {
     loading: false,
     projectList: []
   }
+
   constructor(props) {
     super(props);
-    this.state = this.setState(CodeUpload.initialState);
+    // this.state = this.setState(CodeUpload.initialState);
+    this.state = Object.assign({}, CodeUpload.initialState)
   }
 
   async componentDidMount() {
@@ -43,7 +45,7 @@ export default class CodeUpload extends Component {
   }
 
   afterClose = () => {
-    this.state = this.setState(CodeUpload.initialState);
+    this.setState(CodeUpload.initialState);
   }
 
   fetchProjectList = async () => {
