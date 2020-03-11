@@ -722,7 +722,7 @@ export default class Home extends Component {
                       </Tooltip>
                       <Tooltip
                         title={
-                          !this.state.terminalDisplay ? '展开UI树' : '收起UI树'
+                          !this.state.terminalDisplay ? '展开终端' : '收起终端'
                         }
                       >
                         <Icon
@@ -739,7 +739,44 @@ export default class Home extends Component {
                       className={styles['main-common-tabs']}
                       onTabClick={this.terminalOpen}
                     >
-                      {this.state.codeRuning ? (
+                      <TabPane
+                          tab="日志"
+                          key="log"
+                          className={styles['main-terminal-area']}
+                        >
+                          <div className={styles['terminal-area-log']}>
+                            <Terminal />
+                          </div>
+                          <div className={styles['terminal-area-select']}>
+                            <Select
+                              defaultValue="none"
+                              className={styles['terminal-select']}
+                            >
+                              <Option value="none">日志级别(无)</Option>
+                              <Option value="detail">详细</Option>
+                              <Option value="test">测试</Option>
+                              <Option value="info">信息</Option>
+                              <Option value="warn">警告</Option>
+                              <Option value="error">错误</Option>
+                              <Option value="deadly">致命</Option>
+                            </Select>
+                          </div>
+                        </TabPane>
+                      <TabPane
+                          tab="UI树"
+                          key="tree"
+                          className={styles['main-tree-area']}
+                        >
+                          <Source recording={this.state.recording} />
+                      </TabPane>
+                      <TabPane
+                          tab="操作面板"
+                          key="el"
+                          className={styles['main-el-area']}
+                        >
+                          <SelectedElement {...this.props} />
+                        </TabPane>
+                      {/* {this.state.codeRuning ? (
                         <TabPane
                           tab="日志"
                           key="log"
@@ -772,8 +809,8 @@ export default class Home extends Component {
                         >
                           <Source recording={this.state.recording} />
                         </TabPane>
-                      )}
-                      {this.state.recording && (
+                      )} */}
+                      {/* {this.state.recording && (
                         <TabPane
                           tab="操作面板"
                           key="el"
@@ -781,7 +818,7 @@ export default class Home extends Component {
                         >
                           <SelectedElement {...this.props} />
                         </TabPane>
-                      )}
+                      )} */}
                     </Tabs>
                   </div>
                 </div>
