@@ -212,10 +212,17 @@ export default class Home extends Component {
    * 上传脚本到云测平台
    */
   uploadCode() {
+    const { userInfo } = this.props.user
+    if (userInfo) {
+      this.codeUploadRef.show()
+    } else {
+      this.showLogin()
+    }
     // console.log(
     //   this.props.record.code.value
     // )
-    uploadScript('', this.props.record.code.value)
+    // uploadScript('', this.props.record.code.value)
+    // console.log(this.codeUploadRef)
   }
 
   // handleDownCode() {
@@ -915,7 +922,7 @@ export default class Home extends Component {
             }}
           />
         </Modal>
-        <CodeUpload />
+        <CodeUpload ref={ ref => this.codeUploadRef = ref } />
         <Login ref={ this.onLoginRef } />
       </div>
     );

@@ -58,7 +58,7 @@ const CollectionCreateForm = Form.create({ name: 'form_in_modal' })(
 
 class Login extends Component {
   static initialState = {
-    visible: true,
+    visible: false,
     loading: false,
     projectList: []
   }

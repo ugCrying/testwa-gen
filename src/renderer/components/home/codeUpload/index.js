@@ -24,7 +24,8 @@ export default class CodeUpload extends Component {
     this.state = Object.assign({}, CodeUpload.initialState)
   }
 
-  show() {
+  show = () => {
+    this.setState({ visible: true })
     this.fetchProjectList()
   }
 
@@ -40,7 +41,9 @@ export default class CodeUpload extends Component {
   }
 
   handleCancel = () => {
-
+    this.setState({
+      visible: false
+    })
   }
 
   afterClose = () => {
