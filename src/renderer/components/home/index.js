@@ -367,7 +367,7 @@ export default class Home extends Component {
   }
 
   switchUser = () => {
-    this.logout()
+    // this.logout()
     this.showLogin()
   }
 
