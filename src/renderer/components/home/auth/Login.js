@@ -121,6 +121,7 @@ class Login extends Component {
         wrappedComponentRef={this.saveFormRef}
         visible={this.state.visible}
         onCancel={this.handleCancel}
+        loading={this.state.loading}
         onOk={this.handleOk}
       />
     )

@@ -22,7 +22,6 @@ import { getPackages, runCode, downCode, trackDevices } from './lib';
 import { ipcRenderer } from 'electron';
 import rxdb from '../../db';
 import SelectedElement from './SelectedElement';
-import { uploadScript } from '../../../api/script'
 
 console.log('设备列表组件入口模块');
 const TabPane = Tabs.TabPane;
@@ -218,11 +217,6 @@ export default class Home extends Component {
     } else {
       this.showLogin()
     }
-    // console.log(
-    //   this.props.record.code.value
-    // )
-    // uploadScript('', this.props.record.code.value)
-    // console.log(this.codeUploadRef)
   }
 
   // handleDownCode() {
@@ -462,6 +456,10 @@ export default class Home extends Component {
 
   onLoginRef = ref => {
     this.loginRef = ref.getWrappedInstance()
+  }
+
+  onCodeUploadRef= ref => {
+    this.codeUploadRef = ref.getWrappedInstance()
   }
 
   render() {
@@ -922,7 +920,7 @@ export default class Home extends Component {
             }}
           />
         </Modal>
-        <CodeUpload ref={ ref => this.codeUploadRef = ref } />
+        <CodeUpload ref={ this.onCodeUploadRef } />
         <Login ref={ this.onLoginRef } />
       </div>
     );
