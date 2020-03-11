@@ -445,8 +445,10 @@ export default class Home extends Component {
                     this.setState({ activeKey: '主页' });
                   }}
                 >
-                  <Icon type="home" />
-                  主页
+                  <div className={styles['button-icon']}>
+                    <Icon type="home" />
+                    主页
+                  </div>
                 </Button>
                 <Button
                   size={'small'}
@@ -540,8 +542,10 @@ export default class Home extends Component {
                         // @ts-ignore
                         src={require(`../../../../static/images/replay.svg`)}
                         alt=""
-                      />
-                      回放
+                        />
+                        <div className={styles['button-icon']}>
+                          回放
+                        </div>
                     </div>
                   )}
                 </Button>
@@ -566,7 +570,10 @@ export default class Home extends Component {
                     }
                   }}
                 >
-                  {this.state.recording === 'pause' ? '继续' : '暂停'}
+                  <div className={styles['button-icon']}>
+                    {this.state.recording === 'pause' ? '继续' : '暂停'}
+                  </div>
+                  
                 </Button>
                 <Button
                   icon="mobile"
@@ -576,7 +583,9 @@ export default class Home extends Component {
                     this.state.recording || this.state.codeRuning ? true : false
                   }
                 >
-                  设备
+                  <div className={styles['button-icon']}>
+                    设备
+                  </div>
                 </Button>
                 {/* <Button icon="question-circle" size={"small"}>
                   帮助

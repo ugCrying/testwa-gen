@@ -66,17 +66,27 @@
   align-items: center;
 }
 .header-control-buttons button {
-  margin-left: 20px;
+  /* margin-left: 20px; */
+  box-sizing: border-box;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
   align-items: center;
+  padding: 0 8.5px;
+  height: 100%;
 }
 .header-control-buttons button > .button-icon {
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
   align-items: center;
+}
+
+.header-control-buttons button > .button-icon span {
+  margin-left: 0;
+}
+.header-control-buttons .ant-btn span {
+  margin-left: 0 !important;
 }
 .header-control-buttons button > .button-icon > img,
 svg {
