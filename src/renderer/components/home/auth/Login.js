@@ -5,13 +5,14 @@ import React, { Component } from 'react';
 import { Form, Modal, Input } from 'antd';
 import { login } from '../../../../api/auth';
 import Timeout from 'await-timeout';
+import { connect } from "dva";
 
 const formItemLayout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 14 },
 };
 
-export default class Login extends Component {
+class Login extends Component {
   static initialState = {
     visible: false,
     loading: false,
@@ -21,6 +22,24 @@ export default class Login extends Component {
   constructor(props) {
     super(props);
     this.state = Object.assign({}, Login.initialState)
+  }
+
+  async componentDidMount() {
+    try {
+      const { data } = await login({
+        username: "leenotes",
+        password: "1q2w3e4r5t6y"
+      })
+      this.handleLoginSuccess(data.data)
+    } catch (e) {
+      throw e
+    }
+  }
+
+  show = () => {
+    this.setState({
+      visible: true
+    })
   }
 
   handleOk = async () => {
@@ -43,11 +62,18 @@ export default class Login extends Component {
   }
 
   handleCancel = () => {
-
+    this.setState({
+      visible: false
+    })
   }
 
   afterClose = () => {
     this.setState(Login.initialState);
+  }
+
+  handleLoginSuccess = (userInfo) => {
+    const { dispatch }  = this.props;
+    dispatch({ type: 'user/login', payload: userInfo });
   }
 
   render() {
@@ -94,3 +120,19 @@ export default class Login extends Component {
     )
   }
 }
+
+
+function mergeProps(stateProps, dispatchProps, ownProps) {
+  return Object.assign({}, ownProps, stateProps, dispatchProps)
+}
+
+// function mapDispatchToProps(dispatch) {
+//   return dispatch
+// }
+
+const mapDispatchToProps = (dispatch) => ({
+  // usersAction: bindActionCreators(userAction, dispatch),
+  dispatch: dispatch
+});
+
+export default connect(state => state, mapDispatchToProps, mergeProps, { withRef: true } )(Login);

@@ -2,7 +2,7 @@
  * 主页面
  */
 import React, { Component } from 'react';
-import { Layout, Button, Tabs, Modal, Tooltip, Icon } from 'antd';
+import { Layout, Button, Tabs, Modal, Tooltip, Icon, Menu, Dropdown } from 'antd';
 import { Select } from 'antd';
 import { Subject } from 'rxjs';
 import { map, takeUntil, concatAll, withLatestFrom } from 'rxjs/operators';
@@ -362,6 +362,19 @@ export default class Home extends Component {
     this.setState({ terminalDisplay: true });
   }
 
+  showLogin = () => {
+    this.loginRef.show()
+  }
+
+  switchUser = () => {
+    this.logout()
+    this.showLogin()
+  }
+
+  logout = () => {
+    this.props.dispatch({ type: 'user/logout' })
+  }
+
   /**
    * 标签页切换（此处未使用 router 而是简单的页面切换实现）
    */
@@ -423,8 +436,47 @@ export default class Home extends Component {
     return content;
   }
 
+  menu() {
+    return (
+      <Menu>
+        <Menu.Item key="0">
+          <a target="_blank" rel="noopener noreferrer" href="http://www.alipay.com/">
+            切换帐号
+          </a>
+        </Menu.Item>
+        <Menu.Item key="1">
+          <a target="_blank" rel="noopener noreferrer" href="http://www.taobao.com/">
+            注销
+          </a>
+        </Menu.Item>
+      </Menu>
+    )
+  }
+
+  onLoginRef = ref => {
+    console.log('ref', ref)
+    this.loginRef = ref.getWrappedInstance()
+  }
+
   render() {
     console.log('首页渲染');
+
+    const { userInfo } = this.props.user
+
+    const menu = (
+      <Menu>
+        <Menu.Item key="0">
+          <span onClick={ this.switchUser }>
+            切换帐号
+          </span>
+        </Menu.Item>
+        <Menu.Item key="1">
+          <span onClick={ this.logout }>
+            注销
+          </span>
+        </Menu.Item>
+      </Menu>
+    )
 
     return (
       <div className={styles['devices-wrap']}>
@@ -436,6 +488,19 @@ export default class Home extends Component {
                 src={require(`../../../../static/images/logo.png`)}
                 alt=""
               />
+              {
+                userInfo ? (
+                  <Dropdown overlay={menu}>
+                    <span className={styles['main-header-brand-user-info']}>
+                      { userInfo.username }
+                    </span>
+                  </Dropdown>
+                ) : (
+                    <span className={styles['main-header-brand-user-info']} onClick={ this.showLogin }>
+                      登录
+                  </span>
+                )
+              }
             </div>
             <div className={styles['main-header-control']}>
               <div className={styles['header-control-buttons']}>
@@ -854,7 +919,7 @@ export default class Home extends Component {
           />
         </Modal>
         <CodeUpload />
-        <Login />
+        <Login ref={ this.onLoginRef } />
       </div>
     );
   }
