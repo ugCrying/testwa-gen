@@ -525,8 +525,8 @@ export default class Home extends Component {
                       onClick={() => {
                         runCode(
                           {
+                            ...this.state.device,
                             ...this.props.record.code.info,
-                            ...this.state.device
                           },
                           this.props.record.recordedActions ||
                             this.props.record.code.value
