@@ -2,7 +2,7 @@
  * （云测平台）登录
  */
 import React, { Component } from 'react';
-import { Form, Select, Modal, Input } from 'antd';
+import { Form, Modal, Input } from 'antd';
 import { login } from '../../../../api/auth';
 import Timeout from 'await-timeout';
 
@@ -13,7 +13,7 @@ const formItemLayout = {
 
 export default class Login extends Component {
   static initialState = {
-    visible: true,
+    visible: false,
     loading: false,
     projectList: []
   }

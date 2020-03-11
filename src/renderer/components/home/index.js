@@ -22,6 +22,7 @@ import { getPackages, runCode, downCode, trackDevices } from './lib';
 import { ipcRenderer } from 'electron';
 import rxdb from '../../db';
 import SelectedElement from './SelectedElement';
+import { uploadScript } from '../../../api/script'
 
 console.log('设备列表组件入口模块');
 const TabPane = Tabs.TabPane;
@@ -211,7 +212,10 @@ export default class Home extends Component {
    * 上传脚本到云测平台
    */
   uploadCode() {
-    
+    // console.log(
+    //   this.props.record.code.value
+    // )
+    uploadScript('', this.props.record.code.value)
   }
 
   // handleDownCode() {
