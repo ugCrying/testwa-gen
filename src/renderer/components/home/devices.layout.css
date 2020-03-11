@@ -436,7 +436,8 @@ svg {
 }
 
 .terminal-area-log {
-  height: 100%;
+  /* height: calc(100% - 34px); */
+  flex: 1;
   width: 100%;
   box-sizing: border-box;
   padding: 6px;
@@ -454,7 +455,9 @@ svg {
 }
 
 .terminal-area-select {
-  height: 32px;
+  /* padding: 0 6px; */
+  padding-bottom: 2px;;
+  height: 42px;
   width: 100%;
   flex: none;
   background: #f2f5fa;
@@ -462,8 +465,12 @@ svg {
   flex-flow: row nowrap;
   justify-content: flex-start;
   align-items: center;
-  box-sizing: border-box;
-  padding-left: 8px;
+}
+
+.terminal-select {
+  height: 100%;
+  /* min-width: 120px; */
+  width: 100%;
 }
 
 .ant-select-selection.ant-select-selection--single {

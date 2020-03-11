@@ -84,10 +84,10 @@ class Source extends Component {
       });
     return (
       <div className={styles["source-wrap"]}>
-        <div className={styles["source-title"]}>
+        {/* <div className={styles["source-title"]}>
           <Icon type="profile" />
           <p>UI树</p>
-        </div>
+        </div> */}
         <div className={styles["source-tree"]}>
           {this.props.record.sourceJSON &&
             this.props.recording === "process" &&
