@@ -77,22 +77,23 @@ class Login extends Component {
   handleOk = async () => {
     try {
       this.setState({ loading: true });
-      const { form } = this.formRef.props;
-      form.validateFields(async (err, values) => {
-        if (err) {
-          return;
-        } else {
-          const { data } = await login(values)
-          this.handleLoginSuccess(data.data)
-        }
+      const values = await this.getFormValues()
+      const { data } = await login(values)
+      this.handleLoginSuccess(data.data)
       this.setState({ visible: false });
-    });
     } catch (e) {
       throw e
     } finally {
       await Timeout.set(300)
       this.setState({ loading: false });
     }
+  }
+
+  getFormValues = () => {
+    return new Promise((resolve, reject) => {
+      const { form } = this.formRef.props;
+      form.validateFields((err, values) => err ? reject(err) : resolve(values))
+    })
   }
 
   handleCancel = () => {

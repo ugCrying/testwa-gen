@@ -6,7 +6,7 @@ const baseInfo = async function () {
     sessionStorage.setItem('username', responseConfig.data.data.username)
     return responseConfig
   } catch (e) {
-    throw e
+    return Promise.reject(e)
   }
 }
 
@@ -17,7 +17,7 @@ export const login = async function (data = {}) {
     // return responseConfig
     return await baseInfo()
   } catch (e) {
-    throw e
+    return Promise.reject(e)
   }
 }
 

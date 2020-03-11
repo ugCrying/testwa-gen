@@ -454,13 +454,10 @@ export default class Home extends Component {
   }
 
   onLoginRef = ref => {
-    console.log('ref', ref)
     this.loginRef = ref.getWrappedInstance()
   }
 
   render() {
-    console.log('首页渲染');
-
     const { userInfo } = this.props.user
 
     const menu = (

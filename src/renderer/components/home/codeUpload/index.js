@@ -4,7 +4,6 @@
 import React, { Component } from 'react';
 import { Form, Select, Modal, Input } from 'antd';
 import { getProjectList } from '../../../../api/project';
-import { login } from '../../../../api/auth';
 import Timeout from 'await-timeout';
 
 const formItemLayout = {
@@ -25,8 +24,8 @@ export default class CodeUpload extends Component {
     this.state = Object.assign({}, CodeUpload.initialState)
   }
 
-  async componentDidMount() {
-    await this.fetchProjectList()
+  show() {
+    this.fetchProjectList()
   }
 
   handleOk = async () => {
@@ -49,10 +48,10 @@ export default class CodeUpload extends Component {
   }
 
   fetchProjectList = async () => {
-    await login({
-      username: "leenotes",
-      password: "1q2w3e4r5t6y"
-    })
+    // await login({
+    //   username: "leenotes",
+    //   password: "1q2w3e4r5t6y"
+    // })
     try {
       this.setState({ loading: true })
       const { data } = await getProjectList()
