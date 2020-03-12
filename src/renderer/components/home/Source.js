@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Icon, Tree } from "antd";
+import { Tree } from "antd";
 // @ts-ignore
 import InspectorStyles from "./Inspector.css";
 import { emitter } from "../../lib";
