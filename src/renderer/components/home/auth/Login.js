@@ -2,7 +2,7 @@
  * （云测平台）登录
  */
 import React, { Component } from 'react';
-import { Form, Modal, Input, Button } from 'antd';
+import { Form, Modal, Input } from 'antd';
 import { login } from '../../../../api/auth';
 import Timeout from 'await-timeout';
 import { connect } from "dva";

@@ -3,7 +3,7 @@
 import { connect } from "dva";
 import Home from "../components/home";
 import { notification } from 'antd';
-// @ts-ignore
+// eslint-dsiable-next-line
 import { ipcRenderer } from "electron";
 import { emitter } from '../lib'
 console.log("渲染进程入口模块");
