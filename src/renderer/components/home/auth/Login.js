@@ -68,6 +68,12 @@ class Login extends Component {
     this.state = Object.assign({}, Login.initialState)
   }
 
+  async componentDidMount() {
+    // for dev
+    // const { data } = await login({ username: 'leenotes', password: '1q2w3e4r5t6y' })
+    // this.handleLoginSuccess(data.data)
+  }
+
   show = () => {
     this.setState({
       visible: true

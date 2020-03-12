@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { REMOTE_REQUEST } from '../utils/remoteRequest';
 
 /**
  * 补齐可选参数默认值（供后端格式）
@@ -33,24 +34,81 @@ const fixDefaultArugs = function (action = '', argus = []) {
   }
 }
 
-/**
- * 上传脚本到云测平台
- * @param {*} projectId 所属项目 id 
- * @param {*} data 脚本详情
- * @return {Promise<any>}
- */
-export const uploadScript = function (projectId, data) {
-  // hack for old data
-  console.log(data)
-  data = _.cloneDeep(data)
-  data.forEach((script) => {
+const defaultTitle = function (script = {}) {
+  const mapping = {
+    'findAndAssign': '选取元素',
+    'click': '点击元素',
+    'sendKeys': '输入文本',
+    'swipe': '滑动屏幕'
+  }
+  const title = mapping[script['action']]
+  if (title) {
+    script['title'] = title
+  }
+}
+
+const splitActions = function (scripts) {
+  const functions = []
+  scripts.forEach((script, index, arr) => {
+    if (!script) {
+      return
+    }
+    if (script.action === 'findAndAssign') {
+      const nextScript = arr[index  + 1]
+      // script.functionId = index + 1
+      functions.push([
+        script,
+        nextScript
+      ])
+      arr.splice(index, 1, null)
+      arr.splice(index + 1, 1, null)
+      return
+    }
+    else {
+      functions.push([
+        script
+      ])
+      arr.splice(index, 1, null)
+    }
+  })
+  functions.forEach((func, index) => {
+    func.forEach(script => {
+      script.functionId = index + 1
+    })
+  })
+  return functions.flat(2)
+}
+
+const actionsPipe = function (scripts) {
+  scripts = _.cloneDeep(scripts)
+  scripts.forEach((script) => {
     // TODO: 前后端字段定义不一致
     script.parameter = script.params
     fixDefaultArugs(
       script.action,
       script.parameter
     )
-    delete(script.params)
+    delete (script.params)
+    defaultTitle(script)
   })
-  console.log(data)
+  return splitActions(scripts)
+}
+
+/**
+ * 上传脚本到云测平台
+ * @param {*} info 脚本信息
+ * @param {*} code 脚本代码
+ * @return {Promise<any>}
+ */
+export const uploadScript = function (info, code) {
+  const data = Object.assign({}, {
+    scriptName: '',
+    scriptCaseDesc: '',
+    scriptFunctions: actionsPipe(code),
+    // TODO: 目前只支持安卓
+    platform: 'Android'
+  }, info)
+  const url = `/v2/project/${info.projectId}/script/save`
+  console.log(url, data)
+  return REMOTE_REQUEST.post(`/v2/project/${info.projectId}/script/save`, data)
 }

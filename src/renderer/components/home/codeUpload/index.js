@@ -2,7 +2,7 @@
  * 上传脚本到云测平台
  */
 import React, { Component } from 'react';
-import { Form, Select, Modal, Input } from 'antd';
+import { Form, Select, Modal, Input, notification } from 'antd';
 import { getProjectList } from '../../../../api/project';
 import Timeout from 'await-timeout';
 import { uploadScript } from '../../../../api/script'
@@ -58,25 +58,12 @@ const CollectionCreateForm = Form.create({ name: 'form_in_modal' })(
                     )
                   })
                 }
-                {/* <Option value="87">+87</Option> */}
               </Select>
-  //             <Select placeholder="所属项目">
-  //               {
-  // [].map(project => {
-  //                   return (
-  //                     <Select.Option
-  //                       value={project.id}
-  //                       key={project.id}
-  //                     >{project.projectName}</Select.Option>
-  //                   )
-  //                 })
-  //               }
-  //             </Select>
             )}
           </Form.Item>
           <Form.Item {...formItemLayout} label="脚本描述">
               {getFieldDecorator('scriptCaseDesc', {
-                rules: [{ required: true, message: '请输入脚本描述' }],
+                // rules: [{ required: true, message: '请输入脚本描述' }],
               })(<Input.TextArea maxLength={96} autoSize={{ minRows: 2, maxRows: 3 }} placeholder="脚本描述" />)}
           </Form.Item>
         </Form>
@@ -108,11 +95,13 @@ class CodeUpload extends Component {
     try {
       this.setState({ loading: true });
       const values = await this.getFormValues()
-      console.log(values)
-      console.log(
-        this.props.record.code.value
-      )
-      uploadScript('', this.props.record.code.value)
+      await uploadScript(values, this.props.record.code.value)
+      notification.success({
+        message: '系统提示',
+        description: '上传脚本成功'
+        // description: '点击查看详情'
+      });
+      this.setState({ visible: false })
     } catch (e) {
       throw e
     } finally {
