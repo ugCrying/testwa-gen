@@ -3,7 +3,7 @@
  */
 
 import React, { Component } from 'react';
-import { Button, Spin } from 'antd';
+import { Button, Spin, Tooltip } from 'antd';
 import { BannerParser } from 'minicap';
 import HighlighterRect from './HighlighterRect';
 import adbkit from 'adbkit';
@@ -493,83 +493,95 @@ export default class Device extends Component {
             <div className={styles['control-space']} />
             <div className={styles['control-container']}>
               <div className={styles['control-bar']}>
-                <Button
-                  onClick={() => {
-                    ipcRenderer.send('close');
-                  }}
-                >
-                  <img
-                    // @ts-ignore
-                    src={require(`../../../../static/images/close.svg`)}
-                    alt=""
-                  />
-                </Button>
-                <Button
-                  onClick={() => {
-                    ipcRenderer.send('min');
-                  }}
-                >
-                  <img
-                    // @ts-ignore
-                    src={require(`../../../../static/images/min.svg`)}
-                    alt=""
-                  />
-                </Button>
-                <Button
-                  onClick={() =>
-                    client.shell(
-                      this.props.device,
-                      'input keyevent "KEYCODE_BACK"'
-                    )
-                  }
-                >
-                  <img
-                    className={styles['reply-button']}
-                    // @ts-ignore
-                    src={require(`../../../../static/images/reply.svg`)}
-                    alt=""
-                  />
-                </Button>
-                <Button
-                  onClick={() =>
-                    client.shell(
-                      this.props.device,
-                      'input keyevent "KEYCODE_HOME"'
-                    )
-                  }
-                >
-                  <img
-                    // @ts-ignore
-                    src={require(`../../../../static/images/home.svg`)}
-                    alt=""
-                  />
-                </Button>
-                <Button
-                  onClick={() => {
-                    client.shell(
-                      this.props.device,
-                      'input keyevent "KEYCODE_MENU"'
-                    );
-                  }}
-                >
-                  <img
-                    // @ts-ignore
-                    src={require(`../../../../static/images/menu.svg`)}
-                    alt=""
-                  />
-                </Button>
-                <Button
-                  onClick={() => {
-                    this.setState({ loading: true });
-                    this.getSource();
-                  }}
-                >
-                  <img
-                    // @ts-ignore
-                    src={require(`../../../../static/images/refresh.svg`)}
-                    alt=""
-                  />
-                </Button>
+                <Tooltip title="关闭窗口">
+                  <Button
+                    onClick={() => {
+                      ipcRenderer.send('close');
+                    }}
+                  >
+                    <img
+                      // @ts-ignore
+                      src={require(`../../../../static/images/close.svg`)}
+                      alt=""
+                    />
+                  </Button>
+                  </Tooltip>
+                <Tooltip title="最小化窗口">
+                  <Button
+                    onClick={() => {
+                      ipcRenderer.send('min');
+                    }}
+                  >
+                    <img
+                      // @ts-ignore
+                      src={require(`../../../../static/images/min.svg`)}
+                      alt=""
+                    />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="返回上一级">
+                  <Button
+                    onClick={() =>
+                      client.shell(
+                        this.props.device,
+                        'input keyevent "KEYCODE_BACK"'
+                      )
+                    }
+                  >
+                    <img
+                      className={styles['reply-button']}
+                      // @ts-ignore
+                      src={require(`../../../../static/images/reply.svg`)}
+                      alt=""
+                    />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="回到桌面">
+                  <Button
+                    onClick={() =>
+                      client.shell(
+                        this.props.device,
+                        'input keyevent "KEYCODE_HOME"'
+                      )
+                    }
+                  >
+                    <img
+                      // @ts-ignore
+                      src={require(`../../../../static/images/home.svg`)}
+                      alt=""
+                    />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="任务列表">
+                  <Button
+                    onClick={() => {
+                      client.shell(
+                        this.props.device,
+                        'input keyevent "KEYCODE_MENU"'
+                      );
+                    }}
+                  >
+                    <img
+                      // @ts-ignore
+                      src={require(`../../../../static/images/menu.svg`)}
+                      alt=""
+                    />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="刷新UI树">
+                  <Button
+                    onClick={() => {
+                      this.setState({ loading: true });
+                      this.getSource();
+                    }}
+                  >
+                    <img
+                      // @ts-ignore
+                      src={require(`../../../../static/images/refresh.svg`)}
+                      alt=""
+                    />
+                  </Button>
+                </Tooltip>
                 <input
                   className={styles['v-input']}
                   autoFocus
