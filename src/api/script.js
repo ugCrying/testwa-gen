@@ -12,10 +12,15 @@ const fixDefaultArugs = function (action = '', argus = []) {
       argus[3] = argus[3] || false
       break;
     case 'click':
+      if (argus.length === 2) {
+        argus.pop()
+      }
       break;
     case 'clear':
       break;
     case 'sendKeys':
+      // argus[0]能取到元素内容，元素下标不再需要
+      argus.splice(1, 1)
       break;
     case 'back':
       break;
@@ -28,8 +33,13 @@ const fixDefaultArugs = function (action = '', argus = []) {
     case 'swipe':
       if (argus.length === 4) {
         argus.unshift('')
-        argus.unshift('')
+        // argus.unshift('')
       }
+      if (argus.length === 6) {
+        // argus[0]能取到元素内容，元素下标不再需要
+        argus.splice(1, 1)
+      }
+      // debugger
       break;
   }
 }
