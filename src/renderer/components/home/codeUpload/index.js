@@ -95,6 +95,7 @@ class CodeUpload extends Component {
     try {
       this.setState({ loading: true });
       const values = await this.getFormValues()
+      values['appBasePackage'] = this.props.record.code.info.packageName
       await uploadScript(values, this.props.record.code.value)
       notification.success({
         message: '系统提示',

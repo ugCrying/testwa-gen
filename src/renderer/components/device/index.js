@@ -18,6 +18,7 @@ import { ipcRenderer } from 'electron';
 import { emitter } from '../../lib';
 import { xmlToJSON } from './lib';
 import { adbGetsource } from './utils';
+import { connect } from 'dva'
 
 const electron = require('electron');
 
@@ -49,7 +50,7 @@ let timer;
 
 export const client = adbkit.createClient();
 
-export default class Device extends Component {
+class Device extends Component {
   constructor(props) {
     console.log('屏幕同步组件实例化');
     super(props);
@@ -610,3 +611,5 @@ export default class Device extends Component {
     );
   }
 }
+
+export default connect(state => state)(Device)
