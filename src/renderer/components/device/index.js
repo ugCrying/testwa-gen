@@ -19,6 +19,7 @@ import { emitter } from '../../lib';
 import { xmlToJSON } from './lib';
 import { adbGetsource } from './utils';
 import { connect } from 'dva'
+import _ from 'lodash'
 
 const electron = require('electron');
 
@@ -87,6 +88,37 @@ class Device extends Component {
     });
   }
 
+  componentWillMount() {
+    // ipcRenderer.send('test', '1111111111')
+    ipcRenderer.on('getSouceSuccess', (_, sourceJSON) => {
+      console.log('-----------------getSouceSuccess---------------------------')
+      console.log('----------------getSouceSuccess----------------------------')
+      // console.log(_, e)
+      sourceXML = sourceJSON.value;
+      sourceJSON = xmlToJSON(sourceJSON.value);
+      // console.log('开始send', browserWindow, sourceJSON);
+        // const browserWindow = electron.remote.BrowserWindow.fromId(
+        //   +localStorage.getItem('mainWinId')
+        // );
+      // browserWindow.webContents.send('getSourceJSON', Object.assign({}, sourceJSON));
+      ipcRenderer.send('getSourceJSON', Object.assign({}, sourceJSON))
+      console.log('send完成');
+      this.setState({ sourceJSON, loading: false });
+      console.log('-----------------getSouceSuccess---------------------------')
+      console.log('-----------------getSouceSuccess---------------------------')
+    })
+    ipcRenderer.on('getSouceFailed', () => {
+      console.log('------------getSouceFailed-------------')
+      console.log('------------getSouceFailed-------------')
+      // retry
+      ipcRenderer.send('startU2')
+      ipcRenderer.send('test')
+      this.setState({ loading: false });
+      console.log('------------getSouceFailed-------------')
+      console.log('------------getSouceFailed-------------')
+    })
+  }
+
   /**
    * 键盘输入同步至设备
    * @param {String} text
@@ -119,6 +151,7 @@ class Device extends Component {
       throw e;
     }
   }
+
 
   // FIXME: 为何取名 appium 而不是 selenium
   // TODO: 接口抽离解耦
@@ -161,14 +194,15 @@ class Device extends Component {
   }
 
   getSource() {
+    ipcRenderer.send('test')
     // console.log("sourceJSON");
-    this.appiumGetSource(() => {
-      ipcRenderer.send('startU2');
-    });
-    timer = setTimeout(() => {
-      timer = null;
-      this.setState({ loading: false });
-    }, 15000);
+    // this.appiumGetSource(() => {
+    //   ipcRenderer.send('startU2');
+    // });
+    // timer = setTimeout(() => {
+    //   timer = null;
+    //   this.setState({ loading: false });
+    // }, 15000);
   }
 
   componentWillUnmount() {
@@ -229,7 +263,10 @@ class Device extends Component {
         this.isMove ? { ...this.tap, widthEnd, heightEnd } : this.tap
       );
       // TODO: 为何要延迟 300ms
-      setTimeout(this.getSource.bind(this), 300);
+      setTimeout(() => {
+        console.log(this.isMove)
+        this.getSource.bind(this)()
+      }, 300);
       console.log('onmouseup loading true');
       // TODO: loading 控制放到 getSource 方法内？
       this.setState({ loading: true });

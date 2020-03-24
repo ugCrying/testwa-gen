@@ -117,6 +117,7 @@ export default class Home extends Component {
     });
     ipcRenderer.on('getSourceJSON', (_, sourceJSON) => {
       this.saved = false;
+      console.log()
       console.log('ipcRenderer getSourceJSON', sourceJSON)
       this.props.dispatch({
         type: 'record/source',

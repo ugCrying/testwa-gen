@@ -10,6 +10,11 @@ function getUserInfo() {
     if ((now - lastTime) >= expireTime) {
       throw new Error('token 过期')
     }
+    console.log(
+      JSON.parse(
+        localStorage.getItem('userInfo')
+      )
+    )
     return JSON.parse(
       localStorage.getItem('userInfo')
     )

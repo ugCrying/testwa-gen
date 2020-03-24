@@ -88,6 +88,9 @@ class CodeUpload extends Component {
 
   show = () => {
     this.setState({ visible: true })
+    console.log(
+      this.props.record.code
+    )
     this.fetchProjectList()
   }
 

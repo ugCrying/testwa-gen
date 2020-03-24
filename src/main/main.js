@@ -10,6 +10,49 @@ const { startMini, trackDevices } = require("./trackDevices");
 const { join } = require("path");
 const { client, installUiautomator2, startUiautomator2 } = require("./adb");
 const { startAppium, stopAppium } = require("./lib");
+// const { xmlToJSON } = require('../renderer/components/device/lib')
+// FIMXE: 不支持 import 语法
+// import { xmlToJSON } from '../renderer/components/device/lib'
+
+const getAppiumSource = require('./test')
+
+const source = async () => {
+  try {
+    const sourceXML = await getAppiumSource()
+    console.log('-----------------sendSourceFromMain---------------------------')
+    console.log('-----------------sendSourceFromMain---------------------------')
+    console.log('-----------------sendSourceFromMain---------------------------')
+    console.log('-----------------sendSourceFromMain---------------------------')
+    console.log('-----------------sendSourceFromMain---------------------------')
+    deviceWin.webContents.send("getSouceSuccess", sourceXML)
+    console.log('-----------------sendSourceFromMain---------------------------')
+    // console.log('-----------------getSourceJSONFromMain---------------------------')
+    // mainWindow.webContents.send("getSourceJSON", xmlToJSON(sourceXML.value))
+    // console.log('-----------------getSourceJSONFromMain---------------------------')
+    // console.log('-----------------getSourceJSONFromMain---------------------------')
+  } catch (e) {
+    console.log('-----------------source error---------------------------')
+    console.log(e)
+    console.log('-----------------source error---------------------------')
+    throw e
+  }
+}
+
+ipcMain.on('test', async (e) => {
+  try {
+    await source()
+  } catch (e) {
+    // TODO:此处只做了一次
+    // deviceWin.webContents.send("getSouceFailed", '')
+    startUiautomator2(_device.id).then(setTimeout(createSession, 5000));
+    // 等待 session 创建成功
+    setTimeout(() => {
+      source()
+    }, 3000)
+    // throw e
+  }
+})
+
 let mainWindow;
 let deviceWin;
 let cp;
