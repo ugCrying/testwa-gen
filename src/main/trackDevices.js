@@ -1,3 +1,8 @@
+/**
+ * @abort
+ * move to src/api/mini
+ */
+
 console.log("adb封装模块");
 const { join } = require("path");
 const { client, installUiautomator2, startUiautomator2 } = require("./adb");

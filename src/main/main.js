@@ -3,12 +3,12 @@
 const { getSource, postSession } = require('../api/appium')
 const { runScript } = require('../api/adb')
 const { installU2ToDevice, startU2 } = require('../api/u2')
+const { startMini, trackDevices } = require("../api/mini");
 const Timeout = require('await-timeout')
 const { fork, spawnSync } = require("child_process");
 const { app, Menu, BrowserWindow, ipcMain } = require("electron");
 const menu = require("./menu");
 const upgrade = require("./upgrade");
-const { startMini, trackDevices } = require("./trackDevices");
 const { join } = require("path");
 const { startAppium, stopAppium } = require("./lib");
 

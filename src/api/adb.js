@@ -36,8 +36,26 @@ const runScript = async function (deviceId, script) {
     )
 }
 
+const getProperties = async function (deviceId) {
+  return client.getProperties(deviceId)
+}
+
+/**
+ * @return {Promise<[any]>}
+ */
+const listDevices = async function () {
+  return await client.listDevices()
+}
+
+const trackDevices = async function () {
+  return await client.trackDevices()
+}
+
 module.exports = {
   installApp,
+  listDevices,
   pushFile,
   runScript,
+  getProperties,
+  trackDevices,
 }
