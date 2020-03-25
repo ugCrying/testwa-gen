@@ -84,6 +84,7 @@ class Device extends Component {
     ipcRenderer.on('getSouceSuccess', (_, sourceJSON) => {
       sourceXML = sourceJSON.value;
       sourceJSON = xmlToJSON(sourceJSON.value);
+      ipcRenderer.send('getSourceJSONSuccess', sourceJSON)
       this.setState({ sourceJSON, loading: false });
     })
     ipcRenderer.on('getSouceFailed', (err) => {

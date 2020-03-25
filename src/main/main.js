@@ -2,7 +2,7 @@
 "use strict";
 const { getSource, postSession, startAppium, stopAppium } = require('../api/appium')
 const { runScript } = require('../api/adb')
-const { xmlToJSON } = require('../api/xml')
+// const { xmlToJSON } = require('../api/xml')
 const { installU2ToDevice, startU2, src } = require('../api/u2')
 const { startMini, trackDevices, getMinicapImgBase64 } = require("../api/mini");
 const Timeout = require('await-timeout')
@@ -252,6 +252,11 @@ ipcMain.on('swiped', (_, data) => mainWindow.webContents.send("swiped", data))
 // forward the taped action from deviceWindow to mainWindow
 ipcMain.on('taped', (_, data) => mainWindow.webContents.send("taped", data))
 
+
+ipcMain.on('getSourceJSONSuccess', (_, data) => {
+  mainWindow.webContents.send("getSourceJSONSuccess", data)
+})
+
 // loading ui request from deviceWin
 ipcMain.on('getSource', async (e) => {
   try {
@@ -259,7 +264,8 @@ ipcMain.on('getSource', async (e) => {
     // render cover layer on deviceWindow
     deviceWin.webContents.send("getSouceSuccess", sourceXML)
     // render ui tree on mainWindow
-    mainWindow.webContents.send("getSourceJSONSuccess", xmlToJSON(sourceXML.value))
+    // FIXME: node环境下的xmlToJSON与浏览器环境下表现不一致
+    // mainWindow.webContents.send("getSourceJSONSuccess", xmlToJSON(sourceXML.value))
   } catch (e) {
     // TODO: retry
     deviceWin.webContents.send("getSouceFailed", e)
