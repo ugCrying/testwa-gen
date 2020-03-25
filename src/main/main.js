@@ -2,6 +2,7 @@
 "use strict";
 const { getSource, postSession, startAppium, stopAppium } = require('../api/appium')
 const { runScript } = require('../api/adb')
+const { xmlToJSON } = require('../api/xml')
 const { installU2ToDevice, startU2 } = require('../api/u2')
 const { startMini, trackDevices } = require("../api/mini");
 const Timeout = require('await-timeout')
@@ -241,11 +242,6 @@ ipcMain.on('sendKeys', (_, data) => mainWindow.webContents.send("sendKeys", data
 ipcMain.on('expandedPaths', (_, data) => mainWindow.webContents.send("expandedPaths", data))
 // forward the swipe action from deviceWindow to mainWindow
 ipcMain.on('selectedElement', (_, data) => mainWindow.webContents.send("selectedElement", data))
-// forward the page source json from deviceWindow to mainWindow
-ipcMain.on('getSourceJSON', (_, data) => {
-   console.log('main getSourceJSON', _, data)
-    mainWindow.webContents.send("getSourceJSON", data)
-})
 // forward the swipe action from deviceWindow to mainWindow
 ipcMain.on('swiped', (_, data) => mainWindow.webContents.send("swiped", data))
 // forward the taped action from deviceWindow to mainWindow
@@ -255,7 +251,10 @@ ipcMain.on('taped', (_, data) => mainWindow.webContents.send("taped", data))
 ipcMain.on('getSource', async (e) => {
   try {
     const sourceXML = await getSource()
+    // render cover layer on deviceWindow
     deviceWin.webContents.send("getSouceSuccess", sourceXML)
+    // render ui tree on mainWindow
+    mainWindow.webContents.send("getSourceJSONSuccess", xmlToJSON(sourceXML.value))
   } catch (e) {
     // TODO: retry
     deviceWin.webContents.send("getSouceFailed", e)

@@ -115,10 +115,9 @@ export default class Home extends Component {
           }
         });
     });
-    ipcRenderer.on('getSourceJSON', (_, sourceJSON) => {
+    ipcRenderer.on('getSourceJSONSuccess', (_, sourceJSON) => {
       this.saved = false;
-      console.log()
-      console.log('ipcRenderer getSourceJSON', sourceJSON)
+      console.log('ipcRenderer getSourceJSONSuccess', sourceJSON)
       this.props.dispatch({
         type: 'record/source',
         payload: sourceJSON
@@ -347,7 +346,7 @@ export default class Home extends Component {
    */
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('recordedActions');
-    ipcRenderer.removeAllListeners('getSourceJSON');
+    ipcRenderer.removeAllListeners('getSourceJSONSuccess');
   }
 
   /**

@@ -78,25 +78,13 @@ class Device extends Component {
 
   UNSAFE_componentWillMount() {
     ipcRenderer.on('getSouceSuccess', (_, sourceJSON) => {
-      console.log('-----------------getSouceSuccess---------------------------')
-      console.log('----------------getSouceSuccess----------------------------')
       sourceXML = sourceJSON.value;
       sourceJSON = xmlToJSON(sourceJSON.value);
-      // console.log('开始send', browserWindow, sourceJSON);
-        // const browserWindow = electron.remote.BrowserWindow.fromId(
-        //   +localStorage.getItem('mainWinId')
-        // );
-      // browserWindow.webContents.send('getSourceJSON', Object.assign({}, sourceJSON));
-      ipcRenderer.send('getSourceJSON', Object.assign({}, sourceJSON))
-      console.log('send完成');
       this.setState({ sourceJSON, loading: false });
-      console.log('-----------------getSouceSuccess---------------------------')
     })
     ipcRenderer.on('getSouceFailed', (err) => {
-      console.log('------------getSouceFailed-------------')
       // TODO: retry
       this.setState({ loading: false });
-      console.log('------------getSouceFailed-------------')
     })
   }
 
