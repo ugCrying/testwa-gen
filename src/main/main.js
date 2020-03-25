@@ -298,7 +298,6 @@ ipcMain.on("record", (_, device, id) => {
 });
 
 
-
 ipcMain.on('recordedActions', (_, data) => mainWindow.webContents.send("recordedActions", data))
 ipcMain.on('sendKeys', (_, data) => mainWindow.webContents.send("sendKeys", data))
 ipcMain.on('expandedPaths', (_, data) => mainWindow.webContents.send("expandedPaths", data))
@@ -309,8 +308,6 @@ ipcMain.on('getSourceJSON', (_, data) => {
 })
 ipcMain.on('swiped', (_, data) => mainWindow.webContents.send("swiped", data))
 ipcMain.on('taped', (_, data) => mainWindow.webContents.send("taped", data))
-
-
 
 ipcMain.on(
   "stoprecord",

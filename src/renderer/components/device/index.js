@@ -17,21 +17,10 @@ import shell from './shell.css';
 import { ipcRenderer } from 'electron';
 import { emitter } from '../../lib';
 import { xmlToJSON } from './lib';
-import { adbGetsource } from './utils';
 import { connect } from 'dva'
-import _ from 'lodash'
-
-const electron = require('electron');
 
 export let sourceXML = null;
 console.log('屏幕同步组件入口模块');
-const request = require('request').defaults({
-  // FIXME: 此处大小会影响 getPageSource
-  timeout: 5000,
-  forever: true,
-  json: true,
-  baseUrl: 'http://localhost:4444/wd/hub/session/1/'
-});
 let keyboard;
 const connectKeyboard = () => {
   keyboard = require('net').connect({ port: 6677 });
@@ -47,7 +36,6 @@ ipcRenderer.once('mainWinId', (_, { mainWinId }) => {
   localStorage.setItem('mainWinId', mainWinId);
 });
 let top, left;
-let timer;
 
 export const client = adbkit.createClient();
 
@@ -88,7 +76,7 @@ class Device extends Component {
     });
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     // ipcRenderer.send('test', '1111111111')
     ipcRenderer.on('getSouceSuccess', (_, sourceJSON) => {
       console.log('-----------------getSouceSuccess---------------------------')
@@ -131,78 +119,8 @@ class Device extends Component {
     keyboard.write(text + '\n');
   }
 
-  async appiumGetSourceNew() {
-    try {
-      console.log(
-        `获取device ${this.props.device} source信息`,
-        this.props.device
-      )
-      const value = await adbGetsource(this.props.device);
-      sourceXML = value;
-      const sourceJSON = xmlToJSON(value);
-      // FIXME: electron 进程间通信数据流大时可能很慢，但此处用引用传值会议问题
-      const browserWindow = electron.remote.BrowserWindow.fromId(
-        +localStorage.getItem('mainWinId')
-      );
-      browserWindow.webContents.send('getSourceJSON', sourceJSON);
-      this.setState({ sourceJSON, loading: false });
-    } catch (e) {
-      ipcRenderer.send('startU2');
-      throw e;
-    }
-  }
-
-
-  // FIXME: 为何取名 appium 而不是 selenium
-  // TODO: 接口抽离解耦
-  appiumGetSource(cb) {
-    console.log('appiumGetSource11');
-    let start = new Date().getTime();
-    // https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol#get-sessionsessionidsource
-    // TODO: 此处专门区分 ios、android、web 来获取会不会有改善？
-    request.get('/source', (err, res, sourceJSON) => {
-      let end = new Date().getTime();
-      console.log('getSource成功 ', (end - start) / 1000);
-      // return this.setState({ loading: false });
-      console.log('sourceJSON', sourceJSON);
-      try {
-        sourceXML = sourceJSON.value;
-        sourceJSON = xmlToJSON(sourceJSON.value);
-        clearTimeout(timer);
-        timer = null;
-        console.log('will send main getSourceJSON');
-        console.log('准备send');
-        const browserWindow = electron.remote.BrowserWindow.fromId(
-          +localStorage.getItem('mainWinId')
-        );
-        console.log('开始send');
-        browserWindow.webContents.send('getSourceJSON', sourceJSON);
-        console.log('send完成');
-        return this.setState({ sourceJSON, loading: false });
-      } catch (e) {
-        // e 可能为 source 异常或 request 超时异常
-        cb && cb();
-        console.log('getSource', err || sourceJSON || res);
-        let end = new Date().getTime();
-        console.log('getSource失败', (end - start) / 1000, e);
-        // 失败后重试
-        return setTimeout(() => {
-          this.appiumGetSource();
-        }, 2000);
-      }
-    });
-  }
-
   getSource() {
     ipcRenderer.send('test')
-    // console.log("sourceJSON");
-    // this.appiumGetSource(() => {
-    //   ipcRenderer.send('startU2');
-    // });
-    // timer = setTimeout(() => {
-    //   timer = null;
-    //   this.setState({ loading: false });
-    // }, 15000);
   }
 
   componentWillUnmount() {
@@ -425,6 +343,7 @@ class Device extends Component {
           // @ts-ignore
           console.log('minicap获取的设备屏幕实际高度', this.banner.realHeight);
           setTimeout(() => {
+            // @ts-ignore
             this.ratio = this.banner.realHeight / this.state.canvasHeight;
             console.log(
               'realHeight&canvasHeight',
