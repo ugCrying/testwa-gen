@@ -1,35 +1,23 @@
 // @ts-check
 "use strict";
-console.log(require("os").tmpdir(), "系统临时目录");
-console.log("主进程入口模块");
+import { getSource, postSession as createSession } from '../api/appium'
+import { runScript } from '../api/adb'
+import { installU2ToDevice, startU2 } from '../api/u2'
+import Timeout from 'await-timeout'
 const { fork, spawnSync } = require("child_process");
 const { app, Menu, BrowserWindow, ipcMain } = require("electron");
 const menu = require("./menu");
 const upgrade = require("./upgrade");
 const { startMini, trackDevices } = require("./trackDevices");
 const { join } = require("path");
-const { client, installUiautomator2, startUiautomator2 } = require("./adb");
 const { startAppium, stopAppium } = require("./lib");
-// const { xmlToJSON } = require('../renderer/components/device/lib')
-// FIMXE: 不支持 import 语法
-// import { xmlToJSON } from '../renderer/components/device/lib'
-
-const getAppiumSource = require('./test')
 
 const source = async () => {
   try {
-    const sourceXML = await getAppiumSource()
-    console.log('-----------------sendSourceFromMain---------------------------')
-    console.log('-----------------sendSourceFromMain---------------------------')
-    console.log('-----------------sendSourceFromMain---------------------------')
-    console.log('-----------------sendSourceFromMain---------------------------')
+    const sourceXML = await getSource()
     console.log('-----------------sendSourceFromMain---------------------------')
     deviceWin.webContents.send("getSouceSuccess", sourceXML)
     console.log('-----------------sendSourceFromMain---------------------------')
-    // console.log('-----------------getSourceJSONFromMain---------------------------')
-    // mainWindow.webContents.send("getSourceJSON", xmlToJSON(sourceXML.value))
-    // console.log('-----------------getSourceJSONFromMain---------------------------')
-    // console.log('-----------------getSourceJSONFromMain---------------------------')
   } catch (e) {
     console.log('-----------------source error---------------------------')
     console.log(e)
@@ -44,7 +32,7 @@ ipcMain.on('test', async (e) => {
   } catch (e) {
     // TODO:此处只做了一次
     // deviceWin.webContents.send("getSouceFailed", '')
-    startUiautomator2(_device.id).then(setTimeout(createSession, 5000));
+    startU2(_device.id).then(setTimeout(createSession, 5000));
     // 等待 session 创建成功
     setTimeout(() => {
       source()
@@ -72,31 +60,13 @@ if (process.platform !== "win32") {
   }
 }
 
-// http://appium.io/docs/en/drivers/android-uiautomator/index.html#usage
-const createSession = () => {
-  require("request").post(
-    "http://localhost:4444/wd/hub/session",
-    {
-      json: true,
-      body: { desiredCapabilities: {} }
-    },
-    (err, res, data) =>
-      console.log("createSession", (err && err.message) || data || res)
-  );
-};
-// global.sharedObj = {
-//   aapt: require("path").join(
-//     __dirname,
-//     "..",
-//     "..",
-//     "static",
-//     "aapt",
-//     require("os").platform(),
-//     "aapt"
-//   )
-// };
-
-const openDeviceWindow = (_, device, cb) => {
+/**
+ * 
+ * @param {*} _ 
+ * @param {*} device 
+ * @return {Promise<any>}
+ */
+const openDeviceWindow = async function (_, device) {
   _device = device;
   if (!device.screen) {
     console.error(`${device.id} 获取分辨率失败`);
@@ -106,23 +76,19 @@ const openDeviceWindow = (_, device, cb) => {
   const [width, height] = device.screen.split("x");
   console.log("创建设备窗口 Renderer");
   startMini(device);
-  installUiautomator2(device.id, () =>
-    startUiautomator2(device.id).then(setTimeout(createSession, 5000))
-  ).then(() => {
-    createSession();
-    client.shell(
-      device.id,
-      "ime set io.appium.uiautomator2.server/io.appium.uiautomator2.handler.TestwaIME"
-    );
-    setTimeout(
-      () =>
-        client.shell(
-          device.id,
-          "am start io.appium.uiautomator2.server/io.appium.uiautomator2.MainActivity"
-        ),
-      600
-    );
-  });
+  await installU2ToDevice(device.id)
+  await startU2(device.id)
+  await Timeout.set(5000)
+  createSession()
+  runScript(
+    device.id,
+    "ime set io.appium.uiautomator2.server/io.appium.uiautomator2.handler.TestwaIME"
+  )
+  await Timeout.set(600)
+  runScript(
+    device.id,
+    "am start io.appium.uiautomator2.server/io.appium.uiautomator2.MainActivity"
+  )
   if (!deviceWin) {
     deviceWin = new BrowserWindow({
       title: "脚本录制",
@@ -168,7 +134,6 @@ const openDeviceWindow = (_, device, cb) => {
     deviceWin.webContents.send("mainWinId", {
       mainWinId: mainWindow.id
     });
-    cb && cb();
     // 原始拟定高度
     const DEVICE_ORIGIN_HEIGHT = display.workArea.height - 50;
     // 设备外壳宽度
@@ -288,39 +253,41 @@ app.once("before-quit", () => {
 });
 app.once("window-all-closed", app.quit);
 ipcMain.on("openDeviceWindow", openDeviceWindow);
-ipcMain.on("record", (_, device, id) => {
-  if (deviceWin) deviceWin.webContents.send("record", id);
-  else
-    device &&
-      openDeviceWindow(_, device, () =>
-        deviceWin.webContents.send("record", id)
-      );
+// start to record
+ipcMain.on("record", async (_, device, id) => {
+  if (deviceWin) {
+    deviceWin.webContents.send("record", id)
+  } else if (device) {
+    await openDeviceWindow('', device)
+    deviceWin.webContents.send("record", id)
+  }
 });
 
-
+// forward the recordedActions detail from deviceWindow to mainWindow
 ipcMain.on('recordedActions', (_, data) => mainWindow.webContents.send("recordedActions", data))
+// forward the sendKeys action from deviceWindow to mainWindow
 ipcMain.on('sendKeys', (_, data) => mainWindow.webContents.send("sendKeys", data))
+// forward the expandedPaths action from deviceWindow to mainWindow
 ipcMain.on('expandedPaths', (_, data) => mainWindow.webContents.send("expandedPaths", data))
+// forward the swipe action from deviceWindow to mainWindow
 ipcMain.on('selectedElement', (_, data) => mainWindow.webContents.send("selectedElement", data))
+// forward the page source json from deviceWindow to mainWindow
 ipcMain.on('getSourceJSON', (_, data) => {
    console.log('main getSourceJSON', _, data)
     mainWindow.webContents.send("getSourceJSON", data)
 })
+// forward the swipe action from deviceWindow to mainWindow
 ipcMain.on('swiped', (_, data) => mainWindow.webContents.send("swiped", data))
+// forward the taped action from deviceWindow to mainWindow
 ipcMain.on('taped', (_, data) => mainWindow.webContents.send("taped", data))
 
+// stop recording code
 ipcMain.on(
   "stoprecord",
   () => deviceWin && deviceWin.webContents.send("stoprecord")
 );
-// ipcMain.on("restartAppium", () => {
-// appium.kill();
-// appium.send({ type: "exit" });
-// setTimeout(() => {
-//   appium = fork(join(__dirname, "..", "..", "static", "wappium", "start_cp"));
-//   appium.on("message", msg => mainWindow.webContents.send("log", msg));
-// }, 3000);
-// });
+
+// play back code
 ipcMain.on("runcode", (_, rawCode) => {
   const path = join(
     __dirname,
@@ -344,6 +311,8 @@ ipcMain.on("runcode", (_, rawCode) => {
     });
   });
 });
+
+// stop playing back code
 ipcMain.on("stopcode", () => {
   stopAppium();
   setTimeout(() => {
@@ -355,12 +324,18 @@ ipcMain.on("stopcode", () => {
   }
 });
 
+// close deviceWindow
 ipcMain.on("close", _ => {
   deviceWin.close();
 });
+
+// minimize deviceWindow
 ipcMain.on("min", _ => {
   deviceWin.minimize();
 });
-ipcMain.on("startU2", () => {
-  startUiautomator2(_device.id).then(setTimeout(createSession, 5000));
+
+// start Uiautomator2
+ipcMain.on("startU2", async () => {
+  await startU2(_device.id)
+  setTimeout(createSession, 5000)
 });
