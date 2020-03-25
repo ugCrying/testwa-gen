@@ -31,6 +31,22 @@ if (process.platform !== "win32") {
   }
 }
 
+const setupDevice = async function (device) {
+  await installU2ToDevice(device.id)
+  await startU2(device.id)
+  await Timeout.set(5000)
+  postSession()
+  runScript(
+    device.id,
+    "ime set io.appium.uiautomator2.server/io.appium.uiautomator2.handler.TestwaIME"
+  )
+  await Timeout.set(600)
+  runScript(
+    device.id,
+    "am start io.appium.uiautomator2.server/io.appium.uiautomator2.MainActivity"
+  )
+}
+
 /**
  * 
  * @param {*} _ 
@@ -47,19 +63,8 @@ const openDeviceWindow = async function (_, device) {
   const [width, height] = device.screen.split("x");
   console.log("创建设备窗口 Renderer");
   startMini(device);
-  await installU2ToDevice(device.id)
-  await startU2(device.id)
-  await Timeout.set(5000)
-  postSession()
-  runScript(
-    device.id,
-    "ime set io.appium.uiautomator2.server/io.appium.uiautomator2.handler.TestwaIME"
-  )
-  await Timeout.set(600)
-  runScript(
-    device.id,
-    "am start io.appium.uiautomator2.server/io.appium.uiautomator2.MainActivity"
-  )
+  setupDevice()
+  // await setupDevice()
   if (!deviceWin) {
     deviceWin = new BrowserWindow({
       title: "脚本录制",
