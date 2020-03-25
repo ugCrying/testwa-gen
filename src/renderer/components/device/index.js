@@ -4,7 +4,6 @@
 
 import React, { Component } from 'react';
 import { Button, Spin, Tooltip } from 'antd';
-import { BannerParser } from 'minicap';
 import HighlighterRect from './HighlighterRect';
 import adbkit from 'adbkit';
 // @ts-ignore
@@ -18,6 +17,8 @@ import { ipcRenderer } from 'electron';
 import { emitter } from '../../lib';
 import { xmlToJSON } from './lib';
 import { connect } from 'dva'
+import Timeout from 'await-timeout'
+import { connectminicap } from './minicap'
 
 export let sourceXML = null;
 console.log('屏幕同步组件入口模块');
@@ -297,72 +298,26 @@ class Device extends Component {
       ipcRenderer.send('displayDevice');
     });
     const g = this.canvas.getContext('2d');
-    let drawing = false;
-    const minicap = require('net').connect({ port: 1717 });
     let img = new Image();
+    const config = {
+      drawing: false,
+      img
+    }
     img.onload = () => {
-      if (!this.canvas) return (drawing = false);
+      if (!this.canvas) return (config.drawing = false);
       this.canvas.width = img.width;
       this.canvas.height = img.height;
       console.log('投屏尺寸', this.canvas.width, this.canvas.height);
       g.drawImage(img, 0, 0);
-      return (drawing = false);
+      return (config.drawing = false);
     };
-    const connectminicap = () => {
-      let data = [];
-      let header = true;
-      let compiling = true;
-      const screen = () => {
-        compiling = true;
-        const arr = data.slice(0, 4); //前四个字节是帧大小
-        const size =
-          (arr[3] << 24) | (arr[2] << 16) | (arr[1] << 8) | (arr[0] << 0); //获得帧大小
-        if (data.length >= size + 4) {
-          //获取帧内容
-          // imgStream.push(chunk, "base64");
-          if (drawing === false) {
-            drawing = true;
-            img.src =
-              'data:image/png;base64,' +
-              Buffer.from(data.slice(4, 4 + size)).toString('base64');
-          }
-          data = data.slice(4 + size);
-          return screen();
-        }
-        return (compiling = false);
-      };
-      drawing = false;
-      minicap.on('data', chunk => {
-        // @ts-ignore
-        data.push(...chunk);
-        if (compiling === false) return screen();
-        if (header) {
-          const parser = new BannerParser();
-          parser.parse(data.splice(0, 24)); //前24个字节是头信息
-          this.banner = parser.take();
-          // @ts-ignore
-          console.log('minicap获取的设备屏幕实际高度', this.banner.realHeight);
-          setTimeout(() => {
-            // @ts-ignore
-            this.ratio = this.banner.realHeight / this.state.canvasHeight;
-            console.log(
-              'realHeight&canvasHeight',
-              this.ratio,
-              this.banner.realHeight,
-              this.state.canvasHeight
-            );
-          }, 1000);
-          header = false;
-          compiling = false;
-        }
-      });
-      minicap.on('connect', () => console.log('minicap 已连接'));
-      minicap.on('close', hadError =>
-        console.log(hadError ? 'minicap连接异常关闭' : 'minicap连接关闭')
-      );
-      minicap.on('error', console.log);
-    };
-    connectminicap();
+    // @ts-ignore
+    connectminicap(config, async (banner) => {
+      this.banner = banner
+      await Timeout.set(1000)
+      // @ts-ignore
+      this.ratio = this.banner.realHeight / this.state.canvasHeight;
+    })
     this.minitouch.on('data', chunk => {
       this.touchSize = chunk
         .toString()
