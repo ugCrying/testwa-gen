@@ -6,6 +6,7 @@ const minicap = require('net').connect({
   port: 1717
 })
 
+// TODO: disconnect
 const connectminicap = (config = {}, cb = (banner) => ({})) => {
   let data = [];
   let header = true;
@@ -38,19 +39,6 @@ const connectminicap = (config = {}, cb = (banner) => ({})) => {
       const parser = new BannerParser();
       parser.parse(data.splice(0, 24)); //前24个字节是头信息
       cb(parser.take())
-      // this.banner = parser.take();
-      // // @ts-ignore
-      // console.log('minicap获取的设备屏幕实际高度', this.banner.realHeight);
-      // setTimeout(() => {
-      //   // @ts-ignore
-      //   this.ratio = this.banner.realHeight / this.state.canvasHeight;
-      //   console.log(
-      //     'realHeight&canvasHeight',
-      //     this.ratio,
-      //     this.banner.realHeight,
-      //     this.state.canvasHeight
-      //   );
-      // }, 1000);
       header = false;
       compiling = false;
     }

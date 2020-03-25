@@ -3,7 +3,7 @@
  */
 
 import React, { Component } from 'react';
-import { Button, Spin, Tooltip } from 'antd';
+import { Spin } from 'antd';
 import HighlighterRect from './HighlighterRect';
 import adbkit from 'adbkit';
 // @ts-ignore
@@ -19,6 +19,8 @@ import { xmlToJSON } from './lib';
 import { connect } from 'dva'
 import Timeout from 'await-timeout'
 import { connectminicap } from './minicap'
+// @ts-ignore
+import DeviceControl from './DeviceControl/DeviceControl'
 
 export let sourceXML = null;
 console.log('屏幕同步组件入口模块');
@@ -287,14 +289,6 @@ class Device extends Component {
       Object.assign(this.device.style, deviceStyle)
       Object.assign(this.shell.style, shellStyle)
       Object.assign(this.screen.style, screenStyle)
-      // this.device.style.height = args.shellHeight + 'px';
-      // this.shell.style.transform = `scale3d(${args.scale}, ${args.scale}, 1)`;
-      // this.shell.style.height = 822 - args.shellHeightDiff + 'px';
-      // this.screen.style.width = args.canvasWidth + 'px';
-      // this.screen.style.height = args.canvasHeight + 'px';
-      // this.screen.style.top = top + 'px';
-      // this.screen.style.left = left + 'px';
-      // this.screen.style.borderRadius = 14 * args.scale + 'px';
       ipcRenderer.send('displayDevice');
     });
     const g = this.canvas.getContext('2d');
@@ -401,122 +395,37 @@ class Device extends Component {
               </div>
             </div>
           </div>
-          <div className={styles['control-wrap']}>
-            <div className={styles['control-space']} />
-            <div className={styles['control-container']}>
-              <div className={styles['control-bar']}>
-                <Tooltip title="关闭窗口">
-                  <Button
-                    onClick={() => {
-                      ipcRenderer.send('close');
-                    }}
-                  >
-                    <img
-                      // @ts-ignore
-                      src={require(`../../../../static/images/close.svg`)}
-                      alt=""
-                    />
-                  </Button>
-                  </Tooltip>
-                <Tooltip title="最小化窗口">
-                  <Button
-                    onClick={() => {
-                      ipcRenderer.send('min');
-                    }}
-                  >
-                    <img
-                      // @ts-ignore
-                      src={require(`../../../../static/images/min.svg`)}
-                      alt=""
-                    />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="返回上一级">
-                  <Button
-                    onClick={() =>
-                      client.shell(
-                        this.props.device,
-                        'input keyevent "KEYCODE_BACK"'
-                      )
-                    }
-                  >
-                    <img
-                      className={styles['reply-button']}
-                      // @ts-ignore
-                      src={require(`../../../../static/images/reply.svg`)}
-                      alt=""
-                    />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="回到桌面">
-                  <Button
-                    onClick={() =>
-                      client.shell(
-                        this.props.device,
-                        'input keyevent "KEYCODE_HOME"'
-                      )
-                    }
-                  >
-                    <img
-                      // @ts-ignore
-                      src={require(`../../../../static/images/home.svg`)}
-                      alt=""
-                    />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="任务列表">
-                  <Button
-                    onClick={() => {
-                      client.shell(
-                        this.props.device,
-                        'input keyevent "KEYCODE_MENU"'
-                      );
-                    }}
-                  >
-                    <img
-                      // @ts-ignore
-                      src={require(`../../../../static/images/menu.svg`)}
-                      alt=""
-                    />
-                  </Button>
-                </Tooltip>
-                <Tooltip title="刷新UI树">
-                  <Button
-                    onClick={() => {
-                      this.setState({ loading: true });
-                      this.getSource();
-                    }}
-                  >
-                    <img
-                      // @ts-ignore
-                      src={require(`../../../../static/images/refresh.svg`)}
-                      alt=""
-                    />
-                  </Button>
-                </Tooltip>
-                <input
-                  className={styles['v-input']}
-                  autoFocus
-                  onBlur={e => {
-                    e.target.focus();
-                    e.target.value = '';
-                    console.log('失去焦点清空文本', e.target.value);
-                  }}
-                  onChange={e => {
-                    this.text = e.target.value;
-                    if (this.state.selectedElement.attributes) {
-                      this.textId = this.state.selectedElement.attributes[
-                        'resource-id'
-                      ];
-                    }
-                    this.doTypeText(this.text);
-                    console.log('文本同步输入', this.text);
-                  }}
-                />
-              </div>
-              <div className={styles['control-container-space']} />
-            </div>
-          </div>
+          <DeviceControl
+            refreshUI={
+              () => {
+                this.setState({ loading: true });
+                this.getSource();
+              }
+            }
+            goBack={
+              () =>
+                client.shell(
+                  this.props.device,
+                  'input keyevent "KEYCODE_BACK"'
+                )
+              }
+            task={
+              () => {
+                client.shell(
+                  this.props.device,
+                  'input keyevent "KEYCODE_MENU"'
+                );
+              }
+            }
+            home={
+              () =>
+                client.shell(
+                  this.props.device,
+                  'input keyevent "KEYCODE_HOME"'
+                )
+              
+            }
+          />
         </div>
       </Spin>
     );

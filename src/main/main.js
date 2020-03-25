@@ -3,8 +3,8 @@
 const { getSource, postSession, startAppium, stopAppium } = require('../api/appium')
 const { runScript } = require('../api/adb')
 const { xmlToJSON } = require('../api/xml')
-const { installU2ToDevice, startU2 } = require('../api/u2')
-const { startMini, trackDevices } = require("../api/mini");
+const { installU2ToDevice, startU2, src } = require('../api/u2')
+const { startMini, trackDevices, getMinicapImgBase64 } = require("../api/mini");
 const Timeout = require('await-timeout')
 const { fork, spawnSync } = require("child_process");
 const { app, Menu, BrowserWindow, ipcMain } = require("electron");
@@ -63,7 +63,7 @@ const openDeviceWindow = async function (_, device) {
   const [width, height] = device.screen.split("x");
   console.log("创建设备窗口 Renderer");
   startMini(device);
-  setupDevice()
+  setupDevice(device)
   // await setupDevice()
   if (!deviceWin) {
     deviceWin = new BrowserWindow({
@@ -324,3 +324,10 @@ ipcMain.on("startU2", async () => {
   await startU2(_device.id)
   setTimeout(postSession, 5000)
 });
+
+ipcMain.on("getMinicapImgBase64", () => {
+  getMinicapImgBase64(src => {
+    console.log('getMinicapImgBase64Success')
+    deviceWin.webContents.send("getMinicapImgBase64Success", src)
+  })
+})

@@ -3,6 +3,7 @@ const { installU2ToDevice, startU2 } = require('./u2')
 const { DEVICE_SCREEN_OUTPUT_RATIO } = require("../common/config");
 const { join } = require("path")
 const { statSync } = require('fs')
+const { connect } = require('net')
 
 const baseUrl = process.defaultApp
     ? join(__dirname, "..", "..", "node_modules")
@@ -131,7 +132,90 @@ const trackDevices = async function () {
   })
 }
 
+// const getMinicapImgBase64 = function () {
+//   const minicap = connect({ port: 1717 })
+//   let data = []
+//   let base64
+//   const convertBufferToBase64 = function () {
+//     //前四个字节是帧大小
+//     const arr = data.slice(0, 4)
+//     //获得帧大小
+//     const size = (arr[3] << 24) | (arr[2] << 16) | (arr[1] << 8) | (arr[0] << 0)
+//     if (data.length >= size + 4) {
+//       //获取帧内容
+//       // imgStream.push(chunk, "base64");
+//       base64 = 'data:image/png;base64,' + Buffer.from(data.slice(4, 4 + size)).toString('base64');
+//       data = data.slice(4 + size);
+//       convertBufferToBase64();
+//     }
+//   }
+//   minicap.on('data', chunk => {
+//     // @ts-ignore
+//     data.push(...chunk)
+//     convertBufferToBase64()
+//     // return base64
+//     console.log('base64', base64, data.length)
+//   })
+// }
+
+let src
+
+const getMinicapImgBase64 = (cb = (v) => {}) => {
+  let drawing = false
+  const connectminicap = () => {
+    const { BannerParser } = require('minicap');
+    const parser = new BannerParser();
+    const minicap = connect({ port: 1717 })
+    let data = [];
+    let header = true;
+    let compiling = true;
+    const screen = () => {
+      compiling = true;
+      const arr = data.slice(0, 4); //前四个字节是帧大小
+      const size =
+        (arr[3] << 24) | (arr[2] << 16) | (arr[1] << 8) | (arr[0] << 0); //获得帧大小
+      if (data.length >= size + 4) {
+        //获取帧内容
+        // imgStream.push(chunk, "base64");
+        if (drawing === false) {
+          drawing = true;
+          src =
+            'data:image/png;base64,' +
+            Buffer.from(data.slice(4, 4 + size)).toString('base64');
+          // cb(src)
+          // console.log('--------------------')
+          // console.log('--------------------')
+          // console.log('--------------------')
+          // console.log('src', src)
+          // console.log('--------------------')
+          // console.log('--------------------')
+          // console.log('--------------------')
+        }
+        data = data.slice(4 + size);
+        return screen();
+      }
+      return (compiling = false);
+    };
+    drawing = false;
+    minicap.on('data', chunk => {
+      // @ts-ignore
+      data.push(...chunk);
+      console.log('minicap data')
+      cb(src)
+      if (compiling === false) return screen();
+      if (header) {
+        parser.parse(data.splice(0, 24)); //前24个字节是头信息
+        // @ts-ignore
+        header = false;
+        compiling = false;
+      }
+    });
+  }
+  connectminicap()
+}
+
 module.exports = {
   startMini,
   trackDevices,
+  getMinicapImgBase64,
 }
