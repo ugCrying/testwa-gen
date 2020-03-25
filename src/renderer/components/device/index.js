@@ -269,14 +269,31 @@ class Device extends Component {
       });
       top = 45 * args.scale;
       left = 10 * args.scale;
-      this.device.style.height = args.shellHeight + 'px';
-      this.shell.style.transform = `scale3d(${args.scale}, ${args.scale}, 1)`;
-      this.shell.style.height = 822 - args.shellHeightDiff + 'px';
-      this.screen.style.width = args.canvasWidth + 'px';
-      this.screen.style.height = args.canvasHeight + 'px';
-      this.screen.style.top = top + 'px';
-      this.screen.style.left = left + 'px';
-      this.screen.style.borderRadius = 14 * args.scale + 'px';
+      const deviceStyle = {
+        height: args.shellHeight + 'px',
+      }
+      const shellStyle = {
+        transform: `scale3d(${args.scale}, ${args.scale}, 1)`,
+        height: 822 - args.shellHeightDiff + 'px'
+      }
+      const screenStyle = {
+        width: args.canvasWidth + 'px',
+        height: args.canvasHeight + 'px',
+        top: top + 'px',
+        left: left + 'px',
+        borderRadius: 14 * args.scale + 'px'
+      }
+      Object.assign(this.device.style, deviceStyle)
+      Object.assign(this.shell.style, shellStyle)
+      Object.assign(this.screen.style, screenStyle)
+      // this.device.style.height = args.shellHeight + 'px';
+      // this.shell.style.transform = `scale3d(${args.scale}, ${args.scale}, 1)`;
+      // this.shell.style.height = 822 - args.shellHeightDiff + 'px';
+      // this.screen.style.width = args.canvasWidth + 'px';
+      // this.screen.style.height = args.canvasHeight + 'px';
+      // this.screen.style.top = top + 'px';
+      // this.screen.style.left = left + 'px';
+      // this.screen.style.borderRadius = 14 * args.scale + 'px';
       ipcRenderer.send('displayDevice');
     });
     const g = this.canvas.getContext('2d');
