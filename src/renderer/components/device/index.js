@@ -19,8 +19,9 @@ import { xmlToJSON } from './lib';
 import { connect } from 'dva'
 import Timeout from 'await-timeout'
 import { connectminicap } from './minicap'
-// @ts-ignore
 import DeviceControl from './DeviceControl/DeviceControl'
+// @ts-ignore
+const { runScript } = require('../../../api/adb')
 
 export let sourceXML = null;
 console.log('屏幕同步组件入口模块');
@@ -396,35 +397,10 @@ class Device extends Component {
             </div>
           </div>
           <DeviceControl
-            refreshUI={
-              () => {
-                this.setState({ loading: true });
-                this.getSource();
-              }
-            }
-            goBack={
-              () =>
-                client.shell(
-                  this.props.device,
-                  'input keyevent "KEYCODE_BACK"'
-                )
-              }
-            task={
-              () => {
-                client.shell(
-                  this.props.device,
-                  'input keyevent "KEYCODE_MENU"'
-                );
-              }
-            }
-            home={
-              () =>
-                client.shell(
-                  this.props.device,
-                  'input keyevent "KEYCODE_HOME"'
-                )
-              
-            }
+            refreshUI={() => this.getSource()}
+            goBack={() => runScript(this.props.device, 'input keyevent "KEYCODE_BACK"')}
+            task={() => runScript(this.props.device, 'input keyevent "KEYCODE_MENU"')}
+            home={() => runScript(this.props.device, 'input keyevent "KEYCODE_HOME"')}
           />
         </div>
       </Spin>

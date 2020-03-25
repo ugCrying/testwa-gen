@@ -2,12 +2,12 @@ import {
   BannerParser
 } from 'minicap';
 
-const minicap = require('net').connect({
-  port: 1717
-})
 
 // TODO: disconnect
 const connectminicap = (config = {}, cb = (banner) => ({})) => {
+  const minicap = require('net').connect({
+    port: 1717
+  })
   let data = [];
   let header = true;
   let compiling = true;
@@ -32,6 +32,7 @@ const connectminicap = (config = {}, cb = (banner) => ({})) => {
   };
   config.drawing = false;
   minicap.on('data', chunk => {
+    console.log('minicapdata')
     // @ts-ignore
     data.push(...chunk);
     if (compiling === false) return screen();
