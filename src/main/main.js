@@ -1,6 +1,6 @@
 // @ts-check
 "use strict";
-const { getSource, postSession } = require('../api/appium')
+const { getSource, postSession, startAppium, stopAppium } = require('../api/appium')
 const { runScript } = require('../api/adb')
 const { installU2ToDevice, startU2 } = require('../api/u2')
 const { startMini, trackDevices } = require("../api/mini");
@@ -10,36 +10,6 @@ const { app, Menu, BrowserWindow, ipcMain } = require("electron");
 const menu = require("./menu");
 const upgrade = require("./upgrade");
 const { join } = require("path");
-const { startAppium, stopAppium } = require("./lib");
-
-const source = async () => {
-  try {
-    const sourceXML = await getSource()
-    console.log('-----------------sendSourceFromMain---------------------------')
-    deviceWin.webContents.send("getSouceSuccess", sourceXML)
-    console.log('-----------------sendSourceFromMain---------------------------')
-  } catch (e) {
-    console.log('-----------------source error---------------------------')
-    console.log(e)
-    console.log('-----------------source error---------------------------')
-    throw e
-  }
-}
-
-ipcMain.on('test', async (e) => {
-  try {
-    await source()
-  } catch (e) {
-    // TODO:此处只做了一次
-    // deviceWin.webContents.send("getSouceFailed", '')
-    startU2(_device.id).then(setTimeout(postSession, 5000));
-    // 等待 session 创建成功
-    setTimeout(() => {
-      source()
-    }, 3000)
-    // throw e
-  }
-})
 
 let mainWindow;
 let deviceWin;
@@ -280,6 +250,17 @@ ipcMain.on('getSourceJSON', (_, data) => {
 ipcMain.on('swiped', (_, data) => mainWindow.webContents.send("swiped", data))
 // forward the taped action from deviceWindow to mainWindow
 ipcMain.on('taped', (_, data) => mainWindow.webContents.send("taped", data))
+
+// loading ui request from deviceWin
+ipcMain.on('getSource', async (e) => {
+  try {
+    const sourceXML = await getSource()
+    deviceWin.webContents.send("getSouceSuccess", sourceXML)
+  } catch (e) {
+    // TODO: retry
+    deviceWin.webContents.send("getSouceFailed", e)
+  }
+})
 
 // stop recording code
 ipcMain.on(

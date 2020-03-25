@@ -123,7 +123,7 @@ const trackDevices = async function () {
     .forEach(device => {
       getDeviceProperties(device).then(pushMiniToDevice)
     });
-  (await client.trackDevices()).on("changeSet", async changes => {
+  (await watchDevices()).on("changeSet", async changes => {
     for (const device of changes.changed) {
       if (device.type !== "device") continue;
       getDeviceProperties(device).then(pushMiniToDevice);

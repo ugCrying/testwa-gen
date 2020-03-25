@@ -1,7 +1,7 @@
 import rxdb from "../../db";
 import fs from "fs";
 import { ipcRenderer } from "electron";
-import { client } from "../../../main/adb";
+import { client } from "../../../api/adb";
 import frameworks from "./client-frameworks";
 const adbkit = require("adbkit");
 const request = require("request").defaults({

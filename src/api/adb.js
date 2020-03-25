@@ -52,6 +52,7 @@ const trackDevices = async function () {
 }
 
 module.exports = {
+  client,
   installApp,
   listDevices,
   pushFile,

@@ -77,11 +77,9 @@ class Device extends Component {
   }
 
   UNSAFE_componentWillMount() {
-    // ipcRenderer.send('test', '1111111111')
     ipcRenderer.on('getSouceSuccess', (_, sourceJSON) => {
       console.log('-----------------getSouceSuccess---------------------------')
       console.log('----------------getSouceSuccess----------------------------')
-      // console.log(_, e)
       sourceXML = sourceJSON.value;
       sourceJSON = xmlToJSON(sourceJSON.value);
       // console.log('开始send', browserWindow, sourceJSON);
@@ -93,16 +91,11 @@ class Device extends Component {
       console.log('send完成');
       this.setState({ sourceJSON, loading: false });
       console.log('-----------------getSouceSuccess---------------------------')
-      console.log('-----------------getSouceSuccess---------------------------')
     })
-    ipcRenderer.on('getSouceFailed', () => {
+    ipcRenderer.on('getSouceFailed', (err) => {
       console.log('------------getSouceFailed-------------')
-      console.log('------------getSouceFailed-------------')
-      // retry
-      ipcRenderer.send('startU2')
-      ipcRenderer.send('test')
+      // TODO: retry
       this.setState({ loading: false });
-      console.log('------------getSouceFailed-------------')
       console.log('------------getSouceFailed-------------')
     })
   }
@@ -120,7 +113,10 @@ class Device extends Component {
   }
 
   getSource() {
-    ipcRenderer.send('test')
+    this.setState({
+      loading: true
+    })
+    ipcRenderer.send('getSource')
   }
 
   componentWillUnmount() {
@@ -234,7 +230,6 @@ class Device extends Component {
     this.setState({
       canvasWidth: this.canvasWidth
     });
-    //test log
     ipcRenderer.once('deviceWinShowed', (_, { width, height }) => {
       console.log('屏幕分辨率', {
         width: window.screen.width,
