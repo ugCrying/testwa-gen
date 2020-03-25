@@ -402,6 +402,15 @@ class Device extends Component {
             goBack={() => runScript(this.props.device, 'input keyevent "KEYCODE_BACK"')}
             task={() => runScript(this.props.device, 'input keyevent "KEYCODE_MENU"')}
             home={() => runScript(this.props.device, 'input keyevent "KEYCODE_HOME"')}
+            input={(e) => {
+              this.text = e.target.value;
+              if (this.state.selectedElement.attributes) {
+                this.textId = this.state.selectedElement.attributes[
+                  "resource-id"
+                ];
+              }
+              this.doTypeText(this.text);
+            }}
           />
         </div>
       </Spin>

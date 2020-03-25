@@ -82,6 +82,16 @@ const DeviceControl = (props) => {
               />
             </Button>
           </Tooltip>
+          <input
+            className={styles["v-input"]}
+            autoFocus
+            onBlur={e => {
+              e.target.focus();
+              e.target.value = "";
+              console.log("失去焦点清空文本", e.target.value);
+            }}
+            onChange={props.input}
+          />
         </div>
         <div className={styles['control-container-space']} />
       </div>
