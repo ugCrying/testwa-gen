@@ -1,4 +1,4 @@
-import { installApp, pushFile, runScript } from './adb'
+const { installApp, pushFile, runScript } = require('./adb')
 const adbkit = require("adbkit")
 const { join } = require("path");
 const ApkReader = require("adbkit-apkreader")
@@ -31,7 +31,7 @@ const getDesiredU2VersionName = async function (path) {
  * @param {String} deviceId deviceId
  * @return {Promise<Undefined>}
  */
-export const installU2ToDevice = async function (deviceId) {
+const installU2ToDevice = async function (deviceId) {
   const [currentPackageInfo, desiredVersion] = await Promise.all([
     getCurrentU2PackageInfo(deviceId),
     getDesiredU2VersionName(join(U2apkPath, "uiautomator2-server.apk"))
@@ -70,9 +70,14 @@ export const installU2ToDevice = async function (deviceId) {
  * @param {String} deviceId deviceId
  * @return {Promise<any>}
  */
-export const startU2 = async function (deviceId = '') {
+const startU2 = async function (deviceId = '') {
   return await runScript(
       deviceId,
       `am instrument -w --no-window-animation io.appium.uiautomator2.server.test/androidx.test.runner.AndroidJUnitRunner`
     )
+}
+
+module.exports = {
+  startU2,
+  installU2ToDevice
 }

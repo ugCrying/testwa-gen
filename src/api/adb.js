@@ -7,7 +7,7 @@ const client = adbkit.createClient()
  * @param {String} apkPath
  * @return {Promise<any>}
  */
-export const installApp = async function (deviceId, apkPath) {
+const installApp = async function (deviceId, apkPath) {
   return await client.install(deviceId, apkPath)
 }
 
@@ -18,7 +18,7 @@ export const installApp = async function (deviceId, apkPath) {
  * @param {String} toPath
  * @return {Promise<any>}
  */
-export const pushFile = async function (deviceId, fromPath, toPath) {
+const pushFile = async function (deviceId, fromPath, toPath) {
   return await client.push(deviceId, fromPath, toPath)
 }
 
@@ -28,10 +28,16 @@ export const pushFile = async function (deviceId, fromPath, toPath) {
  * @param {String} script 
  * @return {Promise<any>}
  */
-export const runScript = async function (deviceId, script) {
+const runScript = async function (deviceId, script) {
   return await client
     .shell(
       deviceId,
       `${script}`
     )
+}
+
+module.exports = {
+  installApp,
+  pushFile,
+  runScript,
 }

@@ -1,4 +1,5 @@
-import axios from 'axios'
+// import axios from 'axios'
+const axios = require('axios')
 
 const request = axios.create({
   timeout: 5000,
@@ -10,7 +11,7 @@ request.interceptors.response.use(({ data }) => data)
 /**
  * https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol#session-1
  */
-export const postSession = function () {
+const postSession = function () {
   return request.post('', {
     "desiredCapabilities": {}
   })
@@ -19,6 +20,11 @@ export const postSession = function () {
 /**
  * https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol#get-sessionsessionidsource
  */
-export const getSource = function (sessionId = '1') {
+const getSource = function (sessionId = '1') {
   return request.get(`/${sessionId}/source`)
+}
+
+module.exports = {
+  postSession,
+  getSource
 }

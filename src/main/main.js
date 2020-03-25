@@ -1,9 +1,9 @@
 // @ts-check
 "use strict";
-import { getSource, postSession as createSession } from '../api/appium'
-import { runScript } from '../api/adb'
-import { installU2ToDevice, startU2 } from '../api/u2'
-import Timeout from 'await-timeout'
+const { getSource, postSession } = require('../api/appium')
+const { runScript } = require('../api/adb')
+const { installU2ToDevice, startU2 } = require('../api/u2')
+const Timeout = require('await-timeout')
 const { fork, spawnSync } = require("child_process");
 const { app, Menu, BrowserWindow, ipcMain } = require("electron");
 const menu = require("./menu");
@@ -32,7 +32,7 @@ ipcMain.on('test', async (e) => {
   } catch (e) {
     // TODO:此处只做了一次
     // deviceWin.webContents.send("getSouceFailed", '')
-    startU2(_device.id).then(setTimeout(createSession, 5000));
+    startU2(_device.id).then(setTimeout(postSession, 5000));
     // 等待 session 创建成功
     setTimeout(() => {
       source()
@@ -79,7 +79,7 @@ const openDeviceWindow = async function (_, device) {
   await installU2ToDevice(device.id)
   await startU2(device.id)
   await Timeout.set(5000)
-  createSession()
+  postSession()
   runScript(
     device.id,
     "ime set io.appium.uiautomator2.server/io.appium.uiautomator2.handler.TestwaIME"
@@ -337,5 +337,5 @@ ipcMain.on("min", _ => {
 // start Uiautomator2
 ipcMain.on("startU2", async () => {
   await startU2(_device.id)
-  setTimeout(createSession, 5000)
+  setTimeout(postSession, 5000)
 });

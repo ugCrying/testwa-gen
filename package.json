@@ -2,7 +2,7 @@
   "name": "testwa",
   "private": true,
   "version": "1.1.2",
-  "main": "main/main.js",
+  "main": "main/index.js",
   "description": "Automated test Script recording tool for Apps.",
   "author": "canfeit <canfeit@qq.com> (http://testwa.com/)",
   "license": "MIT",
@@ -27,6 +27,9 @@
     "firefoxos"
   ],
   "homepage": "https://github.com/canfeit/testwa#readme",
+  "esm": {
+    "cache": false
+  },
   "scripts": {
     "start": "yarn clean&&yarn start-all",
     "dir": "yarn build-umi&&npm run build -- --dir -c.asar=false",
