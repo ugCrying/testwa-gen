@@ -51,7 +51,7 @@ class Device extends Component {
       loading: false,
       selectedElement: {},
       // 画布高度
-      canvasHeight: localStorage.getItem('canvasHeight') || 500,
+      canvasHeight: ~~(localStorage.getItem('canvasHeight') || 500),
       // 画布宽度
       canvasWidth: 300
     };
@@ -78,6 +78,12 @@ class Device extends Component {
       this.setState({ sourceJSON: null });
       this.record = false;
     });
+  }
+
+  get ratio() {
+    const { realHeight = 1 } = this.banner || {}
+    const { canvasHeight = 1 } = this.state
+    return realHeight / canvasHeight
   }
 
   UNSAFE_componentWillMount() {
@@ -153,14 +159,10 @@ class Device extends Component {
     // 处于录制状态下时录制脚本
     if (this.record) {
       const widthEnd = Math.round(
-        (evt.clientX - left) *
-          this.ratio *
-          (this.touchSize[2] / this.banner.realWidth)
+        (evt.clientX - left) * (this.state.canvasWidth * this.touchSize[2])
       );
       const heightEnd = Math.round(
-        (evt.clientY - top) *
-          this.ratio *
-          (this.touchSize[3] / this.banner.realHeight)
+        (evt.clientY - top) * (this.state.canvasHeight * this.touchSize[3])
       );
       if (widthEnd - this.tap.width === 0 && heightEnd - this.tap.height === 0)
         this.isMove = false;
@@ -312,7 +314,7 @@ class Device extends Component {
       this.banner = banner
       await Timeout.set(1000)
       // @ts-ignore
-      this.ratio = this.banner.realHeight / this.state.canvasHeight;
+      // this.ratio = this.banner.realHeight / this.state.canvasHeight;
     })
     this.minitouch.on('data', chunk => {
       this.touchSize = chunk
