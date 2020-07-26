@@ -17,8 +17,7 @@ import { ipcRenderer } from 'electron';
 import { emitter } from '../../lib';
 import { xmlToJSON } from './lib';
 import { connect } from 'dva'
-import Timeout from 'await-timeout'
-import { connectminicap } from './minicap'
+import { startScrcpy } from './scrcpy'
 import DeviceControl from './DeviceControl/DeviceControl'
 // @ts-ignore
 const { runScript } = require('../../../api/adb')
@@ -62,7 +61,7 @@ class Device extends Component {
     // 是否处于录制状态
     this.record = false;
     // this.canvas = null;
-    this.banner = null;
+    this.banner = {};
     this.touchSize = [];
     this.minitouch = require('net').connect({ port: 1718 });
     emitter.on('selectedElement', selectedElement => {
@@ -81,7 +80,7 @@ class Device extends Component {
   }
 
   get ratio() {
-    const { realHeight = 1 } = this.banner || {}
+    const { realHeight = 1 } = this.banner
     const { canvasHeight = 1 } = this.state
     return realHeight / canvasHeight
   }
@@ -310,12 +309,20 @@ class Device extends Component {
       return (config.drawing = false);
     };
     // @ts-ignore
-    connectminicap(config, async (banner) => {
-      this.banner = banner
-      await Timeout.set(1000)
-      // @ts-ignore
-      // this.ratio = this.banner.realHeight / this.state.canvasHeight;
+    startScrcpy(this.canvas, {
+      success: (banner) => {
+        this.banner = banner || this.banner
+        this.setState({ loading: false })
+      },
+      error: () => this.setState({ loading: true })
     })
+    // connectminicap(config, async (banner) => {
+    //   this.banner = banner
+    //   await Timeout.set(1000)
+    //   // @ts-ignore
+    //   this.ratio = this.banner.realHeight / this.state.canvasHeight;
+    //   console.log(this.banner, this.ratio)
+    // })
     this.minitouch.on('data', chunk => {
       this.touchSize = chunk
         .toString()

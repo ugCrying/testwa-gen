@@ -4,6 +4,7 @@ const { DEVICE_SCREEN_OUTPUT_RATIO } = require("../common/config");
 const { join } = require("path")
 const { statSync } = require('fs')
 const { connect } = require('net')
+const { execSync } = require('child_process')
 
 const baseUrl = process.defaultApp
     ? join(__dirname, "..", "..", "node_modules")
@@ -74,27 +75,30 @@ const pushMiniToDevice = async function (device) {
     "bin",
     "minitouch"
   );
-  const capPath = join(
-    baseUrl,
-    "minicap-prebuilt",
-    "prebuilt",
+  const libcompress = join(
+    __dirname,
+    'jniLibs',
     device.cpu,
-    "bin",
-    "minicap"
+    'libcompress.so'
   );
-  const capSoPath = join(
-    baseUrl,
-    "minicap-prebuilt",
-    "prebuilt",
+  const libturbojpeg = join(
+    __dirname,
+    'libs',
+    'libturbojpeg',
+    'prebuilt',
     device.cpu,
-    "lib",
-    `android-${device.sdk}`,
-    "minicap.so"
+    'libturbojpeg.so'
   );
+
+  const scrcpyServer = join(
+    __dirname,
+    'scrcpy-server.jar'
+  )
   try {
     statSync(touchPath);
-    statSync(capPath);
-    statSync(capSoPath);
+    statSync(libcompress);
+    statSync(libturbojpeg);
+    statSync(scrcpyServer);
   } catch (e) {
     delete device.screen;
     console.log(e.message, "不支持的设备架构");
@@ -103,13 +107,10 @@ const pushMiniToDevice = async function (device) {
   console.log("推送服务文件到", device.id);
   Promise.all([
     client.push(device.id, touchPath, "/data/local/tmp/minitouch", 511),
-    client.push(device.id, capPath, "/data/local/tmp/minicap", 511),
-    client.push(device.id, capSoPath, "/data/local/tmp/minicap.so", 511)
-    // client.push(
-    //   device.id,
-    //   join(__dirname, "..", "..", "static", "AppiumBootstrap.jar"),
-    //   "/data/local/tmp/AppiumBootstrap.jar"
-    // )
+    execSync(`adb push ${libcompress} /data/local/tmp/`),
+    execSync(`adb push ${libturbojpeg} /data/local/tmp/`),
+    execSync(`adb push ${scrcpyServer} /data/local/tmp/`),
+    execSync('adb shell chmod 777 /data/local/tmp/scrcpy-server.jar')
   ]).catch(reason => {
     console.error(reason.message, `向${device.id}推送服务文件失败`);
   });
@@ -131,32 +132,6 @@ const trackDevices = async function () {
     }
   })
 }
-
-// const getMinicapImgBase64 = function () {
-//   const minicap = connect({ port: 1717 })
-//   let data = []
-//   let base64
-//   const convertBufferToBase64 = function () {
-//     //前四个字节是帧大小
-//     const arr = data.slice(0, 4)
-//     //获得帧大小
-//     const size = (arr[3] << 24) | (arr[2] << 16) | (arr[1] << 8) | (arr[0] << 0)
-//     if (data.length >= size + 4) {
-//       //获取帧内容
-//       // imgStream.push(chunk, "base64");
-//       base64 = 'data:image/png;base64,' + Buffer.from(data.slice(4, 4 + size)).toString('base64');
-//       data = data.slice(4 + size);
-//       convertBufferToBase64();
-//     }
-//   }
-//   minicap.on('data', chunk => {
-//     // @ts-ignore
-//     data.push(...chunk)
-//     convertBufferToBase64()
-//     // return base64
-//     console.log('base64', base64, data.length)
-//   })
-// }
 
 let src
 

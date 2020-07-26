@@ -180,7 +180,8 @@ export const onSelectDevice = _device => {
   console.log("端口映射到", device.id);
   client.forward(device.id, "tcp:4444", "tcp:6790"); //UI Automator2
   client.forward(device.id, "tcp:6677", "tcp:8888"); //testwa keyboard
-  client.forward(device.id, "tcp:1717", "localabstract:minicap");
+  // client.forward(device.id, "tcp:1717", "localabstract:minicap");
+  client.forward(device.id, "tcp:1717", "tcp:6612");
   client.forward(device.id, "tcp:1718", "localabstract:minitouch");
   // client.forward(device.id, "tcp:4444", "tcp:4724"); //UI Automator1
   // 打开设备小窗

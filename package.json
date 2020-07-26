@@ -40,7 +40,8 @@
     "build-umi": "cd src/renderer && cross-env COMPRESS=none cross-env CSS_COMPRESS=none umi build",
     "start-umi": "cd src/renderer && cross-env BROWSER=none umi dev",
     "start-electron": "cd src&&nodemon --watch main --exec electron .",
-    "start-all": "concurrently \"yarn start-umi\" \"wait-on http://localhost:8000 && yarn start-electron\"",
+    "start-all": "concurrently \"yarn start-umi\" \"wait-on http://localhost:8000 && yarn start-electron\" \"yarn start-ws\" ",
+    "start-ws": "cd src/api/scrcpy && adb forward tcp:1717 tcp:6612 && node ws.js",
     "clean": "yarn clean-bin&&yarn clean-apk",
     "clean-bin": "adb shell rm -r /data/local/tmp/mini*&&adb shell ls /data/local/tmp",
     "clean-apk": "adb uninstall io.appium.uiautomator2.server",
@@ -115,10 +116,12 @@
     "await-timeout": "^1.1.1",
     "axios": "^0.19.2",
     "electron-updater": "^4.0.6",
+    "express": "^4.12.3",
     "lodash": "^4.17.15",
     "request": "^2.88.0",
     "source-map-support": "^0.5.9",
-    "wd": "^1.12.1"
+    "wd": "^1.12.1",
+    "ws": "^0.7.1"
   },
   "devDependencies": {
     "ansi-to-html": "^0.6.9",
