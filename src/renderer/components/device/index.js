@@ -121,6 +121,8 @@ class Device extends Component {
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('stoprecord');
     ipcRenderer.removeAllListeners('record');
+    this.minitouch.destroy()
+    console.log('断开 minitou')
     // TODO: remove eventListener "changeStyle"
   }
 
@@ -325,10 +327,13 @@ class Device extends Component {
     //   console.log(this.banner, this.ratio)
     // })
     this.minitouch.on('data', chunk => {
-      this.touchSize = chunk
-        .toString()
-        .split('^')[1]
-        .split(' ');
+      console.log('chunk', chunk)
+      if (chunk) {
+        this.touchSize = chunk
+          .toString()
+          .split('^')[1]
+          .split(' ');
+      }
     });
     this.minitouch.on('connect', () => console.log('minitouch 已连接'));
     this.minitouch.on('close', hadError =>

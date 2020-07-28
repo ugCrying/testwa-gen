@@ -1,11 +1,17 @@
-const { runScript, getProperties, listDevices, trackDevices: watchDevices, client } = require('./adb')
+const { runScript, getProperties, listDevices, trackDevices: watchDevices, client, installApp } = require('./adb')
 const { installU2ToDevice, startU2 } = require('./u2')
 const { DEVICE_SCREEN_OUTPUT_RATIO } = require("../common/config");
 const { join } = require("path")
 const { statSync } = require('fs')
 const { connect } = require('net')
 const { execSync } = require('child_process')
+const lineBreak = (process.platform === 'win32') ? '\n\r' : '\n';
 
+const isOverAndroid10 = (sn) => {
+  const command = `adb -s ${sn} shell getprop ro.build.version.release`
+  const version = ~~execSync(command).toString().replace(lineBreak, '')
+  return version >= 10
+}
 const baseUrl = process.defaultApp
     ? join(__dirname, "..", "..", "node_modules")
     : join(__dirname, "..", "..")
@@ -105,13 +111,21 @@ const pushMiniToDevice = async function (device) {
     return;
   }
   console.log("推送服务文件到", device.id);
-  Promise.all([
+  const tasks = [
     client.push(device.id, touchPath, "/data/local/tmp/minitouch", 511),
+    // FIXME: 指定 sn
     execSync(`adb push ${libcompress} /data/local/tmp/`),
     execSync(`adb push ${libturbojpeg} /data/local/tmp/`),
     execSync(`adb push ${scrcpyServer} /data/local/tmp/`),
     execSync('adb shell chmod 777 /data/local/tmp/scrcpy-server.jar')
-  ]).catch(reason => {
+  ]
+  if (isOverAndroid10(device.id)) {
+    console.log('STFService.apk 推送')
+    tasks.push(
+      installApp(device.id, join(__dirname, 'STFService.apk'))
+    )
+  }
+  Promise.all(tasks).catch(reason => {
     console.error(reason.message, `向${device.id}推送服务文件失败`);
   });
   await installU2ToDevice(device.id)

@@ -1,9 +1,19 @@
 import rxdb from "../../db";
 import fs from "fs";
 import { ipcRenderer } from "electron";
-import { client } from "../../../api/adb";
+import { client, installApp, runScript } from "../../../api/adb";
 import frameworks from "./client-frameworks";
+import Timeout from 'await-timeout'
 const adbkit = require("adbkit");
+const { execSync } = require('child_process')
+const { join } = require('path')
+const lineBreak = (process.platform === 'win32') ? '\n\r' : '\n';
+
+const isOverAndroid10 = (sn) => {
+  const command = `adb -s ${sn} shell getprop ro.build.version.release`
+  const version = ~~execSync(command).toString().replace(lineBreak, '')
+  return version >= 10
+}
 const request = require("request").defaults({
   timeout: 6000,
   forever: true,
@@ -124,9 +134,10 @@ export const getAppInfo = (packageName, cb) => {
     }
   });
 };
-const getdeviceApp = (dispatch, cb) => {
+const getDeviceApp = (dispatch, cb) => {
   request.get("/package", (err, res, packages) => {
     try {
+      console.log(err, res, packages)
       packages = JSON.parse(packages.value);
       clearTimeout(timer);
       timer = null;
@@ -138,8 +149,8 @@ const getdeviceApp = (dispatch, cb) => {
       });
     } catch (e) {
       if (cb) cb();
-      console.log("getdeviceApp", err || packages || res);
-      return setTimeout(() => getdeviceApp(dispatch), 2000);
+      console.log("getDeviceApp", err || packages || res);
+      return setTimeout(() => getDeviceApp(dispatch), 2000);
     }
   });
 };
@@ -149,7 +160,7 @@ const getdeviceApp = (dispatch, cb) => {
  * @param {*} dispatch 
  */
 export const getPackages = dispatch => {
-  getdeviceApp(dispatch, () => {
+  getDeviceApp(dispatch, () => {
     ipcRenderer.send("startU2");
     setTimeout(
       () =>
@@ -175,7 +186,8 @@ export const getPackages = dispatch => {
  * 选中设备
  * @param {*} _device 
  */
-export const onSelectDevice = _device => {
+export const onSelectDevice = async _device => {
+  // FIMXE: 此处改为异步是否有风险
   device = _device;
   console.log("端口映射到", device.id);
   client.forward(device.id, "tcp:4444", "tcp:6790"); //UI Automator2
@@ -184,6 +196,33 @@ export const onSelectDevice = _device => {
   client.forward(device.id, "tcp:1717", "tcp:6612");
   client.forward(device.id, "tcp:1718", "localabstract:minitouch");
   // client.forward(device.id, "tcp:4444", "tcp:4724"); //UI Automator1
+  // minitouch 安卓 10 兼容
+  // https://testerhome.com/topics/22068?order_by=like&
+  if (isOverAndroid10(device.id)) {
+    console.log('android 10')
+    // TODO: 断开
+    // 启动 service
+    // '../../../../static/STFService.apk'
+    // console.log(join(__dirname, '..', '..', '..', '..', 'static', 'STFService.apk'))
+    // await installApp(device.id, join(__dirname, 'STFService.apk'))
+    await Timeout.set(100)
+    // runScript(device.id, `adb shell am startservice --user 0 \
+    // -a jp.co.cyberagent.stf.ACTION_START \
+    // -n jp.co.cyberagent.stf/.Service`)
+    // './service.sh'
+    await Timeout.set(100)
+    // 启动 agent
+  //   runScript(device.id, `APK=$(adb shell pm path jp.co.cyberagent.stf | \
+  //     tr -d '\r' | awk -F: '{print $2}')
+  
+  // adb shell export CLASSPATH="$APK"\; \
+  //     exec app_process /system/bin jp.co.cyberagent.stf.Agent`)
+    await Timeout.set(100)
+    // './agent.sh'
+    await Timeout.set(100)
+    // './nc-agent.sh'
+    // 启动 minitouch
+  }
   // 打开设备小窗
   ipcRenderer.send("openDeviceWindow", device);
 };
