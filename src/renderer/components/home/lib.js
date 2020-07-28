@@ -2,10 +2,11 @@ import rxdb from "../../db";
 import fs from "fs";
 import { ipcRenderer } from "electron";
 import { client, installApp, runScript } from "../../../api/adb";
+import { startStf } from '../../../api/stf'
 import frameworks from "./client-frameworks";
 import Timeout from 'await-timeout'
 const adbkit = require("adbkit");
-const { execSync } = require('child_process')
+const { execSync, fork } = require('child_process')
 const { join } = require('path')
 const lineBreak = (process.platform === 'win32') ? '\n\r' : '\n';
 
@@ -199,29 +200,7 @@ export const onSelectDevice = async _device => {
   // minitouch 安卓 10 兼容
   // https://testerhome.com/topics/22068?order_by=like&
   if (isOverAndroid10(device.id)) {
-    console.log('android 10')
-    // TODO: 断开
-    // 启动 service
-    // '../../../../static/STFService.apk'
-    // console.log(join(__dirname, '..', '..', '..', '..', 'static', 'STFService.apk'))
-    // await installApp(device.id, join(__dirname, 'STFService.apk'))
-    await Timeout.set(100)
-    // runScript(device.id, `adb shell am startservice --user 0 \
-    // -a jp.co.cyberagent.stf.ACTION_START \
-    // -n jp.co.cyberagent.stf/.Service`)
-    // './service.sh'
-    await Timeout.set(100)
-    // 启动 agent
-  //   runScript(device.id, `APK=$(adb shell pm path jp.co.cyberagent.stf | \
-  //     tr -d '\r' | awk -F: '{print $2}')
-  
-  // adb shell export CLASSPATH="$APK"\; \
-  //     exec app_process /system/bin jp.co.cyberagent.stf.Agent`)
-    await Timeout.set(100)
-    // './agent.sh'
-    await Timeout.set(100)
-    // './nc-agent.sh'
-    // 启动 minitouch
+    await startStf(device.id)
   }
   // 打开设备小窗
   ipcRenderer.send("openDeviceWindow", device);

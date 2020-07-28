@@ -207,4 +207,5 @@ module.exports = {
   startMini,
   trackDevices,
   getMinicapImgBase64,
+  isOverAndroid10
 }
