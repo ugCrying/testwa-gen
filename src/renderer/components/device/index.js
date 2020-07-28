@@ -64,6 +64,7 @@ class Device extends Component {
     this.banner = {};
     this.touchSize = [];
     this.minitouch = require('net').connect({ port: 1718 });
+    this.minitouch.on('error', console.error)
     emitter.on('selectedElement', selectedElement => {
       this.setState({ selectedElement });
     });

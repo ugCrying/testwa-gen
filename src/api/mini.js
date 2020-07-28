@@ -69,7 +69,7 @@ const getDeviceProperties = async function (device) {
 const pushMiniToDevice = async function (device) {
   const touchPath = join(
     baseUrl,
-    "minitouch-prebuilt",
+    "minitouch-prebuilt-beta",
     "prebuilt",
     device.cpu,
     "bin",

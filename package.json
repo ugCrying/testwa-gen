@@ -93,8 +93,8 @@
         "to": "minicap-prebuilt"
       },
       {
-        "from": "node_modules/minitouch-prebuilt",
-        "to": "minitouch-prebuilt"
+        "from": "node_modules/minitouch-prebuilt-beta",
+        "to": "minitouch-prebuilt-beta"
       },
       "static/wappium/lib",
       "static/wappium/tests/*.txt",
@@ -118,6 +118,7 @@
     "electron-updater": "^4.0.6",
     "express": "^4.12.3",
     "lodash": "^4.17.15",
+    "minitouch-prebuilt-beta": "^1.3.0",
     "request": "^2.88.0",
     "source-map-support": "^0.5.9",
     "wd": "^1.12.1",
@@ -138,7 +139,6 @@
     "mime-types": "^2.1.22",
     "minicap": "^0.2.1-0",
     "minicap-prebuilt": "^2.3.0",
-    "minitouch-prebuilt": "^1.2.0",
     "nodemon": "^2.0.2",
     "pouchdb-adapter-idb": "^7.0.0",
     "react-syntax-highlighter": "^10.1.2",
