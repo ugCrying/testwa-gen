@@ -116,7 +116,7 @@ const pushMiniToDevice = async function (device) {
     execSync(`adb -s ${device.id} push ${libcompress} /data/local/tmp/`),
     execSync(`adb -s ${device.id} push ${libturbojpeg} /data/local/tmp/`),
     execSync(`adb -s ${device.id} push ${scrcpyServer} /data/local/tmp/`),
-    execSync('adb -s ${device.id} shell chmod 777 /data/local/tmp/scrcpy-server.jar')
+    execSync(`adb -s ${device.id} shell chmod 777 /data/local/tmp/scrcpy-server.jar`)
   ]
   if (isOverAndroid10(device.id)) {
     console.log('STFService.apk 推送')

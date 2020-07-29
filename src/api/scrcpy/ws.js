@@ -131,7 +131,7 @@ wss.on('connection', function (ws) {
           readBannerBytes += 1
 
           if (readBannerBytes === bannerLength) {
-            console.log('banner', banner)
+            // console.log('banner', banner)
             ws.send(JSON.stringify({
               type: 'banner',
               value: banner
@@ -156,8 +156,8 @@ wss.on('connection', function (ws) {
 
             // Sanity check for JPG header, only here for debugging purposes.
             if (frameBody[0] !== 0xFF || frameBody[1] !== 0xD8) {
-              console.error(
-                'Frame body does not start with JPG header', frameBody)
+              // console.error(
+              //   'Frame body does not start with JPG header', frameBody)
               // process.exit(1)
             } else {
               isSuccess = true

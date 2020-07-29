@@ -185,13 +185,14 @@ export const getPackages = dispatch => {
  * @param {*} _device 
  */
 export const onSelectDevice = async _device => {
+  // stopMinitouch()
   // FIMXE: 此处改为异步是否有风险
   device = _device;
   console.log("端口映射到", device.id);
   client.forward(device.id, "tcp:4444", "tcp:6790"); //UI Automator2
   client.forward(device.id, "tcp:6677", "tcp:8888"); //testwa keyboard
   // client.forward(device.id, "tcp:1717", "localabstract:minicap");
-  client.forward(device.id, "tcp:1717", "tcp:6612");
+  client.forward(device.id, "tcp:1717", "tcp:6612"); // scrcpy
   client.forward(device.id, "tcp:1718", "localabstract:minitouch");
   // client.forward(device.id, "tcp:4444", "tcp:4724"); //UI Automator1
   // minitouch 安卓 10 兼容
