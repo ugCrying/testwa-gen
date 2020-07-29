@@ -11,8 +11,9 @@ const startAgent = async (sn) => {
   console.log('startAgent')
   // 关闭之前打开过的
   // stopMinitouch()
-  const apk = execSync(`adb -s ${sn} shell pm path jp.co.cyberagent.stf | \
-  tr -d '\r' | awk -F: '{print $2}'`).toString().replace(lineBreak, '')
+  // const apk = execSync(`adb -s ${sn} shell pm path jp.co.cyberagent.stf | \
+  // tr -d '\r' | awk -F: '{print $2}'`).toString().replace(lineBreak, '')
+  const apk = execSync('adb shell pm path jp.co.cyberagent.stf').toString().replace(lineBreak, '').replace('package:', '')
   const s = `export CLASSPATH="${apk}"\; exec app_process /system/bin jp.co.cyberagent.stf.Agent`
   // console.log(
   //   agentProcess

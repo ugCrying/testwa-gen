@@ -55,11 +55,16 @@ const iif = () => {
     
     ws.onopen = function() {
       console.log('onopen', arguments)
-      ws.send('1920x1080/0')
+      // ws.send('1920x1080/0')
+      ws.send(JSON.stringify({
+        type: 'sn',
+        value: 'UYT7N18202004247'
+      }))
     }
   }
 
-
+  // connect()
+  // return
   var timer
   timer = setInterval(() => {
     if (!success) {
