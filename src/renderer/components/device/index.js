@@ -21,6 +21,7 @@ import { startScrcpy } from './scrcpy'
 import DeviceControl from './DeviceControl/DeviceControl'
 // @ts-ignore
 const { runScript } = require('../../../api/adb')
+const qs = require('querystring')
 
 export let sourceXML = null;
 console.log('屏幕同步组件入口模块');
@@ -78,6 +79,21 @@ class Device extends Component {
       this.setState({ sourceJSON: null });
       this.record = false;
     });
+    console.log('-------')
+    console.log(
+      qs.parse(window.location.href)
+    )
+    // TODO: 使用 regex 或 react-router 取参
+    const hrefObj = qs.parse(window.location.href)
+    Object.keys(hrefObj)
+      .forEach(key => {
+        if (key.includes('?device')) {
+          this.deviceId = hrefObj[key]
+        }
+      })
+    console.log(
+      this.deviceId
+    )
   }
 
   get ratio() {
@@ -312,7 +328,7 @@ class Device extends Component {
       return (config.drawing = false);
     };
     // @ts-ignore
-    startScrcpy(this.canvas, {
+    startScrcpy(this.deviceId, this.canvas, {
       success: (banner) => {
         this.banner = banner || this.banner
         this.setState({ loading: false })

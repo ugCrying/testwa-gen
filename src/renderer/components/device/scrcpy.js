@@ -1,6 +1,6 @@
 // require('../../../api/scrcpy/index.js')
 
-const startScrcpy = (canvas, { success, error }) => {
+const startScrcpy = (sn, canvas, { success, error }) => {
   var isSuccess = false
   var ws
   var banner
@@ -60,7 +60,11 @@ const startScrcpy = (canvas, { success, error }) => {
     
     ws.onopen = function() {
       console.log('onopen', arguments)
-      ws.send('1920x1080/0')
+      // ws.send('1920x1080/0')
+      ws.send(JSON.stringify({
+        type: 'sn',
+        value: sn
+      }))
     }
   }
 
