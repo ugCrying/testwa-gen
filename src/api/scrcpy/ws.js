@@ -51,7 +51,7 @@ wss.on('connection', function (ws) {
     }
     
     // TODO: pass sn
-    fork('./scrcpy.js', { stdio: 'inherit' })
+    fork('./scrcpy.js', [`--sn=${sn}`], { stdio: 'inherit' })
     let close = false
     let timer
   
