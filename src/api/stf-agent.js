@@ -11,7 +11,7 @@ const startAgent = async (sn) => {
   console.log('startAgent')
   // 关闭之前打开过的
   // stopMinitouch()
-  const apk = execSync(`adb shell pm path jp.co.cyberagent.stf | \
+  const apk = execSync(`adb -s ${sn} shell pm path jp.co.cyberagent.stf | \
   tr -d '\r' | awk -F: '{print $2}'`).toString().replace(lineBreak, '')
   const s = `export CLASSPATH="${apk}"\; exec app_process /system/bin jp.co.cyberagent.stf.Agent`
   // console.log(
@@ -40,6 +40,3 @@ const startAgent = async (sn) => {
 module.exports = {
   startAgent
 }
-
-// FIXME: 删除后不生效
-startAgent('UYT7N18202004247')
