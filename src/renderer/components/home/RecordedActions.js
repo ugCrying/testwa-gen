@@ -110,7 +110,7 @@ class RecordActions extends Component {
     console.log('操作行为组件实例化');
     this.state = {
       // 当前代码编程语言，可修改
-      actionFramework: 'python'
+      actionFramework: 'jsWd'
     };
     this.columns = [
       {
@@ -270,7 +270,7 @@ class RecordActions extends Component {
             <div className={styles['script-title']}>
               <div className={styles['script-title-select']}>
                 <Select
-                  defaultValue="python"
+                  defaultValue="jsWd"
                   // @ts-ignore
                   onChange={actionFramework =>
                     this.setState({ actionFramework })
