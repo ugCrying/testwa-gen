@@ -11,11 +11,13 @@ const { app, Menu, BrowserWindow, ipcMain } = require("electron");
 const menu = require("./menu");
 const upgrade = require("./upgrade");
 const { join } = require("path");
+const { statSync } = require('fs')
 
 let mainWindow;
 let deviceWin;
 let cp;
 let _device;
+let scrcpyServer;
 let baseUrl = process.defaultApp
   ? "http://localhost:8000"
   : `file://${__dirname}/../renderer/index.html`;
@@ -201,6 +203,20 @@ app.once("ready", () => {
   });
   mainWindow.loadURL(baseUrl);
   mainWindow.once("ready-to-show", async () => {
+    // console.log(join(__dirname, '..', 'api', 'scrcpy', 'ws.js'))
+    let p
+    try {
+      let tmp1 = join(__dirname, '..', 'api', 'scrcpy', 'ws.js')
+      statSync(tmp1)
+      p = tmp1
+    } catch (e) {
+      let tmp2 = join(__dirname,  'api', 'scrcpy', 'ws.js')
+      statSync(tmp2)
+      p = tmp2
+    }
+    scrcpyServer = fork(p, { stdio: 'inherit' })
+    console.log(scrcpyServer)
+    console.log('scrcpyServer')
     await new Promise(resolve => setTimeout(resolve, 500));
     mainWindow.maximize();
     mainWindow.show();
@@ -225,6 +241,10 @@ app.once("ready", () => {
   }
 });
 app.once("before-quit", () => {
+  if (scrcpyServer && scrcpyServer.pid) {
+    console.log('kill scrcpy process')
+    process.kill(scrcpyServer.pid)
+  }
   console.log("准备退出");
 });
 app.once("window-all-closed", app.quit);

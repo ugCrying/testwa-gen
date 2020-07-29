@@ -11,7 +11,7 @@ app.use(express.static(path.join(__dirname, '/public')))
 
 var server = http.createServer(app)
 var wss = new WebSocketServer({ server: server })
-
+let child
 
 wss.on('connection', function (ws) {
   const connectScrcpy = (sn) => {
@@ -51,7 +51,12 @@ wss.on('connection', function (ws) {
     }
     
     // TODO: pass sn
-    fork('./scrcpy.js', [`--sn=${sn}`], { stdio: 'inherit' })
+    console.log(__dirname, 'ws')
+    const p = path.join(__dirname, 'scrcpy.js')
+    if (child && child.pid) {
+      process.kill(child.pid)
+    }
+    child = fork(p, [`--sn=${sn}`], { stdio: 'inherit' })
     let close = false
     let timer
   
