@@ -4,7 +4,7 @@ const { getSource, postSession, startAppium, stopAppium } = require('../api/appi
 const { runScript } = require('../api/adb')
 // const { xmlToJSON } = require('../api/xml')
 const { installU2ToDevice, startU2 } = require('../api/u2')
-const { startMini, trackDevices, getMinicapImgBase64 } = require("../api/mini");
+const { startMini, trackDevices } = require("../api/mini");
 const Timeout = require('await-timeout')
 const { fork, spawnSync } = require("child_process");
 const { app, Menu, BrowserWindow, ipcMain } = require("electron");
@@ -330,10 +330,3 @@ ipcMain.on("startU2", async () => {
   await startU2(_device.id)
   setTimeout(postSession, 5000)
 });
-
-ipcMain.on("getMinicapImgBase64", () => {
-  getMinicapImgBase64(src => {
-    console.log('getMinicapImgBase64Success')
-    deviceWin.webContents.send("getMinicapImgBase64Success", src)
-  })
-})
