@@ -1,13 +1,11 @@
 import rxdb from "../../db";
 import fs from "fs";
 import { ipcRenderer } from "electron";
-import { client, installApp, runScript } from "../../../api/adb";
+import { client } from "../../../api/adb";
 import { startStf } from '../../../api/stf'
 import frameworks from "./client-frameworks";
-import Timeout from 'await-timeout'
 const adbkit = require("adbkit");
-const { execSync, fork } = require('child_process')
-const { join } = require('path')
+const { execSync } = require('child_process')
 const lineBreak = (process.platform === 'win32') ? '\n\r' : '\n';
 
 const isOverAndroid10 = (sn) => {

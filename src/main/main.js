@@ -3,7 +3,7 @@
 const { getSource, postSession, startAppium, stopAppium } = require('../api/appium')
 const { runScript } = require('../api/adb')
 // const { xmlToJSON } = require('../api/xml')
-const { installU2ToDevice, startU2, src } = require('../api/u2')
+const { installU2ToDevice, startU2 } = require('../api/u2')
 const { startMini, trackDevices, getMinicapImgBase64 } = require("../api/mini");
 const Timeout = require('await-timeout')
 const { fork, spawnSync } = require("child_process");
