@@ -3,6 +3,7 @@ const { execSync, spawn, exec } = require('child_process')
 let isForwarded = false
 
 // FIXME: 当设备连接后再 forward
+// TODO: sn
 if (!isForwarded) {
   execSync('adb forward tcp:1717 tcp:6612')
 }

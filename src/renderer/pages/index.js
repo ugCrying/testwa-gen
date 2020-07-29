@@ -8,10 +8,6 @@ import { notification } from 'antd';
 import { emitter } from '../lib'
 console.log("渲染进程入口模块");
 
-// FIXME
-// ipcRenderer.on('request_error', err => {
-//   console.log('error', err)
-// })
 emitter.on('request_error', err => {
   notification.error({
     message: '系统错误',

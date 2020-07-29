@@ -9,9 +9,8 @@ const { exec } = require('child_process')
 //   process.exit()
 // })
 
-// TODO: sn
-const startServer = async () => {
-  await exec(`adb shell am startservice --user 0 \
+const startServer = async (sn) => {
+  await exec(`adb -s ${sn} shell am startservice --user 0 \
   -a jp.co.cyberagent.stf.ACTION_START \
   -n jp.co.cyberagent.stf/.Service`)
 }

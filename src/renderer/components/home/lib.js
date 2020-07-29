@@ -41,7 +41,6 @@ export const codeStop = () => {
  * @return {String}
  */
 export const downCode = (info, recordedActions) => {
-  // FIXME: 为何只提供 python 格式导出？
   let framework = new frameworks["python"]();
   framework.caps = {
     platformName: "Android",

@@ -113,11 +113,10 @@ const pushMiniToDevice = async function (device) {
   console.log("推送服务文件到", device.id);
   const tasks = [
     client.push(device.id, touchPath, "/data/local/tmp/minitouch", 511),
-    // FIXME: 指定 sn
-    execSync(`adb push ${libcompress} /data/local/tmp/`),
-    execSync(`adb push ${libturbojpeg} /data/local/tmp/`),
-    execSync(`adb push ${scrcpyServer} /data/local/tmp/`),
-    execSync('adb shell chmod 777 /data/local/tmp/scrcpy-server.jar')
+    execSync(`adb -s ${device.id} push ${libcompress} /data/local/tmp/`),
+    execSync(`adb -s ${device.id} push ${libturbojpeg} /data/local/tmp/`),
+    execSync(`adb -s ${device.id} push ${scrcpyServer} /data/local/tmp/`),
+    execSync('adb -s ${device.id} shell chmod 777 /data/local/tmp/scrcpy-server.jar')
   ]
   if (isOverAndroid10(device.id)) {
     console.log('STFService.apk 推送')
