@@ -99,7 +99,8 @@ alive();
     return `await ${this.getVarName(
       varName,
       varIndex
-    )}.click();await sleep(3000);`;
+    )}.click();
+await sleep(5000);`;
   }
 
   codeFor_clear(varName, varIndex) {
