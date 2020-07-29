@@ -10599,16 +10599,6 @@ mini-store@^2.0.0:
     react-lifecycles-compat "^3.0.4"
     shallowequal "^1.0.2"
 
-minicap-prebuilt@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.npm.taobao.org/minicap-prebuilt/download/minicap-prebuilt-2.3.0.tgz#a616cf84558a71b98aa70d05bce8be09409dd366"
-  integrity sha1-phbPhFWKcbmKpw0FvOi+CUCd02Y=
-
-minicap@^0.2.1-0:
-  version "0.2.1-0"
-  resolved "https://registry.npm.taobao.org/minicap/download/minicap-0.2.1-0.tgz#c11fbe526861189b8104581bf8f7c67feb610bf1"
-  integrity sha1-wR++UmhhGJuBBFgb+PfGf+thC/E=
-
 minimalistic-assert@^1.0.0, minimalistic-assert@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npm.taobao.org/minimalistic-assert/download/minimalistic-assert-1.0.1.tgz#2e194de044626d4a10e7f7fbc00ce73e83e4d5c7"
