@@ -133,6 +133,14 @@ await sleep(5000);`;
   .perform()
     `;
   }
+
+  codeFor_sleep(ms = 1000) {
+    console.log(
+      'codeFor_sleep',
+      arguments
+    )
+    return `await sleep(${ms})`
+  }
 }
 
 JsWdFramework.readableName = "JS - WD (Promise)";

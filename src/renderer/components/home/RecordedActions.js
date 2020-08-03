@@ -12,6 +12,7 @@ import InspectorStyles from './Inspector.css';
 import styles from './recordedActions.css';
 import { connect } from 'dva';
 import rxdb from '../../db';
+import _ from 'lodash'
 const { remove } = require('immutable');
 
 console.log('操作行为组件模块');
@@ -128,18 +129,30 @@ class RecordActions extends Component {
       {
         title: '编辑',
         key: 'operation',
-        // fixed: "right",
+        fixed: "right",
         width: 100,
-        render: (_, record) => {
+        render: (_, record, index) => {
           return (
-            <Popconfirm
-              title="确定要删除吗?"
-              okText="确定"
-              cancelText="取消"
-              onConfirm={() => this.handleDelete(record)}
-            >
-              <a href="">删除</a>
-            </Popconfirm>
+            <div>
+              <Popconfirm
+                title="确定要删除吗?"
+                okText="确定"
+                cancelText="取消"
+                onConfirm={() => this.handleDelete(record)}
+              >
+                <a href="">删除</a>
+              </Popconfirm>
+              <br />
+              <Popconfirm
+                title="插入sleep的节点?"
+                okText="之后"
+                cancelText="之前"
+                onConfirm={() => this.handleInsertSleep(record, index, false)}
+                onCancel={() => this.handleInsertSleep(record, index, true)}
+              >
+                <a href="">插入sleep</a>
+              </Popconfirm>
+            </div>
           );
         }
       }
@@ -186,6 +199,29 @@ class RecordActions extends Component {
     this.setState({ fresh: true });
   };
 
+  handleInsertSleep = async (row, index, pre = true) => {
+    console.log(row)
+    // this.codes = remove(this.codes, row.key);
+    const idx = pre ? index : index + 1
+    this.codes.splice(idx, 0, {
+      action: "sleep",
+      params: ["1000"]
+    })
+    if (this.props.record.code.addTime) {
+      const db = await rxdb;
+      const result = await db.code
+        .findOne(this.props.record.code.addTime)
+        .update({ $set: { value: this.codes } });
+      console.log(result)
+    } else {
+      this.props.dispatch({
+        type: 'record/updateRecordedActions',
+        payload: this.codes
+      });
+    }
+    this.setState({ fresh: true });
+  }
+
   getTableData() {
     const datas = [];
     // let params;
@@ -196,6 +232,8 @@ class RecordActions extends Component {
     let i = 0;
     if (this.codes)
       for (const data of this.codes) {
+        console.log(data)
+        data.params = Array.isArray(data.params) ? data.params : [data.params]
         // data.key = i++;
         datas.push({
           action: data.action,
@@ -259,10 +297,10 @@ class RecordActions extends Component {
               columns={columns}
               pagination={false}
               scroll={{
-                x: columns.filter(e => e.width).reduce((w1, w2) => {
-                  return w1 + w2
-                }),
-                y: 'calc(100vh - 200px)'
+                x: _.sum(columns.map(({ width = 60 }) => width)),
+                // y: `max(calc(100vh - 200px), 400px)`
+                // y: true
+                y: 200
               }}
             />
           </TabPane>

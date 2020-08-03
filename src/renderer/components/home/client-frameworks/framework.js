@@ -114,4 +114,8 @@ export default class Framework {
   codeFor_swipe () {
     throw new Error("Need to implement codeFor_tap");
   }
+
+  codeFor_sleep() {
+    return ''
+  }
 }
