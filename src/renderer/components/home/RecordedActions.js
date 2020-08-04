@@ -142,7 +142,7 @@ class RecordActions extends Component {
               >
                 <a href="">删除</a>
               </Popconfirm>
-              <br />
+              {/* <br />
               <Popconfirm
                 title="插入sleep的节点?"
                 okText="之后"
@@ -151,7 +151,7 @@ class RecordActions extends Component {
                 onCancel={() => this.handleInsertSleep(record, index, true)}
               >
                 <a href="">插入sleep</a>
-              </Popconfirm>
+              </Popconfirm> */}
             </div>
           );
         }
@@ -300,7 +300,8 @@ class RecordActions extends Component {
                 x: _.sum(columns.map(({ width = 60 }) => width)),
                 // y: `max(calc(100vh - 200px), 400px)`
                 // y: true
-                y: 200
+                // y: 200
+                y: 'calc(100vh - 200px)'
               }}
             />
           </TabPane>

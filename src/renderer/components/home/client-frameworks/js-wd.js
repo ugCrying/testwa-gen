@@ -7,6 +7,9 @@ class JsWdFramework extends Framework {
     return "js";
   }
 
+  // https://juejin.im/post/6844903693632946189#comment
+  // FIMXE: 连续两条 sleep 执行会导致脚本退出，这可能与 node 时间轮训机制有关，这属于遗留问题。
+  // 直接 node code.js 正常运行，但在 electron 中回放不行，这可能是 electron node 环境与直接运行 node 环境有不同
   wrapWithBoilerplate(code) {
     let caps = JSON.stringify(this.caps);
     return `// Requires the admc/wd client library
@@ -27,7 +30,21 @@ const request = require('request').defaults({
   baseUrl: 'http://localhost:4444/wd/hub/session/1/',
 });
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  let remainTime = ms / 1000 - 1
+  let timer = setInterval(() => {
+    console.log('剩余' + (remainTime--) + 's进入下一步')
+    if (remainTime <= 0) {
+      clearInterval(timer)
+      timer = null
+    }
+  }, 1000)
+  return new Promise(resolve => {
+    setTimeout(() => {
+      clearInterval(timer)
+      timer = null
+      resolve()
+    }, ms)
+  });
 }
 async function main () {
   try {
@@ -38,7 +55,7 @@ async function main () {
     console.log("wd retry");
     return main().catch(console.log);
   }
-  await sleep(10000);
+  await sleep(15000);
   try{
   ${this.indent(code, 2)}
   }catch(e){
@@ -100,7 +117,7 @@ alive();
       varName,
       varIndex
     )}.click();
-await sleep(5000);`;
+await sleep(5500);`;
   }
 
   codeFor_clear(varName, varIndex) {

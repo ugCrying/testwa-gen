@@ -296,7 +296,8 @@ ipcMain.on("runcode", (_, rawCode) => {
       rawCode
     )
     cp = fork(path);
-    cp.on("exit", () => {
+    cp.on("exit", (code) => {
+      console.log(`cp exit with code ${code}`)
       cp = null;
       mainWindow.webContents.send("runed");
     });
