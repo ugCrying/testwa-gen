@@ -19,7 +19,9 @@ export default ({
   record,
   text,
   textId,
-  clearText
+  clearText,
+  updateLastActionTime,
+  lastActionTime
 }) => {
   const { x1, y1, x2, y2 } = parseCoordinates(element);
   let left = x1 / ratio;
@@ -57,15 +59,22 @@ export default ({
             ]);
         }
         clearText();
+        updateLastActionTime();
         const { variableName, strategy, selector } = getRecordedActions(
           element, sourceXML
         );
+        const currentActionTime = (new Date()).getTime()
+        lastActionTime = lastActionTime || currentActionTime
         require('electron').remote.BrowserWindow.fromId(+localStorage.getItem("mainWinId")).webContents.send(
           // ipcRenderer.sendTo(
           //渲染进程通信消息中转
           // +localStorage.getItem("mainWinId"),
           "recordedActions",
           [
+            {
+              action: 'sleep',
+              params: [currentActionTime - lastActionTime]
+            },
             {
               action: "findAndAssign",
               params: [strategy, selector, variableName]
@@ -76,6 +85,7 @@ export default ({
             }
           ]
         );
+        lastActionTime = (new Date()).getTime()
       }}
       onMouseOver={() => {
         timer = setTimeout(() => {

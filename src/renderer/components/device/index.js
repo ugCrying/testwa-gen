@@ -18,7 +18,7 @@ import { emitter } from '../../lib';
 import { xmlToJSON } from './lib';
 import { connect } from 'dva'
 import Timeout from 'await-timeout'
-import { connectminicap } from './minicap'
+import { connectMinicap } from './minicap'
 import DeviceControl from './DeviceControl/DeviceControl'
 // @ts-ignore
 const { runScript } = require('../../../api/adb')
@@ -53,7 +53,9 @@ class Device extends Component {
       // 画布高度
       canvasHeight: localStorage.getItem('canvasHeight') || 500,
       // 画布宽度
-      canvasWidth: 300
+      canvasWidth: 300,
+      // 上一步操作时间戳
+      lastActionTime: null
     };
     // 是否处于按压状态
     this.isPressing = false;
@@ -69,6 +71,9 @@ class Device extends Component {
       this.setState({ selectedElement });
     });
     ipcRenderer.on('record', () => {
+      this.setState({
+        lastActionTime: (new Date()).getTime()
+      })
       this.record = true;
       console.log('ipcRenderer.on("record", loading true');
       this.setState({ loading: true });
@@ -303,12 +308,12 @@ class Device extends Component {
       if (!this.canvas) return (config.drawing = false);
       this.canvas.width = img.width;
       this.canvas.height = img.height;
-      console.log('投屏尺寸', this.canvas.width, this.canvas.height);
+      // console.log('投屏尺寸', this.canvas.width, this.canvas.height);
       g.drawImage(img, 0, 0);
       return (config.drawing = false);
     };
     // @ts-ignore
-    connectminicap(config, async (banner) => {
+    connectMinicap(config, async (banner) => {
       this.banner = banner
       await Timeout.set(1000)
       // @ts-ignore
@@ -328,8 +333,6 @@ class Device extends Component {
   }
 
   highlighterRects() {
-    let start = new Date().getTime();
-    console.log('进入highlighterRects');
     const highlighterRects = [];
     let recursive = (element, zIndex = 0) => {
       highlighterRects.push(
@@ -343,13 +346,17 @@ class Device extends Component {
           textId={this.textId}
           record={this.record}
           clearText={() => (this.text = '')}
+          lastActionTime={this.state.lastActionTime}
+          updateLastActionTime={() => {
+            this.setState({
+              lastActionTime:  (new Date()).getTime()
+            })
+          }}
         />
       );
       for (let childEl of element.children) recursive(childEl, zIndex + 1);
     };
     this.state.sourceJSON && recursive(this.state.sourceJSON);
-    let end = new Date().getTime();
-    console.log('highlighterRects耗时', (end - start) / 1000);
     return highlighterRects;
   }
 

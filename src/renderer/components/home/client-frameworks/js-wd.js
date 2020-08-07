@@ -55,7 +55,6 @@ async function main () {
     console.log("wd retry");
     return main().catch(console.log);
   }
-  await sleep(15000);
   try{
   ${this.indent(code, 2)}
   }catch(e){
@@ -116,8 +115,7 @@ alive();
     return `await ${this.getVarName(
       varName,
       varIndex
-    )}.click();
-await sleep(5500);`;
+    )}.click();`;
   }
 
   codeFor_clear(varName, varIndex) {

@@ -162,7 +162,7 @@ let src
 
 const getMinicapImgBase64 = (cb = (v) => {}) => {
   let drawing = false
-  const connectminicap = () => {
+  const connectMinicap = () => {
     const { BannerParser } = require('minicap');
     const parser = new BannerParser();
     const minicap = connect({ port: 1717 })
@@ -211,7 +211,7 @@ const getMinicapImgBase64 = (cb = (v) => {}) => {
       }
     });
   }
-  connectminicap()
+  connectMinicap()
 }
 
 module.exports = {

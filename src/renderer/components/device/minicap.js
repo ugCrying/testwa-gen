@@ -4,7 +4,7 @@ import {
 
 
 // TODO: disconnect
-const connectminicap = (config = {}, cb = (banner) => ({})) => {
+const connectMinicap = (config = {}, cb = (banner) => ({})) => {
   const minicap = require('net').connect({
     port: 1717
   })
@@ -32,7 +32,7 @@ const connectminicap = (config = {}, cb = (banner) => ({})) => {
   };
   config.drawing = false;
   minicap.on('data', chunk => {
-    console.log('minicapdata')
+    // console.log('minicapdata')
     // @ts-ignore
     data.push(...chunk);
     if (compiling === false) return screen();
@@ -47,5 +47,5 @@ const connectminicap = (config = {}, cb = (banner) => ({})) => {
 }
 
 export {
-  connectminicap
+  connectMinicap
   }
