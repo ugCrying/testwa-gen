@@ -1,4 +1,4 @@
-import { REMOTE_REQUEST } from '../utils/remoteRequest';
+import { REMOTE_REQUEST } from '../utils/remoteRequest'
 
 export const getProjectList = function(queryParams = {}) {
   return REMOTE_REQUEST.get('/v1/project/page', {
@@ -6,8 +6,8 @@ export const getProjectList = function(queryParams = {}) {
       pageNo: 1,
       pageSize: 9999,
       order: 'desc',
-      orderBy: 'id'
+      orderBy: 'id',
       // ...queryParams
-    }
+    },
   })
 }

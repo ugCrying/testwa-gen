@@ -12,6 +12,15 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
+    semi: [
+      2,
+      'never',
+      {
+        beforeStatementContinuationChars: 'never',
+      },
+    ],
+    'no-console': 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-const-assign': 'warn',
     'no-this-before-super': 'warn',
     'no-undef': 'warn',
@@ -35,4 +44,4 @@ module.exports = {
     'jsx-a11y',
     'import',
   ],
-};
+}

@@ -1,1 +1,1 @@
-export const emitter = new (require("events")).EventEmitter();
+export const emitter = new (require('events')).EventEmitter()

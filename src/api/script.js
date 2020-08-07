@@ -1,43 +1,43 @@
-import _ from 'lodash';
-import { REMOTE_REQUEST } from '../utils/remoteRequest';
-export const actionAliasMapping = {
-  'findAndAssign': '选取元素',
-  'click': '点击元素',
-  'sendKeys': '输入文本',
-  'swipe': '滑动屏幕',
-  'sleep': '等待'
-}
+import _ from 'lodash'
+import { REMOTE_REQUEST } from '../utils/remoteRequest'
 
+export const actionAliasMapping = {
+  findAndAssign: '选取元素',
+  click: '点击元素',
+  sendKeys: '输入文本',
+  swipe: '滑动屏幕',
+  sleep: '等待',
+}
 
 /**
  * 补齐可选参数默认值（供后端格式）
- * @param {String} action 
- * @param {any[]} argus 
+ * @param {String} action
+ * @param {any[]} argus
  */
 const fixDefaultArugs = function (action = '', argus = []) {
   switch (`${action}`) {
     case 'findAndAssign':
       argus[3] = argus[3] || false
-      break;
+      break
     case 'click':
       if (argus.length === 2) {
         argus.pop()
       }
-      break;
+      break
     case 'clear':
-      break;
+      break
     case 'sendKeys':
       // argus[0]能取到元素内容，元素下标不再需要
       argus.splice(1, 1)
-      break;
+      break
     case 'back':
-      break;
+      break
     case 'tap':
       if (argus.length === 4) {
         argus.unshift('')
         argus.unshift('')
       }
-      break;
+      break
     case 'swipe':
       if (argus.length === 4) {
         argus.unshift('')
@@ -48,14 +48,14 @@ const fixDefaultArugs = function (action = '', argus = []) {
         argus.splice(1, 1)
       }
       // debugger
-      break;
+      break
   }
 }
 
 const defaultTitle = function (script = {}) {
-  const title = actionAliasMapping[script['action']]
+  const title = actionAliasMapping[script.action]
   if (title) {
-    script['title'] = title
+    script.title = title
   }
 }
 
@@ -66,25 +66,23 @@ const splitActions = function (scripts) {
       return
     }
     if (script.action === 'findAndAssign') {
-      const nextScript = arr[index  + 1]
+      const nextScript = arr[index + 1]
       // script.functionId = index + 1
       functions.push([
         script,
-        nextScript
+        nextScript,
       ])
       arr.splice(index, 1, null)
       arr.splice(index + 1, 1, null)
-      return
-    }
-    else {
+    } else {
       functions.push([
-        script
+        script,
       ])
       arr.splice(index, 1, null)
     }
   })
   functions.forEach((func, index) => {
-    func.forEach(script => {
+    func.forEach((script) => {
       script.functionId = index + 1
     })
   })
@@ -98,7 +96,7 @@ const actionsPipe = function (scripts) {
     script.parameter = script.params
     fixDefaultArugs(
       script.action,
-      script.parameter
+      script.parameter,
     )
     delete (script.params)
     defaultTitle(script)
@@ -113,12 +111,13 @@ const actionsPipe = function (scripts) {
  * @return {Promise<any>}
  */
 export const uploadScript = function (info, code) {
+  // eslint-disable-next-line prefer-object-spread
   const data = Object.assign({}, {
     scriptName: '',
     scriptCaseDesc: '',
     scriptFunctions: actionsPipe(code),
     // TODO: 目前只支持安卓
-    platform: 'Android'
+    platform: 'Android',
   }, info)
   const url = `/v2/project/${info.projectId}/script/save`
   console.log(url, data)

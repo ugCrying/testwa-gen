@@ -1,8 +1,9 @@
+const adbkit = require('adbkit')
+const { join } = require('path')
+const ApkReader = require('adbkit-apkreader')
 const { installApp, pushFile, runScript } = require('./adb')
-const adbkit = require("adbkit")
-const { join } = require("path");
-const ApkReader = require("adbkit-apkreader")
-const U2apkPath = join(__dirname, "..", "..", "static", "uiautomator2", "apks")
+
+const U2apkPath = join(__dirname, '..', '..', 'static', 'uiautomator2', 'apks')
 
 /**
  * read the device's Uiautomator2's packageInfo
@@ -10,7 +11,7 @@ const U2apkPath = join(__dirname, "..", "..", "static", "uiautomator2", "apks")
  * @return {Promise<any>}
  */
 const getCurrentU2PackageInfo = async function (deviceId = '') {
-  return await runScript(deviceId, "dumpsys package io.appium.uiautomator2.server")
+  return await runScript(deviceId, 'dumpsys package io.appium.uiautomator2.server')
     .then(adbkit.util.readAll)
 }
 
@@ -22,7 +23,7 @@ const getCurrentU2PackageInfo = async function (deviceId = '') {
 const getDesiredU2VersionName = async function (path) {
   return await ApkReader
     .open(path)
-    .then(reader => reader.readManifest())
+    .then((reader) => reader.readManifest())
     .then(({ versionName }) => versionName)
 }
 
@@ -34,15 +35,15 @@ const getDesiredU2VersionName = async function (path) {
 const installU2ToDevice = async function (deviceId) {
   const [currentPackageInfo, desiredVersion] = await Promise.all([
     getCurrentU2PackageInfo(deviceId),
-    getDesiredU2VersionName(join(U2apkPath, "uiautomator2-server.apk"))
+    getDesiredU2VersionName(join(U2apkPath, 'uiautomator2-server.apk')),
   ])
   // If the information is inconsistent we need to override
   if (!currentPackageInfo.includes(`versionName=${desiredVersion}`)) {
     try {
       // install or upgrade directly
       await Promise.all([
-        installApp(deviceId, join(U2apkPath, "uiautomator2-server.apk")),
-        installApp(deviceId, join(U2apkPath, "uiautomator2-test.apk"))
+        installApp(deviceId, join(U2apkPath, 'uiautomator2-server.apk')),
+        installApp(deviceId, join(U2apkPath, 'uiautomator2-test.apk')),
       ])
     } catch (e) {
       // push apk to device, and install them manually
@@ -50,14 +51,14 @@ const installU2ToDevice = async function (deviceId) {
       await Promise.all([
         pushFile(
           deviceId,
-          join(U2apkPath, "uiautomator2-server.apk"),
-          "/sdcard/uiautomator2-server.apk"
+          join(U2apkPath, 'uiautomator2-server.apk'),
+          '/sdcard/uiautomator2-server.apk',
         ),
         pushFile(
           deviceId,
-          join(U2apkPath, "uiautomator2-test.apk"),
-          "/sdcard/uiautomator2-test.apk"
-        )
+          join(U2apkPath, 'uiautomator2-test.apk'),
+          '/sdcard/uiautomator2-test.apk',
+        ),
       ])
       throw e
     }
@@ -72,12 +73,12 @@ const installU2ToDevice = async function (deviceId) {
  */
 const startU2 = async function (deviceId = '') {
   return await runScript(
-      deviceId,
-      `am instrument -w --no-window-animation io.appium.uiautomator2.server.test/androidx.test.runner.AndroidJUnitRunner`
-    )
+    deviceId,
+    'am instrument -w --no-window-animation io.appium.uiautomator2.server.test/androidx.test.runner.AndroidJUnitRunner',
+  )
 }
 
 module.exports = {
   startU2,
-  installU2ToDevice
+  installU2ToDevice,
 }

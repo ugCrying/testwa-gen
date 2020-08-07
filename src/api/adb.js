@@ -1,4 +1,5 @@
-const adbkit = require("adbkit")
+const adbkit = require('adbkit')
+
 const client = adbkit.createClient()
 
 /**
@@ -24,15 +25,15 @@ const pushFile = async function (deviceId, fromPath, toPath) {
 
 /**
  * run a script on adb
- * @param {String} deviceId 
- * @param {String} script 
+ * @param {String} deviceId
+ * @param {String} script
  * @return {Promise<any>}
  */
 const runScript = async function (deviceId, script) {
   return await client
     .shell(
       deviceId,
-      `${script}`
+      `${script}`,
     )
 }
 

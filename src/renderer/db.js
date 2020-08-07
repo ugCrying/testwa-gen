@@ -1,5 +1,7 @@
-import RxDB from 'rxdb';
-RxDB.plugin(require('pouchdb-adapter-idb'));
+import RxDB from 'rxdb'
+
+RxDB.plugin(require('pouchdb-adapter-idb'))
+
 const collections = [
   {
     name: 'code',
@@ -45,14 +47,14 @@ const collections = [
       required: ['path', 'name'],
     },
   },
-];
+]
 const _create = async function() {
   const db = await RxDB.create({
     name: 'testwa',
     adapter: 'idb',
-  });
-  await Promise.all(collections.map(colData => db.collection(colData)));
-  return db;
-};
+  })
+  await Promise.all(collections.map((colData) => db.collection(colData)))
+  return db
+}
 
-export default _create();
+export default _create()

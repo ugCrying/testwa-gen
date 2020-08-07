@@ -1,4 +1,4 @@
-import { REMOTE_REQUEST } from '../utils/remoteRequest';
+import { REMOTE_REQUEST } from '../utils/remoteRequest'
 
 const baseInfo = async function () {
   try {
