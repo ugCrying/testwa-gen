@@ -150,10 +150,6 @@ alive();
   }
 
   codeFor_sleep(ms = 1000) {
-    console.log(
-      'codeFor_sleep',
-      arguments
-    )
     return `await sleep(${ms})`
   }
 }

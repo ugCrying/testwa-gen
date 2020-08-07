@@ -1,5 +1,13 @@
 import _ from 'lodash';
 import { REMOTE_REQUEST } from '../utils/remoteRequest';
+export const actionAliasMapping = {
+  'findAndAssign': '选取元素',
+  'click': '点击元素',
+  'sendKeys': '输入文本',
+  'swipe': '滑动屏幕',
+  'sleep': '等待'
+}
+
 
 /**
  * 补齐可选参数默认值（供后端格式）
@@ -45,13 +53,7 @@ const fixDefaultArugs = function (action = '', argus = []) {
 }
 
 const defaultTitle = function (script = {}) {
-  const mapping = {
-    'findAndAssign': '选取元素',
-    'click': '点击元素',
-    'sendKeys': '输入文本',
-    'swipe': '滑动屏幕'
-  }
-  const title = mapping[script['action']]
+  const title = actionAliasMapping[script['action']]
   if (title) {
     script['title'] = title
   }

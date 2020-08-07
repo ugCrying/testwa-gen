@@ -1,8 +1,6 @@
 /**
- * highlight rectangle ?
- * 高亮矩形区域
+ * xml 元素高亮
  */
-
 import React from "react";
 import { getRecordedActions, parseCoordinates } from "./lib";
 import { ipcRenderer } from "electron";
@@ -24,10 +22,10 @@ export default ({
   lastActionTime
 }) => {
   const { x1, y1, x2, y2 } = parseCoordinates(element);
-  let left = x1 / ratio;
-  let top = y1 / ratio;
-  let width = ((x2 - x1) / ratio) * 0.97;
-  let height = ((y2 - y1) / ratio) * 0.97;
+  const left = (x1 / ratio) || 0;
+  const top = (y1 / ratio) || 0;
+  const width = ((x2 - x1) / ratio) * 0.97;
+  const height = ((y2 - y1) / ratio) * 0.97;
   let timer;
   return (
     <div
@@ -37,16 +35,10 @@ export default ({
           : styles["highlighter-box"]
       }
       onClick={() => {
-        // 非录制状态下不做操作
-        if (!record) {
-          return;
-        }
-        //check
-        console.log("输入文本录制", text);
+        if (!record) return
         if (text) {
           const { variableName } = getRecordedActions(element, sourceXML);
           ipcRenderer.send(
-            //+localStorage.getItem("mainWinId"), 
             "sendKeys", [
               {
                 action: "findAndAssign",
@@ -65,10 +57,7 @@ export default ({
         );
         const currentActionTime = (new Date()).getTime()
         lastActionTime = lastActionTime || currentActionTime
-        require('electron').remote.BrowserWindow.fromId(+localStorage.getItem("mainWinId")).webContents.send(
-          // ipcRenderer.sendTo(
-          //渲染进程通信消息中转
-          // +localStorage.getItem("mainWinId"),
+        ipcRenderer.send(
           "recordedActions",
           [
             {
@@ -91,7 +80,6 @@ export default ({
         timer = setTimeout(() => {
           emitter.emit("selectedElement", element);
           ipcRenderer.send(
-            // +localStorage.getItem("mainWinId"),
             "selectedElement",
             element
           );
@@ -106,7 +94,6 @@ export default ({
           }
           emitter.emit("expandedPaths", expandedPaths);
           ipcRenderer.send(
-            // +localStorage.getItem("mainWinId"),
             "expandedPaths",
             expandedPaths
           );
@@ -118,11 +105,11 @@ export default ({
       }}
       key={element.path}
       style={{
+        top,
+        left,
         zIndex,
-        left: left || 0,
-        top: top || 0,
-        width: width || 0,
-        height: height || 0
+        width,
+        height
       }}
     >
       <div />

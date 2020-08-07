@@ -262,20 +262,20 @@ ipcMain.on('getSource', async (e) => {
   try {
     const sourceXML = await getSource()
     // render cover layer on deviceWindow
-    deviceWin.webContents.send("getSouceSuccess", sourceXML)
+    deviceWin.webContents.send("getSourceSuccess", sourceXML)
     // render ui tree on mainWindow
     // FIXME: node环境下的xmlToJSON与浏览器环境下表现不一致
     // mainWindow.webContents.send("getSourceJSONSuccess", xmlToJSON(sourceXML.value))
   } catch (e) {
     // TODO: retry
-    deviceWin.webContents.send("getSouceFailed", e)
+    deviceWin.webContents.send("getSourceFailed", e)
   }
 })
 
 // stop recording code
 ipcMain.on(
-  "stoprecord",
-  () => deviceWin && deviceWin.webContents.send("stoprecord")
+  "stopRecord",
+  () => deviceWin && deviceWin.webContents.send("stopRecord")
 );
 
 // play back code

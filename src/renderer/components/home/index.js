@@ -180,7 +180,7 @@ export default class Home extends Component {
         });
       });
     }
-    ipcRenderer.send('stoprecord', null);
+    ipcRenderer.send('stopRecord', null);
     this.setState({
       // device: null,
       visible: false
@@ -633,7 +633,7 @@ export default class Home extends Component {
                       );
                     } else {
                       this.setState({ recording: 'pause' });
-                      ipcRenderer.send('stoprecord', null);
+                      ipcRenderer.send('stopRecord', null);
                     }
                   }}
                 >

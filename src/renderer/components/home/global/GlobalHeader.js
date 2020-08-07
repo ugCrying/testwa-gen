@@ -189,7 +189,7 @@ class GlobalHeader extends Component {
                   );
                 } else {
                   this.props.setState({ recording: 'pause' });
-                  ipcRenderer.send('stoprecord', null);
+                  ipcRenderer.send('stopRecord', null);
                 }
               }}
             >

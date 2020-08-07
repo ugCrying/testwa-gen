@@ -2,7 +2,7 @@
  * 操作行为模块
  */
 import React, { Component } from 'react';
-import { Select, Tabs, Table, Form, Popconfirm, Input } from 'antd';
+import { Tabs, Table, Form, Popconfirm, Input } from 'antd';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { vs } from 'react-syntax-highlighter/dist/styles/hljs';
 import frameworks from './client-frameworks';
@@ -13,10 +13,9 @@ import styles from './recordedActions.css';
 import { connect } from 'dva';
 import rxdb from '../../db';
 import _ from 'lodash'
+// const { actionAliasMapping } = require('../../../api/script')
 const { remove } = require('immutable');
 
-console.log('操作行为组件模块');
-const Option = Select.Option;
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
 const EditableContext = React.createContext();
@@ -108,10 +107,8 @@ class EditableCell extends React.Component {
 class RecordActions extends Component {
   constructor(props) {
     super(props);
-    console.log('操作行为组件实例化');
     this.state = {
-      // 当前代码编程语言，可修改
-      actionFramework: 'python'
+      actionFramework: 'jsWd'
     };
     this.columns = [
       {
@@ -119,7 +116,8 @@ class RecordActions extends Component {
         dataIndex: 'action',
         // fixed: "left",
         width: 200,
-        editable: true
+        editable: true,
+        // render: (text) => actionAliasMapping[text]
       },
       {
         title: '元素',
@@ -131,9 +129,8 @@ class RecordActions extends Component {
         key: 'operation',
         fixed: "right",
         width: 100,
-        render: (_, record, index) => {
+        render: (_, record) => {
           return (
-            <div>
               <Popconfirm
                 title="确定要删除吗?"
                 okText="确定"
@@ -142,27 +139,12 @@ class RecordActions extends Component {
               >
                 <a href="">删除</a>
               </Popconfirm>
-              {/* <br />
-              <Popconfirm
-                title="插入sleep的节点?"
-                okText="之后"
-                cancelText="之前"
-                onConfirm={() => this.handleInsertSleep(record, index, false)}
-                onCancel={() => this.handleInsertSleep(record, index, true)}
-              >
-                <a href="">插入sleep</a>
-              </Popconfirm> */}
-            </div>
           );
         }
       }
     ];
   }
 
-  /**
-   * 删除行
-   * TODO:
-   */
   handleDelete = async row => {
     this.codes = remove(this.codes, row.key);
     if (this.props.record.code.addTime) {
@@ -199,55 +181,16 @@ class RecordActions extends Component {
     this.setState({ fresh: true });
   };
 
-  handleInsertSleep = async (row, index, pre = true) => {
-    console.log(row)
-    // this.codes = remove(this.codes, row.key);
-    const idx = pre ? index : index + 1
-    this.codes.splice(idx, 0, {
-      action: "sleep",
-      params: ["1000"]
-    })
-    if (this.props.record.code.addTime) {
-      const db = await rxdb;
-      const result = await db.code
-        .findOne(this.props.record.code.addTime)
-        .update({ $set: { value: this.codes } });
-      console.log(result)
-    } else {
-      this.props.dispatch({
-        type: 'record/updateRecordedActions',
-        payload: this.codes
-      });
-    }
-    this.setState({ fresh: true });
-  }
-
   getTableData() {
-    const datas = [];
-    // let params;
     this.codes =
       this.props.record.code && this.props.record.code.value[0]
         ? this.props.record.code.value
         : this.props.record.recordedActions;
-    let i = 0;
-    if (this.codes)
-      for (const data of this.codes) {
-        console.log(data)
-        data.params = Array.isArray(data.params) ? data.params : [data.params]
-        // data.key = i++;
-        datas.push({
-          action: data.action,
-          params: data.params.filter(d => d).join(','),
-          key: i++
-        });
-        //   data.params[1]
-        //     ? (params = data.params[1])
-        //     : datas.push({ params, key: ++i, action: data.action });
-      }
-    console.log(datas);
-    return datas;
-    // this.codes = datas;
-    // return this.codes;
+    return (this.codes || []).map(({ action, params }, index) => ({
+      action,
+      params: params.filter(Boolean).join(','),
+      key: index
+    }))
   }
 
   getCode() {
@@ -256,7 +199,6 @@ class RecordActions extends Component {
       this.props.record.code && this.props.record.code.value[0]
         ? this.props.record.code.value
         : this.props.record.recordedActions;
-    // if (this.state.actionFramework === "table") return JSON.stringify(code);
     let framework = new frameworks[this.state.actionFramework]();
     framework.actions = code || [];
     return framework.getCodeString();
@@ -306,24 +248,6 @@ class RecordActions extends Component {
             />
           </TabPane>
           <TabPane tab="代码" key="2">
-            <div className={styles['script-title']}>
-              <div className={styles['script-title-select']}>
-                <Select
-                  defaultValue="python"
-                  // @ts-ignore
-                  onChange={actionFramework =>
-                    this.setState({ actionFramework })
-                  }
-                  className={InspectorStyles['framework-dropdown']}
-                >
-                  {Object.keys(frameworks).map(f => (
-                    <Option key={f} value={f}>
-                      {frameworks[f].readableName}
-                    </Option>
-                  ))}
-                </Select>
-              </div>
-            </div>
             <div className={styles['script-content']}>
               <SyntaxHighlighter
                 language={this.state.actionFramework}

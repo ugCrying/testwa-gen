@@ -12,7 +12,6 @@ import styles from './Inspector.css';
 import devices from './devices.css';
 // @ts-ignore
 import shell from './shell.css';
-// @ts-ignore
 import { ipcRenderer } from 'electron';
 import { emitter } from '../../lib';
 import { xmlToJSON } from './lib';
@@ -20,7 +19,6 @@ import { connect } from 'dva'
 import Timeout from 'await-timeout'
 import { connectMinicap } from './minicap'
 import DeviceControl from './DeviceControl/DeviceControl'
-// @ts-ignore
 const { runScript } = require('../../../api/adb')
 
 export let sourceXML = null;
@@ -72,27 +70,26 @@ class Device extends Component {
     });
     ipcRenderer.on('record', () => {
       this.setState({
-        lastActionTime: (new Date()).getTime()
-      })
+        lastActionTime: (new Date()).getTime() })
       this.record = true;
       console.log('ipcRenderer.on("record", loading true');
       this.setState({ loading: true });
       this.getSource();
     });
-    ipcRenderer.on('stoprecord', () => {
+    ipcRenderer.on('stopRecord', () => {
       this.setState({ sourceJSON: null });
       this.record = false;
     });
   }
 
   UNSAFE_componentWillMount() {
-    ipcRenderer.on('getSouceSuccess', (_, sourceJSON) => {
+    ipcRenderer.on('getSourceSuccess', (_, sourceJSON) => {
       sourceXML = sourceJSON.value;
       sourceJSON = xmlToJSON(sourceJSON.value);
       ipcRenderer.send('getSourceJSONSuccess', sourceJSON)
       this.setState({ sourceJSON, loading: false });
     })
-    ipcRenderer.on('getSouceFailed', (err) => {
+    ipcRenderer.on('getSourceFailed', (err) => {
       // TODO: retry
       this.setState({ loading: false });
     })
@@ -118,7 +115,7 @@ class Device extends Component {
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeAllListeners('stoprecord');
+    ipcRenderer.removeAllListeners('stopRecord');
     ipcRenderer.removeAllListeners('record');
     // TODO: remove eventListener "changeStyle"
   }
