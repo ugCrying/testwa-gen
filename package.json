@@ -4,7 +4,7 @@
   "version": "1.1.2",
   "main": "main/index.js",
   "description": "Automated test Script recording tool for Apps.",
-  "author": "canfeit <canfeit@qq.com> (http://testwa.com/)",
+  "author": "tanghongxin <hongxin.tang@hotmail.com> (http://cloud.testwa.com/)",
   "license": "MIT",
   "keywords": [
     "testwa",
@@ -26,7 +26,7 @@
     "android",
     "firefoxos"
   ],
-  "homepage": "https://github.com/canfeit/testwa#readme",
+  "homepage": "https://github.com/tanghongxin/testwa-gen.git",
   "esm": {
     "cache": false
   },
@@ -49,7 +49,7 @@
   "build": {
     "productName": "TestwaGen",
     "appId": "com.testwa.desktop",
-    "copyright": "Copyright © 2018 testwa",
+    "copyright": "Copyright © 2020 testwa",
     "mac": {
       "target": "dmg"
     },
