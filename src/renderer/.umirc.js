@@ -1,16 +1,14 @@
 export default {
-  disableServiceWorker: true,
-  hashHistory: true,
-  disableHash: true,
+  history: 'hash',
   publicPath: "./",
   outputPath: "../../dist/renderer",
   plugins: [
     [
-      "umi-plugin-dva",
-      {
-        immer: true
-      }
-    ]
+      'umi-plugin-react', {
+        dva: true,
+        antd: true,
+        // hd: {}
+    }],
   ],
   externals(_, request, callback) {
     let isExternal;
@@ -31,5 +29,7 @@ export default {
       isExternal = `require('${request}')`;
     }
     callback(null, isExternal);
-  }
+  },
+  // FIMXE: theme
+  // theme: require('./theme.js')()
 };

@@ -1,38 +1,45 @@
 /**
  * 主页面
  */
-import React, { Component } from 'react';
-import { Layout, Button, Tabs, Modal, Tooltip, Icon, Menu, Dropdown } from 'antd';
-import { Select } from 'antd';
-import { Subject } from 'rxjs';
-import { map, takeUntil, concatAll, withLatestFrom } from 'rxjs/operators';
-import Source from './Source';
-import Terminal from './terminal';
-import DeviceList from './deviceList';
-import SelectApp from './selectApp';
-import Setting from './Setting';
-import RecordedActions from './RecordedActions';
-import CodeList from './codeList';
-import CodeUpload from './codeUpload';
+import React, { Component } from 'react'
+import {
+  Layout, Button, Tabs, Modal, Tooltip, Icon, Menu, Dropdown,
+  Select,
+} from 'antd'
+
+import { Subject } from 'rxjs'
+import {
+  map, takeUntil, concatAll, withLatestFrom,
+} from 'rxjs/operators'
+import { ipcRenderer } from 'electron'
+import Source from './Source'
+import Terminal from './terminal'
+import DeviceList from './deviceList'
+import SelectApp from './selectApp'
+import Setting from './Setting'
+import RecordedActions from './RecordedActions'
+import CodeList from './codeList'
+import CodeUpload from './codeUpload'
 import Login from './auth/Login'
 // @ts-ignore
-import styles from './devices.layout.css';
-import { emitter } from '../../lib';
-import { getPackages, runCode, downCode, trackDevices } from './lib';
-import { ipcRenderer } from 'electron';
-import rxdb from '../../db';
-import SelectedElement from './SelectedElement';
+import styles from './devices.layout.css'
+import { emitter } from '../../lib'
+import {
+  getPackages, runCode, downCode, trackDevices,
+} from './lib'
+import rxdb from '../../db'
+import SelectedElement from './SelectedElement'
 
-const TabPane = Tabs.TabPane;
-const { Header, Sider, Content } = Layout;
-const Option = Select.Option;
+const { TabPane } = Tabs
+const { Header, Sider, Content } = Layout
+const { Option } = Select
 ipcRenderer.on('deviceWinId', (_, id) => {
-  localStorage.setItem('deviceWinId', id);
-});
+  localStorage.setItem('deviceWinId', id)
+})
 
 export default class Home extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       // 当前标签页 key 值
       activeKey: '主页',
@@ -46,27 +53,29 @@ export default class Home extends Component {
       // 终端高度（用于鼠标拖动动态调整）
       terminalHeight: 0,
       // 录制结束时保存脚本模态框是否课件
-      visible: false
-    };
-    this.terminalSwitch = this.terminalSwitch.bind(this);
-    this.terminalOpen = this.terminalOpen.bind(this);
-    trackDevices(this.props.dispatch);
+      visible: false,
+    }
+    this.terminalSwitch = this.terminalSwitch.bind(this)
+    this.terminalOpen = this.terminalOpen.bind(this)
+    this.codeUploadRef = React.createRef()
+    this.loginRef = React.createRef()
+    trackDevices(this.props.dispatch)
     ipcRenderer.on('runed', () => {
       this.setState({
-        codeRuning: false
-      });
-    });
+        codeRuning: false,
+      })
+    })
     ipcRenderer.on('recorded', () => {
-      !this.saved && this.showModal();
-    });
+      !this.saved && this.showModal()
+    })
     ipcRenderer.on('sendKeys', (_, recordedActions) => {
       this.props.dispatch({
         type: 'record/addRecordedActions',
         payload: {
-          recordedActions
-        }
-      });
-    });
+          recordedActions,
+        },
+      })
+    })
     ipcRenderer.on('swiped', (_, tap) => {
       this.props.dispatch({
         type: 'record/addRecordedActions',
@@ -80,46 +89,46 @@ export default class Home extends Component {
                 tap.width,
                 tap.height,
                 tap.widthEnd,
-                tap.heightEnd
-              ]
-            }
-          ]
-        }
-      });
-    });
+                tap.heightEnd,
+              ],
+            },
+          ],
+        },
+      })
+    })
     ipcRenderer.on('taped', (_, tap) => {
-      localStorage.getItem('tap') === 'true' &&
-        this.props.dispatch({
+      localStorage.getItem('tap') === 'true'
+        && this.props.dispatch({
           type: 'record/addRecordedActions',
           payload: {
             recordedActions: [
               {
                 action: 'tap',
-                params: ['', '', tap.width, tap.height]
-              }
-            ]
-          }
-        });
-    });
+                params: ['', '', tap.width, tap.height],
+              },
+            ],
+          },
+        })
+    })
     ipcRenderer.on('recordedActions', (_, recordedActions) => {
       console.log('得到操作行为，更新state', recordedActions);
-      (!localStorage.getItem('tap') ||
-        localStorage.getItem('tap') === 'false') &&
-        this.props.dispatch({
+      (!localStorage.getItem('tap')
+        || localStorage.getItem('tap') === 'false')
+        && this.props.dispatch({
           type: 'record/addRecordedActions',
           payload: {
-            recordedActions
-          }
-        });
-    });
+            recordedActions,
+          },
+        })
+    })
     ipcRenderer.on('getSourceJSONSuccess', (_, sourceJSON) => {
-      this.saved = false;
+      this.saved = false
       console.log('ipcRenderer getSourceJSONSuccess', sourceJSON)
       this.props.dispatch({
         type: 'record/source',
-        payload: sourceJSON
-      });
-    });
+        payload: sourceJSON,
+      })
+    })
   }
 
   selectedCode () {
@@ -127,17 +136,18 @@ export default class Home extends Component {
   }
 
   showModal() {
-    this.saved = true;
+    this.saved = true
     this.setState({
-      recording: null
-    });
+      recording: null,
+    })
     if (
-      this.props.record.recordedActions &&
-      this.props.record.recordedActions.length
-    )
+      this.props.record.recordedActions
+      && this.props.record.recordedActions.length
+    ) {
       this.setState({
-        visible: true
-      });
+        visible: true,
+      })
+    }
   }
 
   /**
@@ -145,14 +155,14 @@ export default class Home extends Component {
    */
   handleOk() {
     // @ts-ignore
-    this.saveCode(this.refs.input.value);
+    this.saveCode(this.refs.input.value)
   }
 
   /**
    * 保存脚本时点击取消
    */
   handleCancel() {
-    this.saveCode();
+    this.saveCode()
   }
 
   /**
@@ -163,27 +173,27 @@ export default class Home extends Component {
    */
   saveCode(name) {
     if (
-      name &&
-      this.props.record.recordedActions &&
-      this.props.record.recordedActions.length
+      name
+      && this.props.record.recordedActions
+      && this.props.record.recordedActions.length
     ) {
-      this.addTime = new Date().getTime().toString();
-      rxdb.then(db => {
-        db['code'].atomicUpsert({
+      this.addTime = new Date().getTime().toString()
+      rxdb.then((db) => {
+        db.code.atomicUpsert({
           name: name || this.addTime,
           addTime: this.addTime,
           info: this.state.device,
-          value: this.props.record.recordedActions
-        });
-      });
+          value: this.props.record.recordedActions,
+        })
+      })
     }
-    ipcRenderer.send('stopRecord', null);
+    ipcRenderer.send('stopRecord', null)
     this.setState({
       // device: null,
-      visible: false
-    });
+      visible: false,
+    })
     // @ts-ignore
-    this.refs.input.value = '';
+    this.refs.input.value = ''
   }
 
   /**
@@ -192,15 +202,15 @@ export default class Home extends Component {
   downCode() {
     require('electron').remote.dialog.showSaveDialog(
       { filters: [{ name: 'code', extensions: ['py'] }] },
-      filename => {
-        filename &&
-          require('fs').writeFile(
+      (filename) => {
+        filename
+          && require('fs').writeFile(
             filename,
             downCode(this.props.record.code.info, this.props.record.code.value),
-            () => {}
-          );
-      }
-    );
+            () => {},
+          )
+      },
+    )
     // this.setState({ downCode: true });
   }
 
@@ -224,25 +234,25 @@ export default class Home extends Component {
    * 删除选中的脚本
    */
   delCode() {
-    console.log(this.props.record.code);
-    const confirm = Modal.confirm;
-    const code = this.props.record.code;
-    const dispatch = this.props.dispatch;
+    console.log(this.props.record.code)
+    const { confirm } = Modal
+    const { code } = this.props.record
+    const { dispatch } = this.props
     confirm({
       title: '确定删除脚本?',
       content: code.name,
-      okText: "确定",
-      cancelText: "取消",
+      okText: '确定',
+      cancelText: '取消',
       onOk() {
-        rxdb.then(db => {
-          db['code'].findOne(code.addTime).remove();
-          dispatch({ type: 'record/addCode', payload: { value: [] } });
-        });
+        rxdb.then((db) => {
+          db.code.findOne(code.addTime).remove()
+          dispatch({ type: 'record/addCode', payload: { value: [] } })
+        })
       },
       onCancel() {
-        console.log('Cancel');
-      }
-    });
+        console.log('Cancel')
+      },
+    })
   }
 
   /**
@@ -250,114 +260,108 @@ export default class Home extends Component {
    */
   async componentDidMount() {
     const tabs = document.querySelector(
-      `.${styles['main-common-tabs']} .ant-tabs-content`
-    );
-    tabs.className = tabs.className + ' ' + styles['ant-tabs-content'];
+      `.${styles['main-common-tabs']} .ant-tabs-content`,
+    )
+    tabs.className = `${tabs.className} ${styles['ant-tabs-content']}`
     const side = document.getElementsByClassName(
-      styles['main-layout-sider']
-    )[0];
+      styles['main-layout-sider'],
+    )[0]
     const sideDrag = document.getElementsByClassName(
-      styles['side-custom-tabs-tabpane-content-drag']
-    )[0];
-    const sideMouseDown = new Subject();
-    const sideMouseMove = new Subject();
-    const sideMouseUp = new Subject();
+      styles['side-custom-tabs-tabpane-content-drag'],
+    )[0]
+    const sideMouseDown = new Subject()
+    const sideMouseMove = new Subject()
+    const sideMouseUp = new Subject()
 
-    const ter = document.getElementsByClassName(styles['main-terminal'])[0];
+    const ter = document.getElementsByClassName(styles['main-terminal'])[0]
     const terDrag = document.getElementsByClassName(
-      styles['main-terminal-drag-line']
-    )[0];
-    const terMouseDown = new Subject();
-    const terMouseMove = new Subject();
-    const terMouseUp = new Subject();
+      styles['main-terminal-drag-line'],
+    )[0]
+    const terMouseDown = new Subject()
+    const terMouseMove = new Subject()
+    const terMouseUp = new Subject()
 
-    sideDrag.addEventListener('mousedown', event => {
-      sideMouseDown.next(event);
-    });
-    document.body.addEventListener('mousemove', event => {
-      sideMouseMove.next(event);
-    });
-    document.body.addEventListener('mouseup', event => {
-      sideMouseUp.next(event);
-    });
+    sideDrag.addEventListener('mousedown', (event) => {
+      sideMouseDown.next(event)
+    })
+    document.body.addEventListener('mousemove', (event) => {
+      sideMouseMove.next(event)
+    })
+    document.body.addEventListener('mouseup', (event) => {
+      sideMouseUp.next(event)
+    })
 
-    terDrag.addEventListener('mousedown', event => {
-      terMouseDown.next(event);
-    });
-    document.body.addEventListener('mousemove', event => {
-      terMouseMove.next(event);
-    });
-    document.body.addEventListener('mouseup', event => {
-      terMouseUp.next(event);
-    });
+    terDrag.addEventListener('mousedown', (event) => {
+      terMouseDown.next(event)
+    })
+    document.body.addEventListener('mousemove', (event) => {
+      terMouseMove.next(event)
+    })
+    document.body.addEventListener('mouseup', (event) => {
+      terMouseUp.next(event)
+    })
 
     sideMouseDown
       .pipe(
-        map(event =>
-          event.preventDefault()
-            ? event.preventDefault()
-            : (event.returnValue = false)
+        map((event) => (event.preventDefault()
+          ? event.preventDefault()
+          : (event.returnValue = false)),
         ),
         // @ts-ignore
-        map(event => sideMouseMove.pipe(takeUntil(sideMouseUp))),
+        map((event) => sideMouseMove.pipe(takeUntil(sideMouseUp))),
         concatAll(),
         // @ts-ignore
-        map(event => event.clientX),
-        withLatestFrom(sideMouseDown, (move, down) => {
-          return move - down.offsetX + 2;
-        })
+        map((event) => event.clientX),
+        withLatestFrom(sideMouseDown, (move, down) => move - down.offsetX + 2),
       )
-      .subscribe(event => {
-        this.setState({ sideWidth: event });
+      .subscribe((event) => {
+        this.setState({ sideWidth: event })
         // @ts-ignore
-        side.style.flex = '0 0 ' + this.state.sideWidth + 'px';
-      });
+        side.style.flex = `0 0 ${this.state.sideWidth}px`
+      })
 
     terMouseDown
       .pipe(
-        map(event =>
-          event.preventDefault()
-            ? event.preventDefault()
-            : (event.returnValue = false)
+        map((event) => (event.preventDefault()
+          ? event.preventDefault()
+          : (event.returnValue = false)),
         ),
         // @ts-ignore
-        map(event => terMouseMove.pipe(takeUntil(terMouseUp))),
+        map((event) => terMouseMove.pipe(takeUntil(terMouseUp))),
         concatAll(),
         // @ts-ignore
-        map(event => event.clientY),
-        withLatestFrom(terMouseDown, (move, down) => {
-          return move - down.offsetY;
-        })
+        map((event) => event.clientY),
+        withLatestFrom(terMouseDown, (move, down) => move - down.offsetY),
       )
-      .subscribe(event => {
+      .subscribe((event) => {
         this.setState({
-          terminalHeight: ter.getBoundingClientRect().bottom - event
-        });
+          terminalHeight: ter.getBoundingClientRect().bottom - event,
+        })
         // @ts-ignore
-        ter.style.height = this.state.terminalHeight + 'px';
-      });
+        ter.style.height = `${this.state.terminalHeight}px`
+      })
   }
 
   /**
    * 组件销毁时事件解绑
    */
   componentWillUnmount() {
-    ipcRenderer.removeAllListeners('recordedActions');
-    ipcRenderer.removeAllListeners('getSourceJSONSuccess');
+    ipcRenderer.removeAllListeners('recordedActions')
+    ipcRenderer.removeAllListeners('getSourceJSONSuccess')
   }
 
   /**
    * 展开 / 关闭终端
    */
   terminalSwitch() {
-    this.setState({ terminalDisplay: !this.state.terminalDisplay });
+    this.setState({ terminalDisplay: !this.state.terminalDisplay })
   }
 
   /**
    * 展开终端
    */
   terminalOpen() {
-    this.setState({ terminalDisplay: true });
+    this.setState({ terminalDisplay: true })
   }
 
   showLogin = () => {
@@ -377,44 +381,44 @@ export default class Home extends Component {
    * 标签页切换（此处未使用 router 而是简单的页面切换实现）
    */
   content() {
-    let content;
+    let content
     switch (this.state.activeKey) {
       case '设备列表':
         content = (
           <DeviceList
-            onSelectDevice={device => {
+            onSelectDevice={(device) => {
               this.props.dispatch({
                 type: 'record/packages',
                 payload: {
-                  packages: null
-                }
-              });
-              this.setState({ activeKey: '应用列表', device });
-              setTimeout(() => getPackages(this.props.dispatch), 500);
+                  packages: null,
+                },
+              })
+              this.setState({ activeKey: '应用列表', device })
+              setTimeout(() => getPackages(this.props.dispatch), 500)
             }}
           />
-        );
-        break;
+        )
+        break
       case '应用列表':
         content = (
           <SelectApp
             recording={() => {
               this.setState({
                 recording: 'process',
-                activeKey: '脚本录制'
-              });
+                activeKey: '脚本录制',
+              })
             }}
           />
-        );
-        break;
+        )
+        break
       case '脚本录制':
         content = (
           <RecordedActions addTime={this.addTime} device={this.state.device} />
-        );
-        break;
+        )
+        break
       case '设置':
-        content = <Setting />;
-        break;
+        content = <Setting />
+        break
       case '主页':
         content = (
           <div className={styles.welcome}>
@@ -426,12 +430,12 @@ export default class Home extends Component {
               alt="二维码"
             />
           </div>
-        );
-        break;
+        )
+        break
       default:
         throw new Error(`unknown activeKey: ${this.state.activeKey}`)
     }
-    return content;
+    return content
   }
 
   menu() {
@@ -451,13 +455,13 @@ export default class Home extends Component {
     )
   }
 
-  onLoginRef = ref => {
-    this.loginRef = ref.getWrappedInstance()
-  }
+  // onLoginRef = (ref) => {
+  //   this.loginRef = ref.getWrappedInstance()
+  // }
 
-  onCodeUploadRef= ref => {
-    this.codeUploadRef = ref.getWrappedInstance()
-  }
+  // onCodeUploadRef= (ref) => {
+  //   this.codeUploadRef = ref.getWrappedInstance()
+  // }
 
   render() {
     const { userInfo } = this.props.user
@@ -465,12 +469,12 @@ export default class Home extends Component {
     const menu = (
       <Menu>
         <Menu.Item key="0">
-          <span onClick={ this.switchUser }>
+          <span onClick={this.switchUser}>
             切换帐号
           </span>
         </Menu.Item>
         <Menu.Item key="1">
-          <span onClick={ this.logout }>
+          <span onClick={this.logout}>
             注销
           </span>
         </Menu.Item>
@@ -484,7 +488,7 @@ export default class Home extends Component {
             <div className={styles['main-header-brand']}>
               <img
                 // @ts-ignore
-                src={require(`../../../../static/images/logo.png`)}
+                src={require('../../../../static/images/logo.png')}
                 alt=""
               />
               {
@@ -495,8 +499,8 @@ export default class Home extends Component {
                     </span>
                   </Dropdown>
                 ) : (
-                    <span className={styles['main-header-brand-user-info']} onClick={ this.showLogin }>
-                      登录
+                  <span className={styles['main-header-brand-user-info']} onClick={this.showLogin}>
+                    登录
                   </span>
                 )
               }
@@ -504,9 +508,9 @@ export default class Home extends Component {
             <div className={styles['main-header-control']}>
               <div className={styles['header-control-buttons']}>
                 <Button
-                  size={'small'}
+                  size="small"
                   onClick={() => {
-                    this.setState({ activeKey: '主页' });
+                    this.setState({ activeKey: '主页' })
                   }}
                 >
                   <div className={styles['button-icon']}>
@@ -515,21 +519,21 @@ export default class Home extends Component {
                   </div>
                 </Button>
                 <Button
-                  size={'small'}
+                  size="small"
                   disabled={
-                    !this.state.codeRuning && this.state.device ? false : true
+                    !(!this.state.codeRuning && this.state.device)
                   }
                 >
                   {this.state.recording ? (
                     <div
                       className={styles['button-icon']}
                       onClick={() => {
-                        this.showModal();
+                        this.showModal()
                       }}
                     >
                       <img
                         // @ts-ignore
-                        src={require(`../../../../static/images/recording.svg`)}
+                        src={require('../../../../static/images/recording.svg')}
                         alt=""
                       />
                       停止
@@ -544,28 +548,26 @@ export default class Home extends Component {
                         //   .startUiautomator2(this.state.device.id)
                         //   .then(() => setTimeout(getPackages, 5000));
                         // getPackages(this.props.dispatch);
-                        this.setState({ activeKey: '应用列表' });
+                        this.setState({ activeKey: '应用列表' })
                       }}
                     >
                       <img
                         alt=""
                         // @ts-ignore
-                        src={require(`../../../../static/images/record.svg`)}
+                        src={require('../../../../static/images/record.svg')}
                       />
                       录制
                     </div>
                   )}
                 </Button>
                 <Button
-                  size={'small'}
+                  size="small"
                   disabled={
-                    !this.state.recording &&
-                    ((this.props.record.code &&
-                      this.props.record.code.value.length) ||
-                      (this.props.record.recordedActions &&
-                        this.props.record.recordedActions.length))
-                      ? false
-                      : true
+                    !(!this.state.recording
+                    && ((this.props.record.code
+                      && this.props.record.code.value.length)
+                      || (this.props.record.recordedActions
+                        && this.props.record.recordedActions.length)))
                   }
                 >
                   {this.state.codeRuning ? (
@@ -573,15 +575,15 @@ export default class Home extends Component {
                       className={styles['button-icon']}
                       onClick={() => {
                         this.setState({
-                          codeRuning: false
-                        });
-                        ipcRenderer.send('stopcode');
+                          codeRuning: false,
+                        })
+                        ipcRenderer.send('stopcode')
                       }}
                     >
                       <img
                         alt=""
                         // @ts-ignore
-                        src={require(`../../../../static/images/recording.svg`)}
+                        src={require('../../../../static/images/recording.svg')}
                       />
                       停止
                     </div>
@@ -594,57 +596,57 @@ export default class Home extends Component {
                             ...this.state.device,
                             ...this.props.record.code.info,
                           },
-                          this.props.record.recordedActions ||
-                            this.props.record.code.value
-                        );
+                          this.props.record.recordedActions
+                            || this.props.record.code.value,
+                        )
                         this.setState({
-                          codeRuning: true
-                        });
+                          codeRuning: true,
+                        })
                       }}
                     >
                       <img
                         // @ts-ignore
-                        src={require(`../../../../static/images/replay.svg`)}
+                        src={require('../../../../static/images/replay.svg')}
                         alt=""
-                        />
-                        <div className={styles['button-icon']}>
-                          回放
-                        </div>
+                      />
+                      <div className={styles['button-icon']}>
+                        回放
+                      </div>
                     </div>
                   )}
                 </Button>
                 <Button
-                  size={'small'}
+                  size="small"
                   icon={
                     this.state.recording === 'pause' ? 'play-circle' : 'pause'
                   }
-                  disabled={this.state.recording ? false : true}
+                  disabled={!this.state.recording}
                   onClick={() => {
                     if (this.state.recording === 'pause') {
-                      this.setState({ recording: 'process' });
+                      this.setState({ recording: 'process' })
                       ipcRenderer.send(
                         'record',
                         null,
                         require('electron').remote.BrowserWindow.getFocusedWindow()
-                          .id
-                      );
+                          .id,
+                      )
                     } else {
-                      this.setState({ recording: 'pause' });
-                      ipcRenderer.send('stopRecord', null);
+                      this.setState({ recording: 'pause' })
+                      ipcRenderer.send('stopRecord', null)
                     }
                   }}
                 >
                   <div className={styles['button-icon']}>
                     {this.state.recording === 'pause' ? '继续' : '暂停'}
                   </div>
-                  
+
                 </Button>
                 <Button
                   icon="mobile"
-                  size={'small'}
+                  size="small"
                   onClick={() => this.setState({ activeKey: '设备列表' })}
                   disabled={
-                    this.state.recording || this.state.codeRuning ? true : false
+                    !!(this.state.recording || this.state.codeRuning)
                   }
                 >
                   <div className={styles['button-icon']}>
@@ -671,11 +673,9 @@ export default class Home extends Component {
                     className={styles['circle-btn']}
                     shape="circle"
                     icon="menu-fold"
-                    onClick={() =>
-                      this.setState({
-                        codeListDisplay: !this.state.codeListDisplay
-                      })
-                    }
+                    onClick={() => this.setState({
+                      codeListDisplay: !this.state.codeListDisplay,
+                    })}
                   />
                 </Tooltip>
                 <Tooltip
@@ -685,11 +685,9 @@ export default class Home extends Component {
                     className={styles['circle-btn']}
                     shape="circle"
                     icon="menu-unfold"
-                    onClick={() =>
-                      this.setState({
-                        terminalShow: !this.state.terminalShow
-                      })
-                    }
+                    onClick={() => this.setState({
+                      terminalShow: !this.state.terminalShow,
+                    })}
                   />
                 </Tooltip>
                 <Tooltip title="设置">
@@ -697,11 +695,9 @@ export default class Home extends Component {
                     className={styles['circle-btn']}
                     shape="circle"
                     icon="setting"
-                    onClick={() =>
-                      this.setState({
-                        activeKey: '设置'
-                      })
-                    }
+                    onClick={() => this.setState({
+                      activeKey: '设置',
+                    })}
                   />
                 </Tooltip>
                 {/* <Button icon="poweroff" size={"small"}>
@@ -713,26 +709,26 @@ export default class Home extends Component {
           <Layout className={styles['main-first-layout']}>
             <Sider
               style={{
-                display: this.state.codeListDisplay ? '' : 'none'
+                display: this.state.codeListDisplay ? '' : 'none',
               }}
               className={styles['main-layout-sider']}
             >
               <Tabs
                 defaultActiveKey="1"
                 className={styles['side-custom-tabs']}
-                tabBarExtraContent={
+                tabBarExtraContent={(
                   <div>
                     <Tooltip title="上传脚本至云测平台">
-                      <Button disabled={ !this.selectedCode.apply(this) } type="link" icon="upload" onClick={this.uploadCode.bind(this)} />
+                      <Button disabled={!this.selectedCode.apply(this)} type="link" icon="upload" onClick={this.uploadCode.bind(this)} />
                     </Tooltip>
                     <Tooltip title="下载脚本至本地">
-                      <Button disabled={ !this.selectedCode.apply(this) } type="link" icon="download" onClick={this.downCode.bind(this)} />
+                      <Button disabled={!this.selectedCode.apply(this)} type="link" icon="download" onClick={this.downCode.bind(this)} />
                     </Tooltip>
                     <Tooltip title="删除脚本文件">
-                      <Button disabled={ !this.selectedCode.apply(this) } type="link" icon="delete" onClick={this.delCode.bind(this)} />
+                      <Button disabled={!this.selectedCode.apply(this)} type="link" icon="delete" onClick={this.delCode.bind(this)} />
                     </Tooltip>
                   </div>
-                }
+                )}
               >
                 <TabPane tab="脚本列表" key="1">
                   <div className={styles['side-custom-tabs-wrap']}>
@@ -743,9 +739,9 @@ export default class Home extends Component {
                         }
                       >
                         <CodeList
-                          onSelect={addTime => {
-                            this.addTime = addTime;
-                            this.setState({ activeKey: '脚本录制' });
+                          onSelect={(addTime) => {
+                            this.addTime = addTime
+                            this.setState({ activeKey: '脚本录制' })
                           }}
                         />
                       </div>
@@ -775,7 +771,7 @@ export default class Home extends Component {
                       display:
                         // this.state.codeRuning ||
                         // this.state.recording ||
-                        this.state.terminalShow ? '' : 'none'
+                        this.state.terminalShow ? '' : 'none',
                     }}
                     className={
                       this.state.terminalDisplay
@@ -789,7 +785,7 @@ export default class Home extends Component {
                         <Icon
                           type="delete"
                           onClick={() => {
-                            emitter.emit('clearLog');
+                            emitter.emit('clearLog')
                           }}
                         />
                       </Tooltip>
@@ -813,42 +809,42 @@ export default class Home extends Component {
                       onTabClick={this.terminalOpen}
                     >
                       <TabPane
-                          tab="日志"
-                          key="log"
-                          className={styles['main-terminal-area']}
-                        >
-                          <div className={styles['terminal-area-log']}>
-                            <Terminal />
-                          </div>
-                          <div className={styles['terminal-area-select']}>
-                            <Select
-                              defaultValue="none"
-                              className={styles['terminal-select']}
-                            >
-                              <Option value="none">日志级别(无)</Option>
-                              <Option value="detail">详细</Option>
-                              <Option value="test">测试</Option>
-                              <Option value="info">信息</Option>
-                              <Option value="warn">警告</Option>
-                              <Option value="error">错误</Option>
-                              <Option value="deadly">致命</Option>
-                            </Select>
-                          </div>
-                        </TabPane>
-                      <TabPane
-                          tab="UI树"
-                          key="tree"
-                          className={styles['main-tree-area']}
-                        >
-                          <Source recording={this.state.recording} />
+                        tab="日志"
+                        key="log"
+                        className={styles['main-terminal-area']}
+                      >
+                        <div className={styles['terminal-area-log']}>
+                          <Terminal />
+                        </div>
+                        <div className={styles['terminal-area-select']}>
+                          <Select
+                            defaultValue="none"
+                            className={styles['terminal-select']}
+                          >
+                            <Option value="none">日志级别(无)</Option>
+                            <Option value="detail">详细</Option>
+                            <Option value="test">测试</Option>
+                            <Option value="info">信息</Option>
+                            <Option value="warn">警告</Option>
+                            <Option value="error">错误</Option>
+                            <Option value="deadly">致命</Option>
+                          </Select>
+                        </div>
                       </TabPane>
                       <TabPane
-                          tab="操作面板"
-                          key="el"
-                          className={styles['main-el-area']}
-                        >
-                          <SelectedElement {...this.props} />
-                        </TabPane>
+                        tab="UI树"
+                        key="tree"
+                        className={styles['main-tree-area']}
+                      >
+                        <Source recording={this.state.recording} />
+                      </TabPane>
+                      <TabPane
+                        tab="操作面板"
+                        key="el"
+                        className={styles['main-el-area']}
+                      >
+                        <SelectedElement {...this.props} />
+                      </TabPane>
                       {/* {this.state.codeRuning ? (
                         <TabPane
                           tab="日志"
@@ -911,15 +907,15 @@ export default class Home extends Component {
           <input
             ref="input"
             placeholder="脚本名称"
-            onBlur={e => {
-              const { value } = e.target;
-              console.log(value);
+            onBlur={(e) => {
+              const { value } = e.target
+              console.log(value)
             }}
           />
         </Modal>
-        <CodeUpload ref={ this.onCodeUploadRef } />
-        <Login ref={ this.onLoginRef } />
+        <CodeUpload ref={this.codeUploadRef} />
+        <Login ref={this.loginRef} />
       </div>
-    );
+    )
   }
 }
