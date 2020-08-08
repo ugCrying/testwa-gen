@@ -500,7 +500,7 @@ export default class Home extends Component {
                   </Dropdown>
                 ) : (
                   <span className={styles['main-header-brand-user-info']} onClick={this.showLogin}>
-                    登录
+                    {/* 登录 */}
                   </span>
                 )
               }
@@ -718,9 +718,9 @@ export default class Home extends Component {
                 className={styles['side-custom-tabs']}
                 tabBarExtraContent={(
                   <div>
-                    <Tooltip title="上传脚本至云测平台">
+                    {/* <Tooltip title="上传脚本至云测平台">
                       <Button disabled={!this.selectedCode.apply(this)} type="link" icon="upload" onClick={this.uploadCode.bind(this)} />
-                    </Tooltip>
+                    </Tooltip> */}
                     <Tooltip title="下载脚本至本地">
                       <Button disabled={!this.selectedCode.apply(this)} type="link" icon="download" onClick={this.downCode.bind(this)} />
                     </Tooltip>

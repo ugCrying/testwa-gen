@@ -63,7 +63,7 @@ class GlobalHeader extends Component {
               </Dropdown>
             ) : (
               <span className={styles['main-header-brand-user-info']} onClick={this.showLogin}>
-                登录
+                {/* 登录 */}
               </span>
             )
           }
