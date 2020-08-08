@@ -15,7 +15,7 @@ export const login = async function (data = {}) {
     const responseConfig = await REMOTE_REQUEST.post('/v1/auth/login', data)
     sessionStorage.setItem('XToken', responseConfig.data.data.accessToken)
     // return responseConfig
-    return await baseInfo()
+    await baseInfo()
   } catch (e) {
     return Promise.reject(e)
   }

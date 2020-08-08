@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /**
  * 上传脚本到云测平台
  */

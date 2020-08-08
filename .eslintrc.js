@@ -22,6 +22,7 @@ module.exports = {
     },
   },
   rules: {
+    'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'global-require': 'off',
     semi: [
       2,

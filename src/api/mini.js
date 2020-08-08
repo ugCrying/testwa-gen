@@ -17,7 +17,7 @@ const baseUrl = process.defaultApp
  * @return {Promise<any>}
  */
 const startMiniTouch = async function (device) {
-  return await runScript(
+  await runScript(
     device.id,
     '/data/local/tmp/minitouch',
   )

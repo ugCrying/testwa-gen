@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /**
  * 操作行为模块
  */

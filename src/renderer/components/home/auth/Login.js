@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 /**
  * （云测平台）登录
  */
