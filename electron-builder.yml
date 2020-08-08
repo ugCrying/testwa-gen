@@ -28,7 +28,10 @@ extraResources:
   to: minicap-prebuilt
 - from: node_modules/minitouch-prebuilt
   to: minitouch-prebuilt
-# - node_modules
+  # TODO: 自动挑选需要的 node_module
+- node_modules
+# - node_modules/umi
+# - node_modules/umi-plugin-react
 - static/wappium/lib
 - static/wappium/tests/*.txt
 - static/wappium/*.js
