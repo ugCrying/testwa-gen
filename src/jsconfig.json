@@ -11,7 +11,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
-    "removeComments": true
+    "removeComments": true,
+    "baseUrl": "../",
+    "paths": {
+      "api/*": ["src/api/*"],
+      "static/*": ["src/static/*"],
+    },
   },
   "exclude": ["node_modules/*"],
   "typeAcquisition": {}

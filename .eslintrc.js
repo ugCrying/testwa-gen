@@ -11,6 +11,16 @@ module.exports = {
     },
     sourceType: 'module',
   },
+  settings: {
+    'import/resolver': {
+      alias: {
+        map: [
+          ['api', './src/api/'],
+          ['static', './static'],
+        ],
+      },
+    },
+  },
   rules: {
     semi: [
       2,
