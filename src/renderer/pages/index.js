@@ -6,7 +6,6 @@ import { notification } from 'antd';
 // eslint-dsiable-next-line
 // import { ipcRenderer } from "electron";
 import { emitter } from '../lib'
-console.log("渲染进程入口模块");
 
 // FIXME
 // ipcRenderer.on('request_error', err => {

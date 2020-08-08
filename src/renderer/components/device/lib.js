@@ -6,8 +6,6 @@ import XPath from "xpath";
 import xpath from 'xpath';
 import { DOMParser as DOMParser2 } from 'xmldom';
 
-console.log("录制辅助方法模块");
-
 /**
  * xml 转 json
  * @param {*} source 

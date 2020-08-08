@@ -194,7 +194,6 @@ class RecordActions extends Component {
   }
 
   getCode() {
-    console.log('脚本代码生成');
     const code =
       this.props.record.code && this.props.record.code.value[0]
         ? this.props.record.code.value
@@ -205,7 +204,6 @@ class RecordActions extends Component {
   }
 
   render() {
-    console.log('操作行为组件渲染');
     const components = {
       body: {
         row: EditableFormRow,

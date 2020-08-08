@@ -23,7 +23,6 @@ import { ipcRenderer } from 'electron';
 import rxdb from '../../db';
 import SelectedElement from './SelectedElement';
 
-console.log('设备列表组件入口模块');
 const TabPane = Tabs.TabPane;
 const { Header, Sider, Content } = Layout;
 const Option = Select.Option;
@@ -34,8 +33,6 @@ ipcRenderer.on('deviceWinId', (_, id) => {
 export default class Home extends Component {
   constructor(props) {
     super(props);
-    console.log('设备列表组件实例化');
-    console.log(localStorage);
     this.state = {
       // 当前标签页 key 值
       activeKey: '主页',

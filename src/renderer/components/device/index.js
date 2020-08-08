@@ -22,7 +22,6 @@ import DeviceControl from './DeviceControl/DeviceControl'
 const { runScript } = require('../../../api/adb')
 
 export let sourceXML = null;
-console.log('屏幕同步组件入口模块');
 let keyboard;
 const connectKeyboard = () => {
   keyboard = require('net').connect({ port: 6677 });

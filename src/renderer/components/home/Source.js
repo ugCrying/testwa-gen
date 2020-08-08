@@ -7,7 +7,6 @@ import { emitter } from "../../lib";
 import styles from "./source.css";
 import { connect } from "dva";
 import { ipcRenderer } from "electron";
-console.log("ui树组件模块");
 const { TreeNode } = Tree;
 class Source extends Component {
   constructor(props) {

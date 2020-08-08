@@ -8,7 +8,6 @@ import JavaFramework from "./java";
 import PythonFramework from "./python";
 // import JsWdIoFramework from "./js-wdio";
 // import RubyFramework from "./ruby";
-console.log("脚本代码模块");
 const frameworks = {
   python: PythonFramework,
   java: JavaFramework,

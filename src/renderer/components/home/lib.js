@@ -191,7 +191,7 @@ export const getCodes = async cb => {
   const db = await rxdb;
   // @ts-ignore
   db.code.find().$.subscribe(codes => {
-    console.dir(codes);
+    // console.dir(codes);
     if (codes) cb({ codes: JSON.parse(JSON.stringify(codes)) });
   });
 };
@@ -201,10 +201,9 @@ export const getApks = async cb => {
   db.apk
     .find()
     .exec()
-    .then(documents => console.dir("rxdb find", documents));
+    // .then(documents => console.dir("rxdb find", documents));
   // @ts-ignore
   db.apk.find().$.subscribe(apks => {
-    console.dir("rxdb subscribe", apks);
     if (apks)
       cb({
         _apks: apks.filter(async apk => {
@@ -226,7 +225,6 @@ export const getApks = async cb => {
  * @param {*} dispatch 
  */
 export const trackDevices = async dispatch => {
-  console.log("获取设备列表");
   const getDeviceProperties = async device => {
     const [properties, screen] = await Promise.all([
       client.getProperties(device.id),
@@ -264,7 +262,6 @@ export const trackDevices = async dispatch => {
     console.error(e.message, "获取设备信息失败");
   }
 
-  console.log("监听设备变化");
   (await client.trackDevices()).on("changeSet", async changes => {
     if (!changes.removed.length && !changes.changed.length) return;
     for (const device of changes.removed) {
