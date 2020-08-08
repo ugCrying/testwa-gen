@@ -200,7 +200,7 @@ app.once('ready', () => {
     webPreferences: {
       nodeIntegration: true,
     },
-    show: false,
+    show: true,
     // backgroundColor: "#2e2c29"
   })
   mainWindow.loadURL(baseUrl)
