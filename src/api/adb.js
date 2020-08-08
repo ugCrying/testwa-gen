@@ -9,7 +9,7 @@ const client = adbkit.createClient()
  * @return {Promise<any>}
  */
 const installApp = async function (deviceId, apkPath) {
-  return await client.install(deviceId, apkPath)
+  await client.install(deviceId, apkPath)
 }
 
 /**
@@ -20,7 +20,7 @@ const installApp = async function (deviceId, apkPath) {
  * @return {Promise<any>}
  */
 const pushFile = async function (deviceId, fromPath, toPath) {
-  return await client.push(deviceId, fromPath, toPath)
+  await client.push(deviceId, fromPath, toPath)
 }
 
 /**
@@ -30,7 +30,7 @@ const pushFile = async function (deviceId, fromPath, toPath) {
  * @return {Promise<any>}
  */
 const runScript = async function (deviceId, script) {
-  return await client
+  await client
     .shell(
       deviceId,
       `${script}`,
@@ -42,14 +42,14 @@ const getProperties = async function (deviceId) {
 }
 
 /**
- * @return {Promise<[any]>}
+ * @return {Promise<any>}
  */
 const listDevices = async function () {
-  return await client.listDevices()
+  await client.listDevices()
 }
 
 const trackDevices = async function () {
-  return await client.trackDevices()
+  await client.trackDevices()
 }
 
 module.exports = {

@@ -12,12 +12,15 @@
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
     "removeComments": true,
-    "baseUrl": "../",
+    "baseUrl": "./",
     "paths": {
       "api/*": ["src/api/*"],
       "static/*": ["src/static/*"],
     },
   },
-  "exclude": ["node_modules/*"],
+  "exclude": [
+    "node_modules/*",
+    "static/*"
+  ],
   "typeAcquisition": {}
 }

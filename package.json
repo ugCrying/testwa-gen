@@ -55,7 +55,7 @@
     "appId": "com.testwa.desktop",
     "copyright": "Copyright © 2020 testwa",
     "mac": {
-      "target": "dmg"
+      "target": "pkg"
     },
     "files": [
       {
@@ -73,10 +73,6 @@
       {
         "from": "src/common",
         "to": "common"
-      },
-      {
-        "from": "src/public",
-        "to": "renderer"
       },
       "!**/{LICENSE,LICENCE,license,*LICENSE,LICENSE*,CHANGELOG*,README*,AUTHORS,.gitmodules,.vscode,.yarnclean}",
       "!**/*.{png,jpg,JPG,PNG,jpeg,gif,map,un~}",
@@ -99,6 +95,7 @@
         "from": "node_modules/minitouch-prebuilt",
         "to": "minitouch-prebuilt"
       },
+      "node_modules",
       "static/wappium/lib",
       "static/wappium/tests/*.txt",
       "static/wappium/*.js",
@@ -119,7 +116,6 @@
     "ansi-to-html": "^0.6.9",
     "await-timeout": "^1.1.1",
     "axios": "^0.19.2",
-    "electron": "5",
     "electron-updater": "^4.0.6",
     "esm": "^3.2.25",
     "immutable": "^4.0.0-rc.12",
@@ -140,6 +136,7 @@
   "devDependencies": {
     "concurrently": "^4.1.0",
     "cross-env": "^5.2.0",
+    "electron": "5",
     "electron-builder": "^20.38.4",
     "electron-devtools-installer": "^2.2.4",
     "eslint": "^7.6.0",
@@ -155,25 +152,5 @@
     "umi": "2.13.3",
     "umi-plugin-react": "^1.15.8",
     "wait-on": "^3.2.0"
-  },
-  "release-it": {
-    "increment": "conventional:angular",
-    "scripts": {
-      "beforeStage": "npx conventional-changelog -p angular -i CHANGELOG.md -s"
-    },
-    "github": {
-      "release": true,
-      "draft": true,
-      "tokenRef": "GH_TOKEN"
-    },
-    "npm": {
-      "publish": false,
-      "publishPath": "."
-    },
-    "git": {
-      "commitArgs": "--no-verify",
-      "requireCleanWorkingDir": false,
-      "tagName": "v${version}"
-    }
   }
 }

@@ -10,11 +10,12 @@ export default {
   plugins: [
     [
       'umi-plugin-react', {
+        dynamicImport: true,
         dva: true,
-        antd: true,
-        // hd: {}
+        antd: true
     }],
   ],
+  treeShaking: true,
   externals(_, request, callback) {
     let isExternal;
     const load = [
