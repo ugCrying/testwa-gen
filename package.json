@@ -33,7 +33,8 @@
     "cache": false
   },
   "scripts": {
-    "lint": "eslint ./src/main/*.js ./src/renderer/*.js ./src/api/*.js",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint --fix src/**/*.js",
     "start": "yarn clean&&yarn start-all",
     "dir": "yarn build-umi&&npm run build -- --dir -c.asar=true",
     "build": "build",
@@ -123,7 +124,6 @@
     "esm": "^3.2.25",
     "immutable": "^4.0.0-rc.12",
     "lodash": "^4.17.15",
-    "mime-types": "^2.1.22",
     "minicap": "^0.2.1-0",
     "minicap-prebuilt": "^2.3.0",
     "minitouch-prebuilt": "^1.2.0",
@@ -135,8 +135,7 @@
     "source-map-support": "^0.5.9",
     "wd": "^1.12.1",
     "xmldom": "^0.1.27",
-    "xpath": "^0.0.27",
-    "yauzl": "^2.10.0"
+    "xpath": "^0.0.27"
   },
   "devDependencies": {
     "concurrently": "^4.1.0",
