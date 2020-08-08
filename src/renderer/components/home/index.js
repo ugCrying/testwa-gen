@@ -488,7 +488,7 @@ export default class Home extends Component {
             <div className={styles['main-header-brand']}>
               <img
                 // @ts-ignore
-                src={require('../../../../static/images/logo.png')}
+                src={require('static/images/logo.png')}
                 alt=""
               />
               {
@@ -533,7 +533,7 @@ export default class Home extends Component {
                     >
                       <img
                         // @ts-ignore
-                        src={require('../../../../static/images/recording.svg')}
+                        src={require('static/images/recording.svg')}
                         alt=""
                       />
                       停止
@@ -554,7 +554,7 @@ export default class Home extends Component {
                       <img
                         alt=""
                         // @ts-ignore
-                        src={require('../../../../static/images/record.svg')}
+                        src={require('static/images/record.svg')}
                       />
                       录制
                     </div>
@@ -583,7 +583,7 @@ export default class Home extends Component {
                       <img
                         alt=""
                         // @ts-ignore
-                        src={require('../../../../static/images/recording.svg')}
+                        src={require('static/images/recording.svg')}
                       />
                       停止
                     </div>
@@ -606,7 +606,7 @@ export default class Home extends Component {
                     >
                       <img
                         // @ts-ignore
-                        src={require('../../../../static/images/replay.svg')}
+                        src={require('static/images/replay.svg')}
                         alt=""
                       />
                       <div className={styles['button-icon']}>

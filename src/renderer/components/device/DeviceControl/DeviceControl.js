@@ -54,7 +54,7 @@ const DeviceControl = (props) => (
           >
             <img
                 // @ts-ignore
-              src={require('../../../../../static/images/home.svg')}
+              src={require('static/images/home.svg')}
               alt=""
             />
           </Button>
