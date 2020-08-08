@@ -1,5 +1,5 @@
 {
-  "name": "testwa",
+  "name": "testwa-gen",
   "private": true,
   "version": "1.1.2",
   "main": "main/index.js",
@@ -7,26 +7,28 @@
   "author": "tanghongxin <hongxin.tang@hotmail.com> (http://cloud.testwa.com/)",
   "license": "MIT",
   "keywords": [
-    "testwa",
+    "automation",
     "appium",
     "selenium",
-    "webdriver",
-    "automation",
-    "testing"
+    "testing",
+    "testwa",
+    "testwa-gen",
+    "webdriver"
   ],
   "tags": [
-    "testwa",
-    "appium",
-    "selenium",
-    "webdriver",
-    "automation",
-    "testing",
-    "javascript",
-    "ios",
     "android",
-    "firefoxos"
+    "appium",
+    "automation",
+    "electron",
+    "javascript",
+    "node",
+    "selenium",
+    "testing",
+    "testwa",
+    "testwa-gen",
+    "webdriver"
   ],
-  "homepage": "https://github.com/tanghongxin/testwa-gen.git",
+  "homepage": "https://github.com/tanghongxin/testwa-gen",
   "esm": {
     "cache": false
   },
@@ -40,7 +42,7 @@
     "build-cli": "npx build",
     "build-umi": "cd src/renderer && cross-env COMPRESS=none cross-env CSS_COMPRESS=none umi build",
     "start-umi": "cd src/renderer && umi dev",
-    "start-electron": "cd src&&nodemon --watch main --exec electron .",
+    "start-electron": "cd src&&nodemon --watch main --exec electron main/index.js",
     "start-all": "concurrently \"yarn start-umi\" \"wait-on http://localhost:8000 && yarn start-electron\"",
     "clean": "yarn clean-bin&&yarn clean-apk",
     "clean-bin": "adb shell rm -r /data/local/tmp/mini*&&adb shell ls /data/local/tmp",
@@ -105,29 +107,40 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/canfeit/testwa.git"
+    "url": "git+https://github.com/tanghongxin/testwa-gen"
   },
   "bugs": {
-    "url": "https://github.com/canfeit/testwa/issues"
+    "url": "https://github.com/tanghongxin/testwa-gen/issues"
   },
   "dependencies": {
     "adbkit": "^2.11.0",
     "adbkit-apkreader": "^3.1.1",
+    "ansi-to-html": "^0.6.9",
     "await-timeout": "^1.1.1",
     "axios": "^0.19.2",
+    "electron": "5",
     "electron-updater": "^4.0.6",
     "esm": "^3.2.25",
+    "immutable": "^4.0.0-rc.12",
     "lodash": "^4.17.15",
+    "mime-types": "^2.1.22",
+    "minicap": "^0.2.1-0",
+    "minicap-prebuilt": "^2.3.0",
+    "minitouch-prebuilt": "^1.2.0",
+    "pouchdb-adapter-idb": "^7.0.0",
+    "react-syntax-highlighter": "^10.1.2",
     "request": "^2.88.0",
+    "rxdb": "^8.0.4",
+    "rxjs": "^6.3.3",
     "source-map-support": "^0.5.9",
-    "wd": "^1.12.1"
+    "wd": "^1.12.1",
+    "xmldom": "^0.1.27",
+    "xpath": "^0.0.27",
+    "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "ansi-to-html": "^0.6.9",
     "concurrently": "^4.1.0",
-    "conventional-changelog-cli": "^2.0.12",
     "cross-env": "^5.2.0",
-    "electron": "5",
     "electron-builder": "^20.38.4",
     "electron-devtools-installer": "^2.2.4",
     "eslint": "^7.6.0",
@@ -136,26 +149,13 @@
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-react": "^7.20.5",
-    "immutable": "^4.0.0-rc.12",
-    "json-server": "^0.14.2",
-    "mime-types": "^2.1.22",
-    "minicap": "^0.2.1-0",
-    "minicap-prebuilt": "^2.3.0",
-    "minitouch-prebuilt": "^1.2.0",
     "nodemon": "^2.0.2",
-    "pouchdb-adapter-idb": "^7.0.0",
-    "react-syntax-highlighter": "^10.1.2",
     "release": "^5.0.3",
     "release-it": "^10.1.0",
-    "rxdb": "^8.0.4",
-    "rxjs": "^6.3.3",
     "standard-version": "^4.4.0",
     "umi": "2.13.3",
     "umi-plugin-react": "^1.15.8",
-    "wait-on": "^3.2.0",
-    "xmldom": "^0.1.27",
-    "xpath": "^0.0.27",
-    "yauzl": "^2.10.0"
+    "wait-on": "^3.2.0"
   },
   "release-it": {
     "increment": "conventional:angular",
