@@ -33,10 +33,9 @@
     "cache": false
   },
   "scripts": {
-    "build": "build",
-    "build:all": "build -w --publish always && build -m --publish always",
-    "build-cli": "npx build",
-    "build:dir": "rm -rf dist && yarn build:umi && yarn build -- --dir -c.asar=true && rm -rf dist/renderer",
+    "build:dir": "rm -rf dist && yarn build:umi && yarn build:electron --dir -c.asar=true && rm -rf dist/renderer",
+    "build:pack": "rm -rf dist && yarn build:electron",
+    "build:electron": "build",
     "build:umi": "cd src/renderer && umi build",
     "clean": "yarn clean:bin && yarn clean:apk",
     "clean:apk": "adb uninstall io.appium.uiautomator2.server",
@@ -44,11 +43,10 @@
     "lint": "eslint . --ext .js",
     "lint:fix": "yarn lint --fix",
     "postinstall": "build install-app-deps",
-    "release": "release-it -n && yarn build:umi && yarn build:all",
-    "start": "yarn clean && yarn start:all",
-    "start:all": "concurrently \"yarn start:umi\" \"wait-on http://localhost:8000 && yarn start:electron\"",
-    "start:umi": "cd src/renderer && umi dev",
-    "start:electron": "cd src && nodemon --watch main --exec electron main/index.js"
+    "release": "release-it -n && TODO",
+    "dev": "concurrently --kill-others \"yarn dev:umi\" \"wait-on http://localhost:8000 --interval 50 && yarn dev:electron\"",
+    "dev:umi": "cd src/renderer && umi dev",
+    "dev:electron": "cd src && nodemon --watch main --exec electron main/index.js"
   },
   "repository": {
     "type": "git",
