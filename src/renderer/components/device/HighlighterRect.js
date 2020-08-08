@@ -1,13 +1,13 @@
 /**
  * xml 元素高亮
  */
-import React from "react";
-import { getRecordedActions, parseCoordinates } from "./lib";
-import { ipcRenderer } from "electron";
-import { emitter } from "../../lib";
-import { sourceXML } from ".";
+import React from 'react'
+import { ipcRenderer } from 'electron'
+import { getRecordedActions, parseCoordinates } from './lib'
+import { emitter } from '../../lib'
+import { sourceXML } from '.'
 // @ts-ignore
-import styles from "./Inspector.css";
+import styles from './Inspector.css'
 
 export default ({
   selectedElement,
@@ -19,89 +19,91 @@ export default ({
   textId,
   clearText,
   updateLastActionTime,
-  lastActionTime
+  lastActionTime,
 }) => {
-  const { x1, y1, x2, y2 } = parseCoordinates(element);
-  const left = (x1 / ratio) || 0;
-  const top = (y1 / ratio) || 0;
-  const width = ((x2 - x1) / ratio) * 0.97;
-  const height = ((y2 - y1) / ratio) * 0.97;
-  let timer;
+  const {
+    x1, y1, x2, y2,
+  } = parseCoordinates(element)
+  const left = (x1 / ratio) || 0
+  const top = (y1 / ratio) || 0
+  const width = ((x2 - x1) / ratio) * 0.97
+  const height = ((y2 - y1) / ratio) * 0.97
+  let timer
   return (
     <div
       className={
         selectedElement.path === element.path && record
-          ? `${styles["highlighter-box"]} ${styles["hovered-element-box"]}`
-          : styles["highlighter-box"]
+          ? `${styles['highlighter-box']} ${styles['hovered-element-box']}`
+          : styles['highlighter-box']
       }
       onClick={() => {
         if (!record) return
         if (text) {
-          const { variableName } = getRecordedActions(element, sourceXML);
+          const { variableName } = getRecordedActions(element, sourceXML)
           ipcRenderer.send(
-            "sendKeys", [
+            'sendKeys', [
               {
-                action: "findAndAssign",
-                params: ["id", textId, "keys" + variableName]
+                action: 'findAndAssign',
+                params: ['id', textId, `keys${variableName}`],
               },
               {
-                action: "sendKeys",
-                params: ["keys" + variableName, "", text]
-              }
-            ]);
+                action: 'sendKeys',
+                params: [`keys${variableName}`, '', text],
+              },
+            ])
         }
-        clearText();
-        updateLastActionTime();
+        clearText()
+        updateLastActionTime()
         const { variableName, strategy, selector } = getRecordedActions(
-          element, sourceXML
-        );
+          element, sourceXML,
+        )
         const currentActionTime = (new Date()).getTime()
         lastActionTime = lastActionTime || currentActionTime
         ipcRenderer.send(
-          "recordedActions",
+          'recordedActions',
           [
             {
               action: 'sleep',
-              params: [currentActionTime - lastActionTime]
+              params: [currentActionTime - lastActionTime],
             },
             {
-              action: "findAndAssign",
-              params: [strategy, selector, variableName]
+              action: 'findAndAssign',
+              params: [strategy, selector, variableName],
             },
             {
-              action: "click",
-              params: [variableName]
-            }
-          ]
-        );
+              action: 'click',
+              params: [variableName],
+            },
+          ],
+        )
         lastActionTime = (new Date()).getTime()
       }}
       onMouseOver={() => {
         timer = setTimeout(() => {
-          emitter.emit("selectedElement", element);
+          emitter.emit('selectedElement', element)
           ipcRenderer.send(
-            "selectedElement",
-            element
-          );
-          const expandedPaths = [];
+            'selectedElement',
+            element,
+          )
+          const expandedPaths = []
           const pathArr = element.path
-            .split(".")
-            .slice(0, element.path.length - 1);
+            .split('.')
+            .slice(0, element.path.length - 1)
           while (pathArr.length > 1) {
-            pathArr.splice(pathArr.length - 1);
-            let path = pathArr.join(".");
-            expandedPaths.push(path);
+            pathArr.splice(pathArr.length - 1)
+            const path = pathArr.join('.')
+            expandedPaths.push(path)
           }
-          emitter.emit("expandedPaths", expandedPaths);
+          emitter.emit('expandedPaths', expandedPaths)
           ipcRenderer.send(
-            "expandedPaths",
-            expandedPaths
-          );
-        }, 300);
+            'expandedPaths',
+            expandedPaths,
+          )
+        }, 300)
       }}
       onMouseOut={() => {
-        clearTimeout(timer);
-        timer = null;
+        clearTimeout(timer)
+        timer = null
       }}
       key={element.path}
       style={{
@@ -109,10 +111,10 @@ export default ({
         left,
         zIndex,
         width,
-        height
+        height,
       }}
     >
       <div />
     </div>
-  );
-};
+  )
+}

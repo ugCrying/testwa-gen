@@ -1,17 +1,17 @@
-import Framework from "./framework";
+import Framework from './framework'
 
 class JsWdFramework extends Framework {
   // @ts-ignore
   get language() {
-    console.log("wd 脚本");
-    return "js";
+    console.log('wd 脚本')
+    return 'js'
   }
 
   // https://juejin.im/post/6844903693632946189#comment
   // FIMXE: 连续两条 sleep 执行会导致脚本退出，这可能与 node 时间轮训机制有关，这属于遗留问题。
   // 直接 node code.js 正常运行，但在 electron 中回放不行，这可能是 electron node 环境与直接运行 node 环境有不同
   wrapWithBoilerplate(code) {
-    let caps = JSON.stringify(this.caps);
+    const caps = JSON.stringify(this.caps)
     return `// Requires the admc/wd client library
 // (npm install wd)
 // Then paste this into a .js file and run with Node 7.6+
@@ -83,61 +83,60 @@ const alive = () => {
     });
 };
 alive();
-`;
+`
   }
 
   codeFor_findAndAssign(strategy, locator, localVar, isArray) {
-    let suffixMap = {
-      xpath: "XPath",
-      "accessibility id": "AccessibilityId",
-      id: "Id",
-      name: "Name",
-      "class name": "ClassName",
-      "-android uiautomator": "AndroidUIAutomator",
-      "-ios predicate string": "IosUIAutomation",
-      "-ios class chain": "IosClassChain"
-    };
+    const suffixMap = {
+      xpath: 'XPath',
+      'accessibility id': 'AccessibilityId',
+      id: 'Id',
+      name: 'Name',
+      'class name': 'ClassName',
+      '-android uiautomator': 'AndroidUIAutomator',
+      '-ios predicate string': 'IosUIAutomation',
+      '-ios class chain': 'IosClassChain',
+    }
     if (!suffixMap[strategy]) {
-      throw new Error(`Strategy ${strategy} can't be code-gened`);
+      throw new Error(`Strategy ${strategy} can't be code-gened`)
     }
     if (isArray) {
       return `let ${localVar} = await driver.elementsBy${
         suffixMap[strategy]
-      }(${JSON.stringify(locator)});`;
-    } else {
-      return `let ${localVar} = await driver.elementBy${
-        suffixMap[strategy]
-      }(${JSON.stringify(locator)});`;
+      }(${JSON.stringify(locator)});`
     }
+    return `let ${localVar} = await driver.elementBy${
+      suffixMap[strategy]
+    }(${JSON.stringify(locator)});`
   }
 
   codeFor_click(varName, varIndex) {
     return `await ${this.getVarName(
       varName,
-      varIndex
-    )}.click();`;
+      varIndex,
+    )}.click();`
   }
 
   codeFor_clear(varName, varIndex) {
-    return `await ${this.getVarName(varName, varIndex)}.clear();`;
+    return `await ${this.getVarName(varName, varIndex)}.clear();`
   }
 
   codeFor_sendKeys(varName, varIndex, text) {
     return `await ${this.getVarName(
       varName,
-      varIndex
-    )}.sendKeys(${JSON.stringify(text)});`;
+      varIndex,
+    )}.sendKeys(${JSON.stringify(text)});`
   }
 
   codeFor_back() {
-    return `await driver.back();`;
+    return `await driver.back();`
   }
 
   codeFor_tap(varNameIgnore, varIndexIgnore, x, y) {
     return `await (new wd.TouchAction(driver))
   .tap({x: ${x}, y: ${y}})
   .perform()
-    `;
+    `
   }
 
   codeFor_swipe(varNameIgnore, varIndexIgnore, x1, y1, x2, y2) {
@@ -146,7 +145,7 @@ alive();
   .moveTo({x: ${x2}, y: ${y2}})
   .release()
   .perform()
-    `;
+    `
   }
 
   codeFor_sleep(ms = 1000) {
@@ -154,6 +153,6 @@ alive();
   }
 }
 
-JsWdFramework.readableName = "JS - WD (Promise)";
+JsWdFramework.readableName = 'JS - WD (Promise)'
 
-export default JsWdFramework;
+export default JsWdFramework

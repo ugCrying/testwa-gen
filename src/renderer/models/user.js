@@ -12,11 +12,11 @@ function getUserInfo() {
     }
     console.log(
       JSON.parse(
-        localStorage.getItem('userInfo')
-      )
+        localStorage.getItem('userInfo'),
+      ),
     )
     return JSON.parse(
-      localStorage.getItem('userInfo')
+      localStorage.getItem('userInfo'),
     )
   } catch (e) {
     return null
@@ -34,15 +34,15 @@ export default {
       localStorage.setItem('lastTime', `${now}`)
       return {
         ...state,
-        userInfo: payload
+        userInfo: payload,
       }
     },
     logout(state) {
       localStorage.removeItem('userInfo')
       return {
         ...state,
-        userInfo: null
+        userInfo: null,
       }
-    }
-  }
+    },
+  },
 }

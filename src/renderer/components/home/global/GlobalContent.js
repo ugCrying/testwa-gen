@@ -1,13 +1,11 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
 class GlobalContent extends Component {
   render() {
     return (
-      <div>
-        
-      </div>
-    );
+      <div />
+    )
   }
 }
 
-export default GlobalContent;
+export default GlobalContent

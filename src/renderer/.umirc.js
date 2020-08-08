@@ -44,10 +44,6 @@ export default {
     config.resolve.alias.set('static', resolve('../../static'))
     config.resolve.alias.set('api', resolve('../api'))
   },
-  
-  // FIXME: theme
-  // theme: require('./theme.js')()
-  // theme: "./theme.js"
   theme: {
     'primary-color': '#52c41a'
   }
