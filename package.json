@@ -35,73 +35,20 @@
   "scripts": {
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint --fix src/**/*.js",
-    "start": "yarn clean&&yarn start-all",
-    "dir": "yarn build-umi&&npm run build -- --dir -c.asar=true",
+    "start": "yarn clean && yarn start-all",
+    "dir": "rm -rf dist && yarn build-umi && yarn build -- --dir -c.asar=true",
     "build": "build",
-    "release": "release-it -n&&yarn build-umi&&npm run build:all",
-    "build:all": "build -w --publish always&&build -m --publish always",
+    "release": "release-it -n && yarn build-umi && yarn build:all",
+    "build:all": "build -w --publish always && build -m --publish always",
     "build-cli": "npx build",
     "build-umi": "cd src/renderer && cross-env COMPRESS=none cross-env CSS_COMPRESS=none umi build",
     "start-umi": "cd src/renderer && umi dev",
     "start-electron": "cd src&&nodemon --watch main --exec electron main/index.js",
     "start-all": "concurrently \"yarn start-umi\" \"wait-on http://localhost:8000 && yarn start-electron\"",
-    "clean": "yarn clean-bin&&yarn clean-apk",
-    "clean-bin": "adb shell rm -r /data/local/tmp/mini*&&adb shell ls /data/local/tmp",
+    "clean": "yarn clean-bin && yarn clean-apk",
+    "clean-bin": "adb shell rm -r /data/local/tmp/mini* && adb shell ls /data/local/tmp",
     "clean-apk": "adb uninstall io.appium.uiautomator2.server",
     "postinstall": "build install-app-deps"
-  },
-  "build": {
-    "productName": "TestwaGen",
-    "appId": "com.testwa.desktop",
-    "copyright": "Copyright © 2020 testwa",
-    "mac": {
-      "target": "pkg"
-    },
-    "files": [
-      {
-        "from": "dist/renderer",
-        "to": "renderer"
-      },
-      {
-        "from": "src/main",
-        "to": "main"
-      },
-      {
-        "from": "src/api",
-        "to": "api"
-      },
-      {
-        "from": "src/common",
-        "to": "common"
-      },
-      "!**/{LICENSE,LICENCE,license,*LICENSE,LICENSE*,CHANGELOG*,README*,AUTHORS,.gitmodules,.vscode,.yarnclean}",
-      "!**/*.{png,jpg,JPG,PNG,jpeg,gif,map,un~}",
-      "!static/",
-      "!docs/",
-      "!dist/",
-      "!src/",
-      "!tests/",
-      "!deno*",
-      "!yarn*",
-      "!.git*",
-      "!sleep.js"
-    ],
-    "extraResources": [
-      {
-        "from": "node_modules/minicap-prebuilt",
-        "to": "minicap-prebuilt"
-      },
-      {
-        "from": "node_modules/minitouch-prebuilt",
-        "to": "minitouch-prebuilt"
-      },
-      "node_modules",
-      "static/wappium/lib",
-      "static/wappium/tests/*.txt",
-      "static/wappium/*.js",
-      "static/wappium/node_modules",
-      "static/uiautomator2/apks"
-    ]
   },
   "repository": {
     "type": "git",
