@@ -94,7 +94,7 @@ class GlobalHeader extends Component {
                 >
                   <img
                     // @ts-ignore
-                    src={require(`../../../../../static/images//recording.svg`)}
+                    src={require(`static/images//recording.svg`)}
                     alt=""
                   />
                   停止
@@ -109,7 +109,7 @@ class GlobalHeader extends Component {
                   <img
                     alt=""
                     // @ts-ignore
-                    src={require(`../../../../../static/images//record.svg`)}
+                    src={require(`static/images//record.svg`)}
                   />
                   录制
                 </div>
@@ -140,7 +140,7 @@ class GlobalHeader extends Component {
                   <img
                     alt=""
                     // @ts-ignore
-                    src={require(`../../../../../static/images//recording.svg`)}
+                    src={require(`static/images//recording.svg`)}
                   />
                   停止
                 </div>
@@ -163,7 +163,7 @@ class GlobalHeader extends Component {
                 >
                   <img
                     // @ts-ignore
-                    src={require(`../../../../../static/images//replay.svg`)}
+                    src={require(`static/images//replay.svg`)}
                     alt=""
                     />
                     <div className={styles['button-icon']}>

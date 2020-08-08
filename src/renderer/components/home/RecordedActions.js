@@ -1,59 +1,64 @@
 /**
  * 操作行为模块
  */
-import React, { Component } from 'react';
-import { Tabs, Table, Form, Popconfirm, Input } from 'antd';
-import SyntaxHighlighter from 'react-syntax-highlighter';
-import { vs } from 'react-syntax-highlighter/dist/styles/hljs';
-import frameworks from './client-frameworks';
-// @ts-ignore
-import InspectorStyles from './Inspector.css';
-// @ts-ignore
-import styles from './recordedActions.css';
-import { connect } from 'dva';
-import rxdb from '../../db';
+import React, { Component } from 'react'
+import {
+  Tabs, Table, Form, Popconfirm, Input,
+} from 'antd'
+import SyntaxHighlighter from 'react-syntax-highlighter'
+import { vs } from 'react-syntax-highlighter/dist/styles/hljs'
+import { connect } from 'dva'
 import _ from 'lodash'
-// const { actionAliasMapping } = require('../../../api/script')
-const { remove } = require('immutable');
+import frameworks from './client-frameworks'
+// @ts-ignore
+import InspectorStyles from './Inspector.css'
+// @ts-ignore
+import styles from './recordedActions.css'
+import rxdb from '../../db'
+// const { actionAliasMapping } = require('api/script')
+const { remove } = require('immutable')
 
-const TabPane = Tabs.TabPane;
-const FormItem = Form.Item;
-const EditableContext = React.createContext();
+const { TabPane } = Tabs
+const FormItem = Form.Item
+const EditableContext = React.createContext()
 
 /**
  * 可编辑行
  * TODO: 提供下拉框选择
- * @param {*} param0 
+ * @param {*} param0
  */
 const EditableRow = ({ form, index, ...props }) => (
   <EditableContext.Provider value={form}>
     <tr {...props} />
   </EditableContext.Provider>
-);
+)
 
-const EditableFormRow = Form.create()(EditableRow);
+const EditableFormRow = Form.create()(EditableRow)
 class EditableCell extends React.Component {
   state = {
-    editing: false
+    editing: false,
   };
+
   toggleEdit = () => {
-    const editing = !this.state.editing;
+    const editing = !this.state.editing
     this.setState({ editing }, () => {
       if (editing) {
-        this.input.focus();
+        this.input.focus()
       }
-    });
+    })
   };
+
   save = () => {
-    const { record, handleSave } = this.props;
+    const { record, handleSave } = this.props
     this.form.validateFields((error, values) => {
-      if (error) return;
-      this.toggleEdit();
-      handleSave({ ...record, ...values });
-    });
+      if (error) return
+      this.toggleEdit()
+      handleSave({ ...record, ...values })
+    })
   };
+
   render() {
-    const { editing } = this.state;
+    const { editing } = this.state
     const {
       editable,
       dataIndex,
@@ -62,28 +67,28 @@ class EditableCell extends React.Component {
       index,
       handleSave,
       ...restProps
-    } = this.props;
+    } = this.props
     return (
-      <td ref={node => (this.cell = node)} {...restProps}>
+      <td ref={(node) => (this.cell = node)} {...restProps}>
         {editable ? (
           <EditableContext.Consumer>
-            {form => {
-              this.form = form;
+            {(form) => {
+              this.form = form
               return editing ? (
                 <FormItem style={{ margin: 0 }}>
                   {form.getFieldDecorator(dataIndex, {
                     rules: [
                       {
                         required: true,
-                        message: `${title} 不能为空`
-                      }
+                        message: `${title} 不能为空`,
+                      },
                     ],
-                    initialValue: record[dataIndex]
+                    initialValue: record[dataIndex],
                   })(
                     <Input
-                      ref={node => (this.input = node)}
+                      ref={(node) => (this.input = node)}
                       onPressEnter={this.save}
-                    />
+                    />,
                   )}
                 </FormItem>
               ) : (
@@ -94,22 +99,22 @@ class EditableCell extends React.Component {
                 >
                   {restProps.children}
                 </div>
-              );
+              )
             }}
           </EditableContext.Consumer>
         ) : (
           restProps.children
         )}
       </td>
-    );
+    )
   }
 }
 class RecordActions extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
-      actionFramework: 'jsWd'
-    };
+      actionFramework: 'jsWd',
+    }
     this.columns = [
       {
         title: '行为',
@@ -122,108 +127,104 @@ class RecordActions extends Component {
       {
         title: '元素',
         dataIndex: 'params',
-        editable: true
+        editable: true,
       },
       {
         title: '编辑',
         key: 'operation',
-        fixed: "right",
+        fixed: 'right',
         width: 100,
-        render: (_, record) => {
-          return (
-              <Popconfirm
-                title="确定要删除吗?"
-                okText="确定"
-                cancelText="取消"
-                onConfirm={() => this.handleDelete(record)}
-              >
-                <a href="">删除</a>
-              </Popconfirm>
-          );
-        }
-      }
-    ];
+        render: (_, record) => (
+          <Popconfirm
+            title="确定要删除吗?"
+            okText="确定"
+            cancelText="取消"
+            onConfirm={() => this.handleDelete(record)}
+          >
+            <a href="">删除</a>
+          </Popconfirm>
+        ),
+      },
+    ]
   }
 
-  handleDelete = async row => {
-    this.codes = remove(this.codes, row.key);
+  handleDelete = async (row) => {
+    this.codes = remove(this.codes, row.key)
     if (this.props.record.code.addTime) {
-      const db = await rxdb;
+      const db = await rxdb
       await db.code
         .findOne(this.props.record.code.addTime)
-        .update({ $set: { value: this.codes } });
+        .update({ $set: { value: this.codes } })
     } else {
       this.props.dispatch({
         type: 'record/updateRecordedActions',
-        payload: this.codes
-      });
+        payload: this.codes,
+      })
     }
-    this.setState({ fresh: true });
+    this.setState({ fresh: true })
   };
 
   /**
    * 保存行更改
    */
-  handleSave = async row => {
-    if (row.params.split) row.params = row.params.split(',');
-    this.codes[row.key] = row;
+  handleSave = async (row) => {
+    if (row.params.split) row.params = row.params.split(',')
+    this.codes[row.key] = row
     if (this.props.record.code.addTime) {
-      const db = await rxdb;
+      const db = await rxdb
       await db.code
         .findOne(this.props.record.code.addTime)
-        .update({ $set: { value: this.codes } });
+        .update({ $set: { value: this.codes } })
     } else {
       this.props.dispatch({
         type: 'record/updateRecordedActions',
-        payload: this.codes
-      });
+        payload: this.codes,
+      })
     }
-    this.setState({ fresh: true });
+    this.setState({ fresh: true })
   };
 
   getTableData() {
-    this.codes =
-      this.props.record.code && this.props.record.code.value[0]
-        ? this.props.record.code.value
-        : this.props.record.recordedActions;
+    this.codes = this.props.record.code && this.props.record.code.value[0]
+      ? this.props.record.code.value
+      : this.props.record.recordedActions
     return (this.codes || []).map(({ action, params }, index) => ({
       action,
       params: params.filter(Boolean).join(','),
-      key: index
+      key: index,
     }))
   }
 
   getCode() {
-    const code =
-      this.props.record.code && this.props.record.code.value[0]
-        ? this.props.record.code.value
-        : this.props.record.recordedActions;
-    let framework = new frameworks[this.state.actionFramework]();
-    framework.actions = code || [];
-    return framework.getCodeString();
+    const code = this.props.record.code && this.props.record.code.value[0]
+      ? this.props.record.code.value
+      : this.props.record.recordedActions
+    const framework = new frameworks[this.state.actionFramework]()
+    framework.actions = code || []
+    return framework.getCodeString()
   }
 
   render() {
     const components = {
       body: {
         row: EditableFormRow,
-        cell: EditableCell
-      }
-    };
-    const columns = this.columns.map(col => {
-      if (!col.editable) return col;
+        cell: EditableCell,
+      },
+    }
+    const columns = this.columns.map((col) => {
+      if (!col.editable) return col
       return {
         ...col,
-        onCell: record => ({
+        onCell: (record) => ({
           record,
           editable: col.editable,
           dataIndex: col.dataIndex,
           title: col.title,
-          handleSave: this.handleSave
-        })
-      };
-    });
-    this.data = this.getTableData();
+          handleSave: this.handleSave,
+        }),
+      }
+    })
+    this.data = this.getTableData()
 
     return (
       <div className={styles['script-wrap']}>
@@ -241,7 +242,7 @@ class RecordActions extends Component {
                 // y: `max(calc(100vh - 200px), 400px)`
                 // y: true
                 // y: 200
-                y: 'calc(100vh - 200px)'
+                y: 'calc(100vh - 200px)',
               }}
             />
           </TabPane>
@@ -249,7 +250,7 @@ class RecordActions extends Component {
             <div className={styles['script-content']}>
               <SyntaxHighlighter
                 language={this.state.actionFramework}
-                style={ vs }
+                style={vs}
                 showLineNumbers
               >
                 {this.getCode()}
@@ -258,8 +259,8 @@ class RecordActions extends Component {
           </TabPane>
         </Tabs>
       </div>
-    );
+    )
   }
 }
 
-export default connect(state => state)(RecordActions);
+export default connect((state) => state)(RecordActions)

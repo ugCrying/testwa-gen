@@ -7,8 +7,8 @@ import {
 } from 'antd'
 import Timeout from 'await-timeout'
 import { connect } from 'dva'
-import { getProjectList } from '../../../../api/project'
-import { uploadScript } from '../../../../api/script'
+import { getProjectList } from 'api/project'
+import { uploadScript } from 'api/script'
 
 const formItemLayout = {
   labelCol: { span: 6 },

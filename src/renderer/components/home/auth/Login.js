@@ -5,7 +5,7 @@ import React, { Component } from 'react'
 import { Form, Modal, Input } from 'antd'
 import Timeout from 'await-timeout'
 import { connect } from 'dva'
-import { login } from '../../../../api/auth'
+import { login } from 'api/auth'
 
 const formItemLayout = {
   labelCol: { span: 6 },

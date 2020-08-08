@@ -1,3 +1,8 @@
+const path = require('path')
+
+function resolve (dir) {
+  return path.join(__dirname, dir)
+}
 export default {
   history: 'hash',
   publicPath: "./",
@@ -30,6 +35,15 @@ export default {
     }
     callback(null, isExternal);
   },
-  // FIMXE: theme
+  chainWebpack(config, { webpack }) {
+    console.log(
+      __dirname
+    )
+    // 设置 alias
+    config.resolve.alias.set('static', resolve('../../static'))
+    config.resolve.alias.set('api', resolve('../api'))
+  }
+  
+  // FIXME: theme
   // theme: require('./theme.js')()
 };
