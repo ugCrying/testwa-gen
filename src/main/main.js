@@ -10,8 +10,7 @@ const {
   getSource, postSession, startAppium, stopAppium,
 } = require('../api/appium')
 const { runScript } = require('../api/adb')
-// const { xmlToJSON } = require('../api/xml')
-const { installU2ToDevice, startU2 } = require('../api/u2')
+const { startU2 } = require('../api/u2')
 const { startMini, trackDevices } = require('../api/mini')
 const menu = require('./menu')
 const upgrade = require('./upgrade')
@@ -19,7 +18,6 @@ const upgrade = require('./upgrade')
 let mainWindow
 let deviceWin
 let cp
-let _device
 const baseUrl = process.defaultApp
   ? 'http://localhost:8000'
   : `file://${__dirname}/../renderer/index.html`
@@ -58,14 +56,12 @@ const setupDevice = async function (device) {
  * @return {Promise<any>}
  */
 const openDeviceWindow = async function (_, device) {
-  _device = device
   if (!device.screen) {
     console.error(`${device.id} 获取分辨率失败`)
     return
   }
   const display = require('electron').screen.getPrimaryDisplay()
   const [width, height] = device.screen.split('x')
-  console.log('创建设备窗口 Renderer')
   startMini(device)
   setupDevice(device)
   if (!deviceWin) {
@@ -199,6 +195,8 @@ app.once('ready', () => {
     webPreferences: {
       nodeIntegration: true,
     },
+    width: 1280,
+    height: 768,
     show: true,
     // backgroundColor: "#2e2c29"
   })

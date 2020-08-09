@@ -8,6 +8,8 @@ import adbkit from 'adbkit'
 import { ipcRenderer } from 'electron'
 import { connect } from 'dva'
 import Timeout from 'await-timeout'
+import net from 'net'
+import { runScript } from 'api/adb'
 import HighlighterRect from './HighlighterRect'
 // @ts-ignore
 import styles from './Inspector.css'
@@ -20,20 +22,7 @@ import { xmlToJSON } from './lib'
 import { connectMinicap } from './minicap'
 import DeviceControl from './DeviceControl/DeviceControl'
 
-const { runScript } = require('api/adb')
-
 export let sourceXML = null
-let keyboard
-const connectKeyboard = () => {
-  keyboard = require('net').connect({ port: 6677 })
-  keyboard.on('connect', () => console.log('keyboard 已连接'))
-  keyboard.on('close', (hadError) => {
-    keyboard = null
-    console.log(hadError ? 'keyboard连接异常关闭' : 'keyboard连接关闭')
-  })
-  keyboard.on('error', console.log)
-  return keyboard
-}
 ipcRenderer.once('mainWinId', (_, { mainWinId }) => {
   localStorage.setItem('mainWinId', mainWinId)
 })
@@ -56,6 +45,7 @@ class Device extends Component {
       // 上一步操作时间戳
       lastActionTime: null,
     }
+    this.keyboard = null
     // 是否处于按压状态
     this.isPressing = false
     // 是否处于滑动（滚动）状态
@@ -89,8 +79,9 @@ class Device extends Component {
       ipcRenderer.send('getSourceJSONSuccess', sourceJSON)
       this.setState({ sourceJSON, loading: false })
     })
-    ipcRenderer.on('getSourceFailed', (err) => {
+    ipcRenderer.on('getSourceFailed', (_, err) => {
       // TODO: retry
+      console.error(err)
       this.setState({ loading: false })
     })
   }
@@ -160,16 +151,28 @@ class Device extends Component {
     this.minitouch.on('error', console.log)
   }
 
+  // eslint-disable-next-line react/sort-comp
+  connectKeyboard () {
+    this.keyboard = net.connect({ port: 6677 })
+    this.keyboard.on('connect', () => console.log('keyboard 已连接'))
+    this.keyboard.on('close', (hadError) => {
+      this.keyboard = null
+      console.log(hadError ? 'keyboard连接异常关闭' : 'keyboard连接关闭')
+    })
+    this.keyboard.on('error', console.error)
+  }
+
   /**
    * 键盘输入同步至设备
    * @param {String} text
    */
+  // eslint-disable-next-line react/sort-comp
   doTypeText(text) {
-    if (!keyboard) {
-      console.log('连接keyboard')
-      keyboard = connectKeyboard()
+    if (!this.keyboard) {
+      this.connectKeyboard()
     }
-    keyboard.write(`${text}\n`)
+    this.text = text
+    this.keyboard.write(`${text}\n`)
   }
 
   getSource() {
@@ -359,7 +362,6 @@ class Device extends Component {
   }
 
   render() {
-    console.log('屏幕组件渲染')
     return (
       <Spin size="large" tip="同步 UI Source..." spinning={this.state.loading}>
         <div
@@ -403,19 +405,28 @@ class Device extends Component {
             </div>
           </div>
           <DeviceControl
+            record={this.record}
             refreshUI={() => this.getSource()}
             goBack={() => {
               runScript(this.props.device, 'input keyevent "KEYCODE_BACK"')
               if (this.record) {
+                const currentActionTime = (new Date()).getTime()
                 ipcRenderer.send(
                   'recordedActions',
                   [
+                    {
+                      action: 'sleep',
+                      params: [currentActionTime - this.state.lastActionTime],
+                    },
                     {
                       action: 'back',
                       params: [],
                     },
                   ],
                 )
+                this.setState({
+                  lastActionTime: (new Date()).getTime(),
+                })
               }
             }}
             task={() => runScript(this.props.device, 'input keyevent "KEYCODE_MENU"')}

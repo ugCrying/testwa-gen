@@ -115,7 +115,7 @@ const pushMiniToDevice = async function (device) {
     console.error(reason.message, `向${device.id}推送服务文件失败`)
   })
   await installU2ToDevice(device.id)
-  // await startU2(device.id)
+  await startU2(device.id)
 }
 
 const trackDevices = async function () {
