@@ -37,13 +37,10 @@ export default {
     callback(null, isExternal);
   },
   chainWebpack(config, { webpack }) {
-    console.log(
-      __dirname
-    )
-    // 设置 alias
     config.resolve.alias.set('static', resolve('../../static'))
     config.resolve.alias.set('api', resolve('../api'))
   },
+  minimizer: 'terserjs',
   theme: {
     'primary-color': '#52c41a'
   }

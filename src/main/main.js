@@ -230,6 +230,7 @@ app.once('ready', () => {
 })
 app.once('before-quit', () => {
   console.log('准备退出')
+  process.exit()
 })
 app.once('window-all-closed', app.quit)
 ipcMain.on('openDeviceWindow', openDeviceWindow)

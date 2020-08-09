@@ -22,16 +22,16 @@ files:
 - "!deno*"
 - "!yarn*"
 - "!.git*"
-- "!sleep.js"
 extraResources:
 - from: node_modules/minicap-prebuilt
   to: minicap-prebuilt
 - from: node_modules/minitouch-prebuilt
   to: minitouch-prebuilt
-  # TODO: 自动挑选需要的 node_module
-- node_modules
-# - node_modules/umi
-# - node_modules/umi-plugin-react
+# FIXME: react 引入的是开发版本
+- node_modules/react
+# FIXME: react 依赖也需要手动引入
+- node_modules/object-assign
+- node_modules/prop-types
 - static/wappium/lib
 - static/wappium/tests/*.txt
 - static/wappium/*.js

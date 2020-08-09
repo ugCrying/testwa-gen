@@ -33,10 +33,10 @@
     "cache": false
   },
   "scripts": {
-    "build:dir": "rm -rf dist && yarn build:umi && yarn build:electron --dir -c.asar=true && rm -rf dist/renderer",
+    "build:dir": "yarn build:umi && yarn build:electron --dir -c.asar=true && rm -rf dist/renderer",
     "build:pack": "rm -rf dist && yarn build:electron",
     "build:electron": "build",
-    "build:umi": "cd src/renderer && umi build",
+    "build:umi": "rm -rf dist && cd src/renderer && umi build",
     "clean": "yarn clean:bin && yarn clean:apk",
     "clean:apk": "adb uninstall io.appium.uiautomator2.server",
     "clean:bin": "adb shell rm -r /data/local/tmp/mini* && adb shell ls /data/local/tmp",
@@ -73,7 +73,6 @@
     "request": "^2.88.0",
     "rxdb": "^8.0.4",
     "rxjs": "^6.3.3",
-    "source-map-support": "^0.5.9",
     "wd": "^1.12.1",
     "xmldom": "^0.1.27",
     "xpath": "^0.0.27"

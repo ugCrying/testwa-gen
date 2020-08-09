@@ -1,4 +1,3 @@
-console.log('自动更新模块')
 const { autoUpdater } = require('electron-updater')
 const { Menu, app } = require('electron')
 
@@ -32,6 +31,5 @@ module.exports = () => {
   autoUpdater.on('error', () => {
     updateMenu('isLatest')
   })
-  console.log('准备检查更新')
   autoUpdater.checkForUpdatesAndNotify()
 }
