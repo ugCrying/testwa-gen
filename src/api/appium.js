@@ -18,7 +18,11 @@ request.interceptors.response.use(({ data }) => data)
  */
 const postSession = async function () {
   return await request.post('', {
-    desiredCapabilities: {},
+    desiredCapabilities: {
+      platformName: 'Android',
+    },
+  }).then((r) => {
+    console.log(r)
   })
 }
 

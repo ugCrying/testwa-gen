@@ -36,7 +36,8 @@ if (process.platform !== 'win32') {
 const setupDevice = async function (device) {
   // await installU2ToDevice(device.id)
   await startU2(device.id)
-  await Timeout.set(500)
+  // FIXME：必须预留一定长度时间
+  await Timeout.set(5000)
   await postSession()
   await runScript(
     device.id,
