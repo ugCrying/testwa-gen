@@ -1,21 +1,22 @@
 import fs from 'fs'
 import { ipcRenderer } from 'electron'
 import { client } from 'api/adb'
+import _ from 'lodash'
 import rxdb from '../../db'
 import frameworks from './client-frameworks'
 
-const adbkit = require('adbkit')
 const request = require('request').defaults({
   timeout: 6000,
   forever: true,
   json: true,
   baseUrl: 'http://localhost:4444/wd/hub/session/1/',
 })
+
+const adbkit = require('adbkit')
 const ApkReader = require('adbkit-apkreader')
 
 let device
 let cp
-let timer
 
 /**
  * 停止正在执行（回放）的脚本
@@ -114,62 +115,33 @@ export const onSelectPackage = ({ packageName, activityName, name }) => {
   device.appName = name
   device.activityName = activityName
 }
-export const getAppInfo = (packageName, cb) => {
-  request.get('/package', (_err, _res, body) => {
-    try {
-      const [app] = JSON.parse(body.value).filter(
-        (app) => app.packageName === packageName,
-      )
-      cb(app)
-    } catch (e) {
-      console.log('uiautomator2服务异常，应用列表获取失败')
+
+const getDeviceApp = () => new Promise((resolve, reject) => {
+  request.get('/package', async (err, res, packages) => {
+    // 失败轮训
+    if (err || !_.get(packages, 'value')) {
+      // await Timeout.set(500)
+      return getDeviceApp().then(resolve)
     }
+    resolve(
+      JSON.parse(packages.value),
+    )
   })
-}
-const getdeviceApp = (dispatch, cb) => {
-  request.get('/package', (err, res, packages) => {
-    try {
-      packages = JSON.parse(packages.value)
-      clearTimeout(timer)
-      timer = null
-      return dispatch({
-        type: 'record/packages',
-        payload: {
-          packages,
-        },
-      })
-    } catch (e) {
-      if (cb) cb()
-      console.log('getdeviceApp', err || packages || res)
-      return setTimeout(() => getdeviceApp(dispatch), 2000)
-    }
-  })
-}
+})
 
 /**
  * 获取设备下 app
  * @param {*} dispatch
  */
 export const getPackages = (dispatch) => {
-  getdeviceApp(dispatch, () => {
-    ipcRenderer.send('startU2')
-    setTimeout(
-      () => client.shell(
-        device.id,
-        'am start io.appium.uiautomator2.server/io.appium.uiautomator2.MainActivity',
-      ),
-      600,
-    )
-  })
-  timer = setTimeout(() => {
-    timer = null
+  getDeviceApp().then(async (packages = []) => {
     dispatch({
       type: 'record/packages',
       payload: {
-        packages: [],
+        packages,
       },
     })
-  }, 25000)
+  })
 }
 
 /**
@@ -196,31 +168,28 @@ export const getCodes = async (cb) => {
     if (codes) cb({ codes: JSON.parse(JSON.stringify(codes)) })
   })
 }
-export const getApks = async (cb) => {
+
+// eslint-disable-next-line no-async-promise-executor
+export const getApkList = () => new Promise(async (resolve, reject) => {
   const db = await rxdb
   // @ts-ignore
   db.apk
     .find()
     .exec()
-    // .then(documents => console.dir("rxdb find", documents));
-  // @ts-ignore
-  db.apk.find().$.subscribe((apks) => {
-    if (apks) {
-      cb({
-        _apks: apks.filter(async (apk) => {
-          try {
-            fs.statSync(apk.path)
-            return true
-          } catch (e) {
-          // @ts-ignore
-            db.apk.remove(apk)
-            return false
-          }
-        }),
-      })
-    }
+  db.apk.find().$.subscribe((apkList = []) => {
+    const result = apkList.filter((apk) => {
+      try {
+        fs.statSync(apk.path)
+        return true
+      } catch (e) {
+      // @ts-ignore
+        db.apk.remove(apk)
+        return false
+      }
+    })
+    resolve(result)
   })
-}
+})
 
 /**
  * 监听设备信息

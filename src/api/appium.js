@@ -14,9 +14,10 @@ request.interceptors.response.use(({ data }) => data)
 
 /**
  * https://github.com/SeleniumHQ/selenium/wiki/JsonWireProtocol#session-1
+ * @returns {Promise<any>}
  */
-const postSession = function () {
-  return request.post('', {
+const postSession = async function () {
+  return await request.post('', {
     desiredCapabilities: {},
   })
 }

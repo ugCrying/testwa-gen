@@ -95,6 +95,71 @@ class Device extends Component {
     })
   }
 
+  componentDidMount() {
+    this.info()
+    // 接受来自main，更改样式大小
+    ipcRenderer.on('changeStyle', (_, args) => {
+      this.canvasHeight = args.canvasHeight
+      this.setState({
+        canvasHeight: this.canvasHeight,
+      })
+      top = 45 * args.scale
+      left = 10 * args.scale
+      const deviceStyle = {
+        height: `${args.shellHeight}px`,
+      }
+      const shellStyle = {
+        transform: `scale3d(${args.scale}, ${args.scale}, 1)`,
+        height: `${822 - args.shellHeightDiff}px`,
+      }
+      const screenStyle = {
+        width: `${args.canvasWidth}px`,
+        height: `${args.canvasHeight}px`,
+        top: `${top}px`,
+        left: `${left}px`,
+        borderRadius: `${14 * args.scale}px`,
+      }
+      Object.assign(this.device.style, deviceStyle)
+      Object.assign(this.shell.style, shellStyle)
+      Object.assign(this.screen.style, screenStyle)
+      ipcRenderer.send('displayDevice')
+    })
+    const g = this.canvas.getContext('2d')
+    const img = new Image()
+    const config = {
+      drawing: false,
+      img,
+    }
+    img.onload = () => {
+      if (!this.canvas) {
+        config.drawing = false
+        return
+      }
+      this.canvas.width = img.width
+      this.canvas.height = img.height
+      // console.log('投屏尺寸', this.canvas.width, this.canvas.height);
+      g.drawImage(img, 0, 0)
+      config.drawing = false
+    }
+    // @ts-ignore
+    connectMinicap(config, async (banner) => {
+      this.banner = banner
+      await Timeout.set(1000)
+      // @ts-ignore
+      this.ratio = this.banner.realHeight / this.state.canvasHeight
+    })
+    this.minitouch.on('data', (chunk) => {
+      this.touchSize = chunk
+        .toString()
+        .split('^')[1]
+        .split(' ')
+    })
+    this.minitouch.on('connect', () => console.log('minitouch 已连接'))
+    this.minitouch.on('close', (hadError) => console.log(hadError ? 'minitouch连接异常关闭' : 'minitouch连接关闭'),
+    )
+    this.minitouch.on('error', console.log)
+  }
+
   /**
    * 键盘输入同步至设备
    * @param {String} text
@@ -265,68 +330,6 @@ class Device extends Component {
     })
   }
 
-  componentDidMount() {
-    this.info()
-    // 接受来自main，更改样式大小
-    ipcRenderer.on('changeStyle', (_, args) => {
-      this.canvasHeight = args.canvasHeight
-      this.setState({
-        canvasHeight: this.canvasHeight,
-      })
-      top = 45 * args.scale
-      left = 10 * args.scale
-      const deviceStyle = {
-        height: `${args.shellHeight}px`,
-      }
-      const shellStyle = {
-        transform: `scale3d(${args.scale}, ${args.scale}, 1)`,
-        height: `${822 - args.shellHeightDiff}px`,
-      }
-      const screenStyle = {
-        width: `${args.canvasWidth}px`,
-        height: `${args.canvasHeight}px`,
-        top: `${top}px`,
-        left: `${left}px`,
-        borderRadius: `${14 * args.scale}px`,
-      }
-      Object.assign(this.device.style, deviceStyle)
-      Object.assign(this.shell.style, shellStyle)
-      Object.assign(this.screen.style, screenStyle)
-      ipcRenderer.send('displayDevice')
-    })
-    const g = this.canvas.getContext('2d')
-    const img = new Image()
-    const config = {
-      drawing: false,
-      img,
-    }
-    img.onload = () => {
-      if (!this.canvas) return (config.drawing = false)
-      this.canvas.width = img.width
-      this.canvas.height = img.height
-      // console.log('投屏尺寸', this.canvas.width, this.canvas.height);
-      g.drawImage(img, 0, 0)
-      return (config.drawing = false)
-    }
-    // @ts-ignore
-    connectMinicap(config, async (banner) => {
-      this.banner = banner
-      await Timeout.set(1000)
-      // @ts-ignore
-      this.ratio = this.banner.realHeight / this.state.canvasHeight
-    })
-    this.minitouch.on('data', (chunk) => {
-      this.touchSize = chunk
-        .toString()
-        .split('^')[1]
-        .split(' ')
-    })
-    this.minitouch.on('connect', () => console.log('minitouch 已连接'))
-    this.minitouch.on('close', (hadError) => console.log(hadError ? 'minitouch连接异常关闭' : 'minitouch连接关闭'),
-    )
-    this.minitouch.on('error', console.log)
-  }
-
   highlighterRects() {
     const highlighterRects = []
     const recursive = (element, zIndex = 0) => {
@@ -401,7 +404,20 @@ class Device extends Component {
           </div>
           <DeviceControl
             refreshUI={() => this.getSource()}
-            goBack={() => runScript(this.props.device, 'input keyevent "KEYCODE_BACK"')}
+            goBack={() => {
+              runScript(this.props.device, 'input keyevent "KEYCODE_BACK"')
+              if (this.record) {
+                ipcRenderer.send(
+                  'recordedActions',
+                  [
+                    {
+                      action: 'back',
+                      params: [],
+                    },
+                  ],
+                )
+              }
+            }}
             task={() => runScript(this.props.device, 'input keyevent "KEYCODE_MENU"')}
             home={() => runScript(this.props.device, 'input keyevent "KEYCODE_HOME"')}
             input={(e) => {

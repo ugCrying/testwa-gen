@@ -6,7 +6,7 @@ const client = adbkit.createClient()
 const XMLPath = '/sdcard/ui.xml'
 
 /**
- * adb UIAutomato2 抓取 XML
+ * adb UIAutomator2 抓取 XML
  * @param {*} deviceId
  */
 const dump = async function(deviceId) {

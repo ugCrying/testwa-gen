@@ -32,6 +32,8 @@ const fixDefaultArugs = function (action = '', argus = []) {
       break
     case 'back':
       break
+    case 'sleep':
+      break
     case 'tap':
       if (argus.length === 4) {
         argus.unshift('')
@@ -48,6 +50,8 @@ const fixDefaultArugs = function (action = '', argus = []) {
         argus.splice(1, 1)
       }
       // debugger
+      break
+    default:
       break
   }
 }

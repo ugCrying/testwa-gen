@@ -10,7 +10,8 @@ export default {
   plugins: [
     [
       'umi-plugin-react', {
-        dynamicImport: true,
+        // FIXME: 开启后会导致首屏加载过长
+        // dynamicImport: true,
         dva: true,
         antd: true
     }],

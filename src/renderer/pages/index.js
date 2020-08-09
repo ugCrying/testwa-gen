@@ -1,10 +1,6 @@
-// @ts-check
-
 import { connect } from 'dva'
 import { notification } from 'antd'
 import Home from '../components/home'
-// eslint-dsiable-next-line
-// import { ipcRenderer } from "electron";
 import { emitter } from '../lib'
 
 // FIXME

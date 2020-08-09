@@ -5,7 +5,7 @@ import React from 'react'
 import { ipcRenderer } from 'electron'
 import { getRecordedActions, parseCoordinates } from './lib'
 import { emitter } from '../../lib'
-import { sourceXML } from '.'
+import { sourceXML } from './index'
 // @ts-ignore
 import styles from './Inspector.css'
 

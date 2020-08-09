@@ -11,8 +11,8 @@ const {
 } = require('../api/appium')
 const { runScript } = require('../api/adb')
 // const { xmlToJSON } = require('../api/xml')
-const { installU2ToDevice, startU2, src } = require('../api/u2')
-const { startMini, trackDevices, getMinicapImgBase64 } = require('../api/mini')
+const { installU2ToDevice, startU2 } = require('../api/u2')
+const { startMini, trackDevices } = require('../api/mini')
 const menu = require('./menu')
 const upgrade = require('./upgrade')
 
@@ -36,16 +36,16 @@ if (process.platform !== 'win32') {
 }
 
 const setupDevice = async function (device) {
-  await installU2ToDevice(device.id)
+  // await installU2ToDevice(device.id)
   await startU2(device.id)
-  await Timeout.set(5000)
-  postSession()
-  runScript(
+  await Timeout.set(500)
+  await postSession()
+  await runScript(
     device.id,
     'ime set io.appium.uiautomator2.server/io.appium.uiautomator2.handler.TestwaIME',
   )
   await Timeout.set(600)
-  runScript(
+  await runScript(
     device.id,
     'am start io.appium.uiautomator2.server/io.appium.uiautomator2.MainActivity',
   )
@@ -68,7 +68,6 @@ const openDeviceWindow = async function (_, device) {
   console.log('创建设备窗口 Renderer')
   startMini(device)
   setupDevice(device)
-  // await setupDevice()
   if (!deviceWin) {
     deviceWin = new BrowserWindow({
       title: '脚本录制',
@@ -91,7 +90,7 @@ const openDeviceWindow = async function (_, device) {
         nodeIntegrationInWorker: true,
       },
     })
-    // if (process.defaultApp) deviceWin.webContents.openDevTools();
+    // if (process.defaultApp) deviceWin.webContents.openDevTools()
     deviceWin.once('closed', () => {
       mainWindow.webContents.send('recorded')
       deviceWin = null
@@ -137,14 +136,14 @@ const openDeviceWindow = async function (_, device) {
       width: DEVICE_ORIGIN_WIDTH + 75,
       height: SHELL_HEIGHT,
     })
-    console.log({
-      设备窗口高度: DEVICE_ORIGIN_WIDTH + 75,
-      设备窗口宽度: SHELL_HEIGHT,
-      投屏高度: canvasHeight,
-      投屏宽度: canvasWidth,
-      adb设备实际高度: height,
-      adb设备实际宽度: width,
-    })
+    // console.log({
+    //   设备窗口高度: DEVICE_ORIGIN_WIDTH + 75,
+    //   设备窗口宽度: SHELL_HEIGHT,
+    //   投屏高度: canvasHeight,
+    //   投屏宽度: canvasWidth,
+    //   adb设备实际高度: height,
+    //   adb设备实际宽度: width,
+    // })
     deviceWin.webContents.send('changeStyle', {
       canvasWidth,
       canvasHeight,
@@ -154,39 +153,39 @@ const openDeviceWindow = async function (_, device) {
     })
 
     // test log
-    {
-      deviceWin.webContents.send('deviceWinShowed', { width, height })
-      // 屏幕尺寸(屏幕对角线长度)in
-      const inch = 15.6
-      // 屏幕分辨率(屏幕宽和高上所拥有像素数)px
-      const pc_pixel = display.size
-      // 屏幕像素密度(屏幕上一个对角线为1英寸的正方形所拥有的像素数,衡量清晰度)ppi=
-      Math.sqrt(Math.pow(pc_pixel.width, 2) + Math.pow(pc_pixel.height, 2))
-        / inch
-      console.log('屏幕分辨率', display.size)
-      console.log('屏幕内容区（去掉win任务栏/mac菜单栏）', display.workArea)
-      console.log(
-        '设备分辨率',
-        { width: +width, height: +height },
-        height / width,
-      )
-      console.log('设备窗口指定', {
-        x: display.workArea.width + display.workArea.x - DEVICE_ORIGIN_WIDTH,
-        y: display.workArea.y,
-        width: DEVICE_ORIGIN_WIDTH,
-        height: display.workArea.height,
-      })
-      console.log('设备窗口', deviceWin.getBounds())
-      console.log('设备窗口内容区', deviceWin.getContentBounds())
-      console.log('设备窗口屏幕大小指定', {
-        width: DEVICE_ORIGIN_WIDTH,
-        height: canvasHeight,
-      })
-      console.log('设备屏幕压缩比例(计划)', {
-        width: width / DEVICE_ORIGIN_WIDTH,
-        height: height / canvasHeight,
-      })
-    }
+    // {
+    //   deviceWin.webContents.send('deviceWinShowed', { width, height })
+    //   // 屏幕尺寸(屏幕对角线长度)in
+    //   const inch = 15.6
+    //   // 屏幕分辨率(屏幕宽和高上所拥有像素数)px
+    //   const pc_pixel = display.size
+    //   // 屏幕像素密度(屏幕上一个对角线为1英寸的正方形所拥有的像素数,衡量清晰度)ppi=
+    //   Math.sqrt(Math.pow(pc_pixel.width, 2) + Math.pow(pc_pixel.height, 2))
+    //     / inch
+    //   console.log('屏幕分辨率', display.size)
+    //   console.log('屏幕内容区（去掉win任务栏/mac菜单栏）', display.workArea)
+    //   console.log(
+    //     '设备分辨率',
+    //     { width: +width, height: +height },
+    //     height / width,
+    //   )
+    //   console.log('设备窗口指定', {
+    //     x: display.workArea.width + display.workArea.x - DEVICE_ORIGIN_WIDTH,
+    //     y: display.workArea.y,
+    //     width: DEVICE_ORIGIN_WIDTH,
+    //     height: display.workArea.height,
+    //   })
+    //   console.log('设备窗口', deviceWin.getBounds())
+    //   console.log('设备窗口内容区', deviceWin.getContentBounds())
+    //   console.log('设备窗口屏幕大小指定', {
+    //     width: DEVICE_ORIGIN_WIDTH,
+    //     height: canvasHeight,
+    //   })
+    //   console.log('设备屏幕压缩比例(计划)', {
+    //     width: width / DEVICE_ORIGIN_WIDTH,
+    //     height: height / canvasHeight,
+    //   })
+    // }
   })
   deviceWin.loadURL(
     `${baseUrl}#/${device.id}?device=${
@@ -205,7 +204,6 @@ app.once('ready', () => {
   })
   mainWindow.loadURL(baseUrl)
   mainWindow.once('ready-to-show', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 500))
     mainWindow.maximize()
     mainWindow.show()
   })
@@ -328,17 +326,4 @@ ipcMain.on('close', (_) => {
 // minimize deviceWindow
 ipcMain.on('min', (_) => {
   deviceWin.minimize()
-})
-
-// start Uiautomator2
-ipcMain.on('startU2', async () => {
-  await startU2(_device.id)
-  setTimeout(postSession, 5000)
-})
-
-ipcMain.on('getMinicapImgBase64', () => {
-  getMinicapImgBase64((src) => {
-    console.log('getMinicapImgBase64Success')
-    deviceWin.webContents.send('getMinicapImgBase64Success', src)
-  })
 })

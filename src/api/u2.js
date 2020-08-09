@@ -11,7 +11,7 @@ const U2apkPath = join(__dirname, '..', '..', 'static', 'uiautomator2', 'apks')
  * @return {Promise<any>}
  */
 const getCurrentU2PackageInfo = async function (deviceId = '') {
-  await runScript(deviceId, 'dumpsys package io.appium.uiautomator2.server')
+  return await runScript(deviceId, 'dumpsys package io.appium.uiautomator2.server')
     .then(adbkit.util.readAll)
 }
 
@@ -21,7 +21,7 @@ const getCurrentU2PackageInfo = async function (deviceId = '') {
  * @return {Promise<String>}
  */
 const getDesiredU2VersionName = async function (path) {
-  await ApkReader
+  return await ApkReader
     .open(path)
     .then((reader) => reader.readManifest())
     .then(({ versionName }) => versionName)
@@ -75,6 +75,10 @@ const startU2 = async function (deviceId = '') {
   await runScript(
     deviceId,
     'am instrument -w --no-window-animation io.appium.uiautomator2.server.test/androidx.test.runner.AndroidJUnitRunner',
+  )
+  await runScript(
+    deviceId,
+    'am start io.appium.uiautomator2.server/io.appium.uiautomator2.MainActivity',
   )
 }
 

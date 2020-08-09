@@ -7,7 +7,7 @@ import {
 } from 'antd'
 import { connect } from 'dva'
 import {
-  getApks,
+  getApkList,
   getPackages,
   onSelectAPK,
   onSelectPackage,
@@ -16,26 +16,22 @@ import {
 // @ts-ignore
 import styles from './app.css'
 // @ts-ignore
-const default_icon = require('static/images/default_app_icon.png')
-
-let apks = []
-getApks(({ _apks }) => (apks = _apks))
+const defaultAppIcon = require('static/images/default_app_icon.png')
 
 class APP extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      // FIXME: app 列表?
-      packages: [],
       // 选中的 app
       select: null,
       // 选中 app 的图标样式
       className: '',
       // loading: true
     }
-    // emitter.on("packages", packages => {
-    //   this.setState({ packages, loading: false });
-    // });
+    this.apkList = []
+    getApkList().then((apkList) => {
+      this.apkList = apkList
+    })
   }
 
   /**
@@ -44,8 +40,11 @@ class APP extends Component {
    * @param {'phone' | 'android'} type 设备类型
    */
   selectApp(app, type) {
-    // iphone 手机
-    type === 'phone' ? onSelectPackage(app) : onSelectAPK(app)
+    if (type === 'phone') {
+      onSelectPackage(app)
+    } else {
+      onSelectAPK(app)
+    }
     this.setState({ select: app, className: app.name + type })
   }
 
@@ -90,6 +89,8 @@ class APP extends Component {
               开始录制
             </Button>
           </div>
+
+          {/* 手机自带的 APP */}
           <div className={styles['app-list-wrap']}>
             {this.props.record.packages
               && this.props.record.packages.map((app, index) => (
@@ -109,7 +110,7 @@ class APP extends Component {
                     />
                   </div>
                   <div className={styles['app-item-icon']}>
-                    <img src={app.icon || default_icon} alt="" />
+                    <img src={app.icon || defaultAppIcon} alt="" />
                   </div>
                   <p className={styles['app-item-name']} title={app.name}>
                     {app.name}
@@ -117,36 +118,39 @@ class APP extends Component {
                 </div>
               ))}
           </div>
+
+          {/* 本地可上传的 APK */}
           <div className={styles['title-list']}>
             <Icon type="laptop" />
             <p>选择电脑上的应用</p>
           </div>
+
+          {/* 录制工具内可上传的 APK */}
           <div className={styles['app-list-wrap']}>
-            {apks
-              && apks.map((app, index) => (
-                <div
-                  className={
+            {this.apkList.map((app, index) => (
+              <div
+                className={
                       this.state.className === `${app.name}local`
                         ? 'app-item selected'
                         : 'app-item'
                     }
-                  key={index}
-                  onClick={this.selectApp.bind(this, app, 'local')}
-                >
-                  <div className={styles['app-item-mask']}>
-                    <Icon
-                      type="check"
-                      style={{ fontSize: 32, color: '#52c41a' }}
-                    />
-                  </div>
-                  <div className={styles['app-item-icon']}>
-                    <img src={app.icon || default_icon} alt="" />
-                  </div>
-                  <p className={styles['app-item-name']} title={app.name}>
-                    {app.name}
-                  </p>
+                key={index}
+                onClick={this.selectApp.bind(this, app, 'local')}
+              >
+                <div className={styles['app-item-mask']}>
+                  <Icon
+                    type="check"
+                    style={{ fontSize: 32, color: '#52c41a' }}
+                  />
                 </div>
-              ))}
+                <div className={styles['app-item-icon']}>
+                  <img src={app.icon || defaultAppIcon} alt="" />
+                </div>
+                <p className={styles['app-item-name']} title={app.name}>
+                  {app.name}
+                </p>
+              </div>
+            ))}
             <div className={styles['app-item']}>
               <div className={styles['app-item-icon item-uploader']}>
                 <Upload
