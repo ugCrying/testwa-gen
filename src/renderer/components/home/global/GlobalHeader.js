@@ -84,7 +84,7 @@ class GlobalHeader extends Component {
             <Button
               size="small"
               disabled={
-                !(!this.props.state.codeRuning && this.props.state.device)
+                !(!this.props.state.codeRunning && this.props.state.device)
               }
             >
               {this.props.state.recording ? (
@@ -108,11 +108,11 @@ class GlobalHeader extends Component {
                     this.props.setState({ activeKey: '应用列表' })
                   }}
                 >
-                  <img
+                  {/* <img
                     alt=""
                     // @ts-ignore
                     src={require('static/images//record.svg')}
-                  />
+                  /> */}
                   录制
                 </div>
               )}
@@ -127,12 +127,12 @@ class GlobalHeader extends Component {
                     && this.props.record.recordedActions.length)))
               }
             >
-              {this.props.state.codeRuning ? (
+              {this.props.state.codeRunning ? (
                 <div
                   className={styles['button-icon']}
                   onClick={() => {
                     this.props.setState({
-                      codeRuning: false,
+                      codeRunning: false,
                     })
                     ipcRenderer.send('stopcode')
                   }}
@@ -157,7 +157,7 @@ class GlobalHeader extends Component {
                         || this.props.record.code.value,
                     )
                     this.props.setState({
-                      codeRuning: true,
+                      codeRunning: true,
                     })
                   }}
                 >
@@ -203,7 +203,7 @@ class GlobalHeader extends Component {
               size="small"
               onClick={() => this.props.setState({ activeKey: '设备列表' })}
               disabled={
-                !!(this.props.state.recording || this.props.state.codeRuning)
+                !!(this.props.state.recording || this.props.state.codeRunning)
               }
             >
               <div className={styles['button-icon']}>

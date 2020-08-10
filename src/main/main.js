@@ -39,11 +39,12 @@ const setupDevice = async function (device) {
   // FIXME：必须预留一定长度时间
   await Timeout.set(5000)
   await postSession()
+  // await Timeout.set(1000)
   await runScript(
     device.id,
     'ime set io.appium.uiautomator2.server/io.appium.uiautomator2.handler.TestwaIME',
   )
-  await Timeout.set(600)
+  // await Timeout.set(1000)
   await runScript(
     device.id,
     'am start io.appium.uiautomator2.server/io.appium.uiautomator2.MainActivity',
@@ -64,7 +65,7 @@ const openDeviceWindow = async function (_, device) {
   const display = require('electron').screen.getPrimaryDisplay()
   const [width, height] = device.screen.split('x')
   startMini(device)
-  setupDevice(device)
+  await setupDevice(device)
   if (!deviceWin) {
     deviceWin = new BrowserWindow({
       title: '脚本录制',
@@ -92,10 +93,10 @@ const openDeviceWindow = async function (_, device) {
       mainWindow.webContents.send('recorded')
       deviceWin = null
     })
-    console.log({
-      mainWinId: mainWindow.id,
-      deviceWinId: deviceWin.id,
-    })
+    // console.log({
+    //   mainWinId: mainWindow.id,
+    //   deviceWinId: deviceWin.id,
+    // })
     mainWindow.webContents.send('deviceWinId', deviceWin.id)
   }
 
@@ -320,6 +321,7 @@ ipcMain.on('stopcode', () => {
 // close deviceWindow
 ipcMain.on('close', (_) => {
   deviceWin.close()
+  mainWindow.webContents.send('closeDeviceWindow')
 })
 
 // minimize deviceWindow

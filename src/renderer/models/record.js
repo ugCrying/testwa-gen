@@ -1,6 +1,17 @@
 export default {
   state: { recordedActions: [], devices: [] },
   reducers: {
+    reset(state) {
+      return {
+        ...state,
+        devices: [],
+        packages: null,
+        sourceJSON: null,
+        recordedActions: [],
+        code: null,
+        codeRunning: false,
+      }
+    },
     devices(state, { payload }) {
       return {
         ...state,
@@ -44,12 +55,12 @@ export default {
         sourceJSON: payload,
       }
     },
-    changeActiveKey(state, { payload }) {
-      return {
-        ...state,
-        activeKey: payload,
-      }
-    },
+    // changeActiveKey(state, { payload }) {
+    //   return {
+    //     ...state,
+    //     activeKey: payload,
+    //   }
+    // },
     addCode(state, { payload }) {
       return {
         ...state,

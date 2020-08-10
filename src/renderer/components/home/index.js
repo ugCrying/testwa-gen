@@ -52,7 +52,7 @@ export default class Home extends Component {
       sideWidth: 0,
       // 终端高度（用于鼠标拖动动态调整）
       terminalHeight: 0,
-      // 录制结束时保存脚本模态框是否课件
+      // 录制结束时保存脚本模态框是否可见
       visible: false,
     }
     this.terminalSwitch = this.terminalSwitch.bind(this)
@@ -62,11 +62,21 @@ export default class Home extends Component {
     trackDevices(this.props.dispatch)
     ipcRenderer.on('runed', () => {
       this.setState({
-        codeRuning: false,
+        codeRunning: false,
       })
     })
     ipcRenderer.on('recorded', () => {
       !this.saved && this.showModal()
+    })
+
+    ipcRenderer.on('closeDeviceWindow', () => {
+      this.setState({
+        activeKey: '设备列表',
+        device: null,
+      })
+      this.props.dispatch({
+        type: 'record/reset',
+      })
     })
     ipcRenderer.on('sendKeys', (_, recordedActions) => {
       this.props.dispatch({
@@ -521,7 +531,7 @@ export default class Home extends Component {
                 <Button
                   size="small"
                   disabled={
-                    !(!this.state.codeRuning && this.state.device)
+                    !(!this.state.codeRunning && this.state.device)
                   }
                 >
                   {this.state.recording ? (
@@ -570,12 +580,12 @@ export default class Home extends Component {
                         && this.props.record.recordedActions.length)))
                   }
                 >
-                  {this.state.codeRuning ? (
+                  {this.state.codeRunning ? (
                     <div
                       className={styles['button-icon']}
                       onClick={() => {
                         this.setState({
-                          codeRuning: false,
+                          codeRunning: false,
                         })
                         ipcRenderer.send('stopcode')
                       }}
@@ -600,7 +610,7 @@ export default class Home extends Component {
                             || this.props.record.code.value,
                         )
                         this.setState({
-                          codeRuning: true,
+                          codeRunning: true,
                         })
                       }}
                     >
@@ -646,7 +656,7 @@ export default class Home extends Component {
                   size="small"
                   onClick={() => this.setState({ activeKey: '设备列表' })}
                   disabled={
-                    !!(this.state.recording || this.state.codeRuning)
+                    !!(this.state.recording || this.state.codeRunning)
                   }
                 >
                   <div className={styles['button-icon']}>
@@ -769,7 +779,7 @@ export default class Home extends Component {
                   <div
                     style={{
                       display:
-                        // this.state.codeRuning ||
+                        // this.state.codeRunning ||
                         // this.state.recording ||
                         this.state.terminalShow ? '' : 'none',
                     }}
@@ -845,7 +855,7 @@ export default class Home extends Component {
                       >
                         <SelectedElement {...this.props} />
                       </TabPane>
-                      {/* {this.state.codeRuning ? (
+                      {/* {this.state.codeRunning ? (
                         <TabPane
                           tab="日志"
                           key="log"

@@ -119,6 +119,7 @@ export const onSelectPackage = ({ packageName, activityName, name }) => {
 const getDeviceApp = () => new Promise((resolve, reject) => {
   request.get('/package', async (err, res, packages) => {
     // 失败轮训
+    // FIXME: 超时次数 / 时间
     if (err || !_.get(packages, 'value')) {
       // await Timeout.set(500)
       return getDeviceApp().then(resolve)
