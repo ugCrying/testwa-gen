@@ -6,6 +6,7 @@ import {
   Layout, Button, Tabs, Modal, Tooltip, Icon, Menu, Dropdown,
   Select,
 } from 'antd'
+import Timeout from 'await-timeout'
 
 import { Subject } from 'rxjs'
 import {
@@ -69,7 +70,15 @@ export default class Home extends Component {
       !this.saved && this.showModal()
     })
 
-    ipcRenderer.on('closeDeviceWindow', () => {
+    ipcRenderer.on('closeDeviceWindow', async () => {
+      if (this.state.codeRunning) {
+        this.setState({
+          codeRunning: false,
+        })
+        ipcRenderer.send('stopcode')
+      }
+      // TODO: ipcRenderer 可能有延迟
+      await Timeout.set(100)
       this.setState({
         activeKey: '设备列表',
         device: null,

@@ -188,7 +188,7 @@ const openDeviceWindow = async function (_, device) {
   deviceWin.loadURL(
     `${baseUrl}#/${device.id}?device=${
       device.id
-    }&width=${width}&height=${height}&testwa_ui=${process.env.testwa_ui}`,
+    }&width=${width}&height=${height}&testwa_ui=${process.env.testwa_ui}&deviceId=${device.id}`,
   )
 }
 app.commandLine.appendSwitch('enable-experimental-web-platform-features')
@@ -228,6 +228,10 @@ app.once('ready', () => {
 })
 app.once('before-quit', () => {
   console.log('准备退出')
+  if (cp) {
+    cp.kill()
+    cp = null
+  }
   process.exit()
 })
 app.once('window-all-closed', app.quit)
@@ -320,11 +324,16 @@ ipcMain.on('stopcode', () => {
 
 // close deviceWindow
 ipcMain.on('close', (_) => {
-  deviceWin.close()
   mainWindow.webContents.send('closeDeviceWindow')
+  deviceWin.close()
+  deviceWin = null
 })
 
 // minimize deviceWindow
 ipcMain.on('min', (_) => {
   deviceWin.minimize()
+})
+
+ipcMain.on('deviceLeave', (_, deviceId) => {
+  deviceWin && deviceWin.webContents && deviceWin.webContents.send('deviceLeave', deviceId)
 })

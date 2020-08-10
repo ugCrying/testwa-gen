@@ -10,6 +10,7 @@ import { connect } from 'dva'
 import Timeout from 'await-timeout'
 import net from 'net'
 import { runScript } from 'api/adb'
+import qs from 'querystring'
 import HighlighterRect from './HighlighterRect'
 // @ts-ignore
 import styles from './Inspector.css'
@@ -70,6 +71,17 @@ class Device extends Component {
       this.setState({ sourceJSON: null })
       this.record = false
     })
+    ipcRenderer.on('deviceLeave', (__, deviceId) => {
+      const { href } = window.location
+      const { deviceId: currentDeviceId } = qs.parse(window.location.href)
+      if (currentDeviceId === deviceId) {
+        this.close()
+      }
+    })
+  }
+
+  close() {
+    ipcRenderer.send('close')
   }
 
   UNSAFE_componentWillMount() {

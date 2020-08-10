@@ -237,6 +237,7 @@ export const trackDevices = async (dispatch) => {
     if (!changes.removed.length && !changes.changed.length) return
     for (const device of changes.removed) {
       console.log(device.id, '离开')
+      ipcRenderer.send('deviceLeave', device.id)
       const idx = devices.findIndex((e) => e.id === device.id)
       if (idx >= 0) devices.splice(idx, 1)
     }
