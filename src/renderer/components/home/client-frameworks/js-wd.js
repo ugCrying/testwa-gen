@@ -32,7 +32,9 @@ const request = require('request').defaults({
 function sleep(ms) {
   let remainTime = ms / 1000 - 1
   let timer = setInterval(() => {
-    console.log('剩余' + (remainTime--) + 's进入下一步')
+    const info = '剩余' + (parseInt(remainTime--)) + 's进入下一步' 
+    console.log(info)
+    process.send(info)
     if (remainTime <= 0) {
       clearInterval(timer)
       timer = null
@@ -69,7 +71,11 @@ async function main () {
         fs.outputFile(require('path').join(__dirname,'screen', caps.udid, date + '.png'), output);
       });
     console.log(e);
+    process.send('遇到异常')
+    process.send(e)
   }
+  console.log("准备退出");
+  process.send("准备退出")
   await driver.quit();
 }
 let i=1;
@@ -77,7 +83,9 @@ const alive = () => {
   main()
     .then(() => {
       i!=${this.run_num}&&setTimeout(() => {
-        console.log('第',++i,'次回放')
+        const msg = ['第', ++i, '次回放'].join('')
+        console.log(msg)
+        process.send(msg)
         alive();
       }, 5000);
     });

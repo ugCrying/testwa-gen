@@ -37,7 +37,7 @@ const setupDevice = async function (device) {
   // await installU2ToDevice(device.id)
   await startU2(device.id)
   // FIXME：必须预留一定长度时间
-  await Timeout.set(5000)
+  await Timeout.set(4500)
   await postSession()
   // await Timeout.set(1000)
   await runScript(
@@ -100,11 +100,10 @@ const openDeviceWindow = async function (_, device) {
     mainWindow.webContents.send('deviceWinId', deviceWin.id)
   }
 
-  // 等待调整device样式信息100ms后进行显示device页面
-  ipcMain.once('displayDevice', () => {
-    setTimeout(() => {
-      deviceWin.show()
-    }, 500)
+  // 等待调整device样式信息300ms后进行显示device页面
+  ipcMain.once('displayDevice', async () => {
+    await Timeout.set(300)
+    deviceWin.show()
   })
 
   ipcMain.once('canvasWidth', (_, canvasWidth) => {
@@ -302,6 +301,9 @@ ipcMain.on('runcode', (_, rawCode) => {
       rawCode,
     )
     cp = fork(path)
+    cp.on('message', (msg) => {
+      mainWindow.webContents.send('log', msg)
+    })
     cp.on('exit', (code) => {
       console.log(`cp exit with code ${code}`)
       cp = null
