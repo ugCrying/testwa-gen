@@ -60,94 +60,6 @@ export default class Home extends Component {
     this.terminalOpen = this.terminalOpen.bind(this)
     this.codeUploadRef = React.createRef()
     this.loginRef = React.createRef()
-    trackDevices(this.props.dispatch)
-    ipcRenderer.on('runed', () => {
-      this.setState({
-        codeRunning: false,
-      })
-    })
-    ipcRenderer.on('recorded', () => {
-      !this.saved && this.showModal()
-    })
-
-    ipcRenderer.on('closeDeviceWindow', async () => {
-      if (this.state.codeRunning) {
-        this.setState({
-          codeRunning: false,
-        })
-        ipcRenderer.send('stopcode')
-      }
-      // TODO: ipcRenderer 可能有延迟
-      await Timeout.set(100)
-      this.setState({
-        activeKey: '设备列表',
-        device: null,
-      })
-      this.props.dispatch({
-        type: 'record/reset',
-      })
-    })
-    ipcRenderer.on('sendKeys', (_, recordedActions) => {
-      this.props.dispatch({
-        type: 'record/addRecordedActions',
-        payload: {
-          recordedActions,
-        },
-      })
-    })
-    ipcRenderer.on('swiped', (_, tap) => {
-      this.props.dispatch({
-        type: 'record/addRecordedActions',
-        payload: {
-          recordedActions: [
-            {
-              action: 'swipe',
-              params: [
-                '',
-                '',
-                tap.width,
-                tap.height,
-                tap.widthEnd,
-                tap.heightEnd,
-              ],
-            },
-          ],
-        },
-      })
-    })
-    ipcRenderer.on('taped', (_, tap) => {
-      localStorage.getItem('tap') === 'true'
-        && this.props.dispatch({
-          type: 'record/addRecordedActions',
-          payload: {
-            recordedActions: [
-              {
-                action: 'tap',
-                params: ['', '', tap.width, tap.height],
-              },
-            ],
-          },
-        })
-    })
-    ipcRenderer.on('recordedActions', (_, recordedActions) => {
-      console.log('得到操作行为，更新state', recordedActions);
-      (!localStorage.getItem('tap')
-        || localStorage.getItem('tap') === 'false')
-        && this.props.dispatch({
-          type: 'record/addRecordedActions',
-          payload: {
-            recordedActions,
-          },
-        })
-    })
-    ipcRenderer.on('getSourceJSONSuccess', (_, sourceJSON) => {
-      this.saved = false
-      console.log('ipcRenderer getSourceJSONSuccess', sourceJSON)
-      this.props.dispatch({
-        type: 'record/source',
-        payload: sourceJSON,
-      })
-    })
   }
 
   selectedCode () {
@@ -278,6 +190,96 @@ export default class Home extends Component {
    * 事件绑定：鼠标拖动调整宽高
    */
   async componentDidMount() {
+    trackDevices(this.props.dispatch)
+    ipcRenderer.on('runed', () => {
+      this.setState({
+        codeRunning: false,
+      })
+    })
+    ipcRenderer.on('recorded', () => {
+      !this.saved && this.showModal()
+    })
+
+    ipcRenderer.on('closeDeviceWindow', async () => {
+      if (this.state.codeRunning) {
+        this.setState({
+          codeRunning: false,
+        })
+        ipcRenderer.send('stopcode')
+      }
+      // TODO: ipcRenderer 可能有延迟
+      await Timeout.set(100)
+      if (this.state.activeKey !== '脚本录制') {
+        this.setState({
+          activeKey: '设备列表',
+          device: null,
+        })
+      }
+      this.props.dispatch({
+        type: 'record/reset',
+      })
+    })
+    ipcRenderer.on('sendKeys', (_, recordedActions) => {
+      this.props.dispatch({
+        type: 'record/addRecordedActions',
+        payload: {
+          recordedActions,
+        },
+      })
+    })
+    ipcRenderer.on('swiped', (_, tap) => {
+      this.props.dispatch({
+        type: 'record/addRecordedActions',
+        payload: {
+          recordedActions: [
+            {
+              action: 'swipe',
+              params: [
+                '',
+                '',
+                tap.width,
+                tap.height,
+                tap.widthEnd,
+                tap.heightEnd,
+              ],
+            },
+          ],
+        },
+      })
+    })
+    ipcRenderer.on('taped', (_, tap) => {
+      localStorage.getItem('tap') === 'true'
+        && this.props.dispatch({
+          type: 'record/addRecordedActions',
+          payload: {
+            recordedActions: [
+              {
+                action: 'tap',
+                params: ['', '', tap.width, tap.height],
+              },
+            ],
+          },
+        })
+    })
+    ipcRenderer.on('recordedActions', (_, recordedActions) => {
+      console.log('得到操作行为，更新state', recordedActions);
+      (!localStorage.getItem('tap')
+        || localStorage.getItem('tap') === 'false')
+        && this.props.dispatch({
+          type: 'record/addRecordedActions',
+          payload: {
+            recordedActions,
+          },
+        })
+    })
+    ipcRenderer.on('getSourceJSONSuccess', (_, sourceJSON) => {
+      this.saved = false
+      console.log('ipcRenderer getSourceJSONSuccess', sourceJSON)
+      this.props.dispatch({
+        type: 'record/source',
+        payload: sourceJSON,
+      })
+    })
     const tabs = document.querySelector(
       `.${styles['main-common-tabs']} .ant-tabs-content`,
     )
@@ -365,7 +367,13 @@ export default class Home extends Component {
    * 组件销毁时事件解绑
    */
   componentWillUnmount() {
+    ipcRenderer.removeAllListeners('closeDeviceWindow')
     ipcRenderer.removeAllListeners('recordedActions')
+    ipcRenderer.removeAllListeners('recorded')
+    ipcRenderer.removeAllListeners('runed')
+    ipcRenderer.removeAllListeners('sendKeys')
+    ipcRenderer.removeAllListeners('swiped')
+    ipcRenderer.removeAllListeners('taped')
     ipcRenderer.removeAllListeners('getSourceJSONSuccess')
   }
 

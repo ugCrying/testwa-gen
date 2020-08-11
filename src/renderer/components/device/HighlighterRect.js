@@ -64,7 +64,9 @@ export default ({
           [
             {
               action: 'sleep',
-              params: [currentActionTime - lastActionTime],
+              params: [
+                Math.ceil((currentActionTime - lastActionTime) / 1000),
+              ],
             },
             {
               action: 'findAndAssign',

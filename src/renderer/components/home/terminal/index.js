@@ -16,6 +16,9 @@ export default class Terminal extends Component {
     this.state = {
       logLines: [],
     }
+  }
+
+  componentDidMount() {
     emitter.on('clearLog', () => this.setState({ logLines: [] }))
     ipcRenderer.on('log', (_, log) => {
       this.setState({ logLines: [...this.state.logLines, log] })
@@ -24,6 +27,7 @@ export default class Terminal extends Component {
 
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('log')
+    emitter.removeAllListeners('clearLog')
   }
 
   render() {

@@ -29,8 +29,8 @@ const request = require('request').defaults({
   json: true,
   baseUrl: 'http://localhost:4444/wd/hub/session/1/',
 });
-function sleep(ms) {
-  let remainTime = ms / 1000 - 1
+function sleep(s) {
+  let remainTime = s - 1
   let timer = setInterval(() => {
     const info = '剩余' + (parseInt(remainTime--)) + 's进入下一步' 
     console.log(info)
@@ -45,7 +45,7 @@ function sleep(ms) {
       clearInterval(timer)
       timer = null
       resolve()
-    }, ms)
+    }, s * 1000)
   });
 }
 async function main () {
@@ -53,7 +53,7 @@ async function main () {
     await driver.init(caps);
   } catch (e) {
     if (!RETRY--) return console.log(e);
-    await sleep(2000);
+    await sleep(2);
     console.log("wd retry");
     return main().catch(console.log);
   }
@@ -76,6 +76,7 @@ async function main () {
   }
   console.log("准备退出");
   process.send("准备退出")
+  await sleep(6)
   await driver.quit();
 }
 let i=1;
@@ -83,9 +84,6 @@ const alive = () => {
   main()
     .then(() => {
       i!=${this.run_num}&&setTimeout(() => {
-        const msg = ['第', ++i, '次回放'].join('')
-        console.log(msg)
-        process.send(msg)
         alive();
       }, 5000);
     });
@@ -156,8 +154,8 @@ alive();
     `
   }
 
-  codeFor_sleep(ms = 1000) {
-    return `await sleep(${ms})`
+  codeFor_sleep(s = 1) {
+    return `await sleep(${s})`
   }
 }
 

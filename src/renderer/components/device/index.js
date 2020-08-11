@@ -57,13 +57,20 @@ class Device extends Component {
     this.banner = null
     this.touchSize = []
     this.minitouch = require('net').connect({ port: 1718 })
+  }
+
+  close() {
+    ipcRenderer.send('close')
+  }
+
+  componentDidMount() {
+    this.info()
     emitter.on('selectedElement', (selectedElement) => {
       this.setState({ selectedElement })
     })
     ipcRenderer.on('record', () => {
       this.setState({ lastActionTime: (new Date()).getTime() })
       this.record = true
-      console.log('ipcRenderer.on("record", loading true')
       this.setState({ loading: true })
       this.getSource()
     })
@@ -72,19 +79,11 @@ class Device extends Component {
       this.record = false
     })
     ipcRenderer.on('deviceLeave', (__, deviceId) => {
-      const { href } = window.location
       const { deviceId: currentDeviceId } = qs.parse(window.location.href)
       if (currentDeviceId === deviceId) {
         this.close()
       }
     })
-  }
-
-  close() {
-    ipcRenderer.send('close')
-  }
-
-  UNSAFE_componentWillMount() {
     ipcRenderer.on('getSourceSuccess', (_, sourceJSON) => {
       sourceXML = sourceJSON.value
       sourceJSON = xmlToJSON(sourceJSON.value)
@@ -96,10 +95,6 @@ class Device extends Component {
       console.error(err)
       this.setState({ loading: false })
     })
-  }
-
-  componentDidMount() {
-    this.info()
     // 接受来自main，更改样式大小
     ipcRenderer.on('changeStyle', (_, args) => {
       this.canvasHeight = args.canvasHeight
@@ -197,7 +192,12 @@ class Device extends Component {
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('stopRecord')
     ipcRenderer.removeAllListeners('record')
-    // TODO: remove eventListener "changeStyle"
+    ipcRenderer.removeAllListeners('deviceLeave')
+    ipcRenderer.removeAllListeners('getSourceSuccess')
+    ipcRenderer.removeAllListeners('getSourceFailed')
+    ipcRenderer.removeAllListeners('record')
+    ipcRenderer.removeAllListeners('changeStyle')
+    emitter.removeAllListeners('selectedElement')
   }
 
   /**
@@ -428,7 +428,9 @@ class Device extends Component {
                   [
                     {
                       action: 'sleep',
-                      params: [currentActionTime - this.state.lastActionTime],
+                      params: [
+                        Math.ceil((currentActionTime - this.state.lastActionTime) / 1000),
+                      ],
                     },
                     {
                       action: 'back',

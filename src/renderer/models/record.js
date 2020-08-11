@@ -4,7 +4,7 @@ export default {
     reset(state) {
       return {
         ...state,
-        devices: [],
+        // devices: [],
         packages: null,
         sourceJSON: null,
         recordedActions: [],

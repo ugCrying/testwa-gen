@@ -14,6 +14,9 @@ class Source extends Component {
     console.log('ui树组件实例化');
     super(props)
     this.state = { selectedElement: {} }
+  }
+
+  componentDidMount () {
     ipcRenderer.on('selectedElement', (_, selectedElement) => {
       console.log('得到当前选中元素，更新state');
       this.setState({ selectedElement })
@@ -22,6 +25,11 @@ class Source extends Component {
       console.log('得到展开元素，更新state');
       this.setState({ expandedPaths })
     });
+  }
+
+  componentWillUnmount () {
+  	ipcRenderer.removeAllListeners('selectedElement')
+  	ipcRenderer.removeAllListeners('expandedPaths')
   }
 
   getFormattedTag(el) {

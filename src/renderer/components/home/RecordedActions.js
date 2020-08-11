@@ -4,7 +4,7 @@
  */
 import React, { Component } from 'react'
 import {
-  Tabs, Table, Form, Popconfirm, Input,
+  Tabs, Table, Form, Popconfirm, Input, Select,
 } from 'antd'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { vs } from 'react-syntax-highlighter/dist/styles/hljs'
@@ -20,6 +20,7 @@ import rxdb from '../../db'
 const { remove } = require('immutable')
 
 const { TabPane } = Tabs
+const { option } = Select
 const FormItem = Form.Item
 const EditableContext = React.createContext()
 
@@ -248,6 +249,22 @@ class RecordActions extends Component {
             />
           </TabPane>
           <TabPane tab="代码" key="2">
+            <div className={styles['script-title']}>
+              <div className={styles['script-title-select']}>
+                <Select
+                  defaultValue="jsWd"
+                  // @ts-ignore
+                  onChange={(actionFramework) => this.setState({ actionFramework })}
+                  className={InspectorStyles['framework-dropdown']}
+                >
+                  {Object.keys(frameworks).map((f) => (
+                    <Option key={f} value={f}>
+                      {frameworks[f].readableName}
+                    </Option>
+                  ))}
+                </Select>
+              </div>
+            </div>
             <div className={styles['script-content']}>
               <SyntaxHighlighter
                 language={this.state.actionFramework}

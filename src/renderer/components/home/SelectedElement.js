@@ -9,9 +9,16 @@ export default class SelectedElement extends Component {
     // this.handleSendKeys = this.handleSendKeys.bind(this);
     this.state = { selectedElement: {} }
     this.text = ''
+  }
+
+  componentDidMount() {
     ipcRenderer.on('selectedElement', (_, selectedElement) => {
       this.setState({ selectedElement })
     })
+  }
+
+  componentWillUnmount() {
+    ipcRenderer.removeAllListeners('selectedElement')
   }
 
   render() {
