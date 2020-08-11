@@ -43,6 +43,7 @@ const stopAppium = function () {
     appium.send({ type: 'exit' })
     appium.kill()
     appium.disconnect()
+    appium = null
   }
 }
 

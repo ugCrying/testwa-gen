@@ -231,6 +231,7 @@ app.once('before-quit', () => {
     cp.kill()
     cp = null
   }
+  stopAppium()
   process.exit()
 })
 app.once('window-all-closed', app.quit)
