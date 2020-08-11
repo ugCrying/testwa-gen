@@ -5,6 +5,7 @@ import React, { Component } from 'react'
 import {
   Layout, Button, Tabs, Modal, Tooltip, Icon, Menu, Dropdown,
   Select,
+  notification,
 } from 'antd'
 import Timeout from 'await-timeout'
 
@@ -191,6 +192,14 @@ export default class Home extends Component {
    */
   async componentDidMount() {
     trackDevices(this.props.dispatch)
+    ipcRenderer.on('needAdbUsbPermission', (__, deviceId) => {
+      // TODO: 使用设备名而非 deviceId / sn
+      notification.error({
+        // message: `初始化设备${deviceId}失败`,
+        message: '初始化设备失败',
+        description: '请检查是否开启调试模式下USB安装权限！',
+      })
+    })
     ipcRenderer.on('runed', () => {
       this.setState({
         codeRunning: false,

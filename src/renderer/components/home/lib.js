@@ -194,6 +194,7 @@ export const getApkList = () => new Promise(async (resolve, reject) => {
 
 /**
  * 监听设备信息
+ * TODO api/mini 下也有 trackDevices 方法
  * @param {*} dispatch
  */
 export const trackDevices = async (dispatch) => {

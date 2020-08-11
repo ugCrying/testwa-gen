@@ -14,6 +14,12 @@ const { startU2 } = require('../api/u2')
 const { startMini, trackDevices } = require('../api/mini')
 const menu = require('./menu')
 const upgrade = require('./upgrade')
+const { emitter } = require('../api/event')
+
+// TODO: 窗口刷新时再次检查
+emitter.on('needAdbUsbPermission', (deviceId) => {
+  mainWindow && mainWindow.webContents.send('needAdbUsbPermission', deviceId)
+})
 
 let mainWindow
 let deviceWin
@@ -266,15 +272,21 @@ ipcMain.on('getSourceJSONSuccess', (_, data) => {
 // loading ui request from deviceWin
 ipcMain.on('getSource', async (e) => {
   try {
+    // 获取失败可能因为 appium 挂掉，重试一次
     const sourceXML = await getSource()
+      .catch(async () => {
+        await postSession()
+        await Timeout.set(1000)
+        const data = await getSource()
+        return data
+      })
     // render cover layer on deviceWindow
     deviceWin.webContents.send('getSourceSuccess', sourceXML)
     // render ui tree on mainWindow
     // FIXME: node环境下的xmlToJSON与浏览器环境下表现不一致
     // mainWindow.webContents.send("getSourceJSONSuccess", xmlToJSON(sourceXML.value))
-  } catch (e) {
-    // TODO: retry
-    deviceWin.webContents.send('getSourceFailed', e)
+  } catch (err) {
+    deviceWin.webContents.send('getSourceFailed', err)
   }
 })
 

@@ -5,6 +5,7 @@ const {
 } = require('./adb')
 const { installU2ToDevice, startU2 } = require('./u2')
 const { DEVICE_SCREEN_OUTPUT_RATIO } = require('../common/config')
+const { emitter } = require('./event')
 
 const baseUrl = process.defaultApp
   ? join(__dirname, '..', '..', 'node_modules')
@@ -114,8 +115,20 @@ const pushMiniToDevice = async function (device) {
   ]).catch((reason) => {
     console.error(reason.message, `向${device.id}推送服务文件失败`)
   })
-  await installU2ToDevice(device.id)
-  await startU2(device.id)
+  try {
+    await installU2ToDevice(device.id)
+    await startU2(device.id)
+  } catch (err) {
+    console.log('\x1b[36m%s\x1b[0m', '----------')
+    console.error(err)
+    console.error(err.message)
+    console.error(mainWindow)
+    console.log('\x1b[36m%s\x1b[0m', '----------')
+    if (err.message.includes('could not be installed')) {
+      emitter.emit('needAdbUsbPermission', device.id)
+    }
+    throw err
+  }
 }
 
 const trackDevices = async function () {

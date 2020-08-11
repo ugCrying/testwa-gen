@@ -2,6 +2,7 @@ const adbkit = require('adbkit')
 const { join } = require('path')
 const ApkReader = require('adbkit-apkreader')
 const { installApp, pushFile, runScript } = require('./adb')
+const { emitter } = require('./event')
 
 const U2apkPath = join(__dirname, '..', '..', 'static', 'uiautomator2', 'apks')
 
@@ -36,7 +37,11 @@ const installU2ToDevice = async function (deviceId) {
   const [currentPackageInfo, desiredVersion] = await Promise.all([
     getCurrentU2PackageInfo(deviceId),
     getDesiredU2VersionName(join(U2apkPath, 'uiautomator2-server.apk')),
-  ])
+  ]).catch((e) => {
+    console.log('????')
+    console.log(e)
+    console.log('????')
+  })
   // If the information is inconsistent we need to override
   if (!currentPackageInfo.includes(`versionName=${desiredVersion}`)) {
     try {
@@ -46,6 +51,10 @@ const installU2ToDevice = async function (deviceId) {
         installApp(deviceId, join(U2apkPath, 'uiautomator2-test.apk')),
       ])
     } catch (e) {
+      console.error(e)
+      if (e.message.includes('could not be installed')) {
+        emitter.emit('needAdbUsbPermission', deviceId)
+      }
       // push apk to device, and install them manually
       // TODO: catch error
       await Promise.all([
@@ -59,7 +68,11 @@ const installU2ToDevice = async function (deviceId) {
           join(U2apkPath, 'uiautomator2-test.apk'),
           '/sdcard/uiautomator2-test.apk',
         ),
-      ])
+      ]).catch((err) => {
+        console.log('222')
+        console.error(err)
+        console.log('222')
+      })
       throw e
     }
   }
