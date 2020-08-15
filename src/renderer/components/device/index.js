@@ -23,18 +23,16 @@ import { xmlToJSON } from './lib'
 import { connectMinicap } from './minicap'
 import DeviceControl from './DeviceControl/DeviceControl'
 
-export let sourceXML = null
 ipcRenderer.once('mainWinId', (_, { mainWinId }) => {
   localStorage.setItem('mainWinId', mainWinId)
 })
-let top; let
-  left
+let top
+let left
 
 export const client = adbkit.createClient()
 
 class Device extends Component {
   constructor(props) {
-    console.log('屏幕同步组件实例化')
     super(props)
     this.state = {
       loading: false,
@@ -56,14 +54,16 @@ class Device extends Component {
     // this.canvas = null;
     this.banner = null
     this.touchSize = []
-    this.minitouch = require('net').connect({ port: 1718 })
+    this.minitouch = net.connect({ port: 1718 })
+    // 当前页面的 xml
+    this.sourceXML = null
   }
 
-  close() {
+  close = () => {
     ipcRenderer.send('close')
   }
 
-  componentDidMount() {
+  componentDidMount = () => {
     this.info()
     emitter.on('selectedElement', (selectedElement) => {
       this.setState({ selectedElement })
@@ -85,10 +85,12 @@ class Device extends Component {
       }
     })
     ipcRenderer.on('getSourceSuccess', (_, sourceJSON) => {
-      sourceXML = sourceJSON.value
-      sourceJSON = xmlToJSON(sourceJSON.value)
-      ipcRenderer.send('getSourceJSONSuccess', sourceJSON)
-      this.setState({ sourceJSON, loading: false })
+      this.sourceXML = sourceJSON.value
+      this.setState({
+        sourceJSON: xmlToJSON(sourceJSON.value),
+        loading: false,
+      })
+      ipcRenderer.send('getSourceJSONSuccess', this.state.sourceJSON)
     })
     ipcRenderer.on('getSourceFailed', (_, err) => {
       // TODO: retry
@@ -155,11 +157,10 @@ class Device extends Component {
     this.minitouch.on('connect', () => console.log('minitouch 已连接'))
     this.minitouch.on('close', (hadError) => console.log(hadError ? 'minitouch连接异常关闭' : 'minitouch连接关闭'),
     )
-    this.minitouch.on('error', console.log)
+    this.minitouch.on('error', console.error)
   }
 
-  // eslint-disable-next-line react/sort-comp
-  connectKeyboard () {
+  connectKeyboard = () => {
     this.keyboard = net.connect({ port: 6677 })
     this.keyboard.on('connect', () => console.log('keyboard 已连接'))
     this.keyboard.on('close', (hadError) => {
@@ -173,8 +174,7 @@ class Device extends Component {
    * 键盘输入同步至设备
    * @param {String} text
    */
-  // eslint-disable-next-line react/sort-comp
-  doTypeText(text) {
+  doTypeText = (text) => {
     if (!this.keyboard) {
       this.connectKeyboard()
     }
@@ -182,7 +182,7 @@ class Device extends Component {
     this.keyboard.write(`${text}\n`)
   }
 
-  getSource() {
+  getSource = () => {
     this.setState({
       loading: true,
     })
@@ -204,7 +204,7 @@ class Device extends Component {
    * 鼠标按下同步至设备
    * @param {*} evt
    */
-  onMouseDown(evt) {
+  onMouseDown = (evt) => {
     this.isPressing = true
     const width = Math.round(
       (evt.clientX - left)
@@ -228,7 +228,7 @@ class Device extends Component {
    * 鼠标抬起同步至设备
    * @param {*} evt
    */
-  onMouseUp(evt) {
+  onMouseUp = (evt) => {
     this.isPressing = false
     this.minitouch.write('u 0\n')
     this.minitouch.write('c\n')
@@ -244,7 +244,9 @@ class Device extends Component {
           * this.ratio
           * (this.touchSize[3] / this.banner.realHeight),
       )
-      if (widthEnd - this.tap.width === 0 && heightEnd - this.tap.height === 0) { this.isMove = false }
+      if (widthEnd - this.tap.width === 0 && heightEnd - this.tap.height === 0) {
+        this.isMove = false
+      }
       ipcRenderer.send(
         // +localStorage.getItem("mainWinId"),
         this.isMove ? 'swiped' : 'taped',
@@ -253,7 +255,7 @@ class Device extends Component {
       // TODO: 为何要延迟 300ms
       setTimeout(() => {
         console.log(this.isMove)
-        this.getSource.bind(this)()
+        this.getSource()
       }, 300)
       console.log('onmouseup loading true')
       // TODO: loading 控制放到 getSource 方法内？
@@ -266,7 +268,7 @@ class Device extends Component {
    * 鼠标滑动同步至设备
    * @param {*} evt
    */
-  onMouseMove(evt) {
+  onMouseMove = (evt) => {
     // 当鼠标按下时，滑动才有效
     if (!this.isPressing) {
       return
@@ -292,7 +294,7 @@ class Device extends Component {
   /**
    * 初始化画布、并打印设备宽高信息
    */
-  info() {
+  info = () => {
     // 原始拟定高度
     const DEVICE_ORIGINAL_HEIGHT = window.screen.availHeight - 50
     // 设备外壳宽度
@@ -345,11 +347,12 @@ class Device extends Component {
     })
   }
 
-  highlighterRects() {
+  highlighterRects = () => {
     const highlighterRects = []
     const recursive = (element, zIndex = 0) => {
       highlighterRects.push(
         <HighlighterRect
+          sourceXML={this.sourceXML}
           selectedElement={this.state.selectedElement}
           element={element}
           zIndex={zIndex}
@@ -358,7 +361,7 @@ class Device extends Component {
           text={this.text}
           textId={this.textId}
           record={this.record}
-          clearText={() => (this.text = '')}
+          clearText={() => { this.text = '' }}
           lastActionTime={this.state.lastActionTime}
           updateLastActionTime={() => {
             this.setState({
@@ -377,12 +380,12 @@ class Device extends Component {
     return (
       <Spin size="large" tip="同步 UI Source..." spinning={this.state.loading}>
         <div
-          ref={(device) => (this.device = device)}
+          ref={(device) => { this.device = device }}
           className={styles['device-wrap']}
         >
           <div className={styles['screen-wrap']}>
             <div
-              ref={(shell) => (this.shell = shell)}
+              ref={(s) => { this.shell = s }}
               className={`${shell['marvel-device']} ${shell.note8}`}
             >
               <div className={shell.inner} />
@@ -398,7 +401,7 @@ class Device extends Component {
               <div className={shell.screen} />
             </div>
             <div
-              ref={(screen) => (this.screen = screen)}
+              ref={(screen) => { this.screen = screen }}
               className={styles['screen-canvas']}
             >
               <div
@@ -406,12 +409,12 @@ class Device extends Component {
                 style={{
                   height: this.state.canvasHeight,
                 }}
-                onMouseDown={this.onMouseDown.bind(this)}
-                onMouseUp={this.onMouseUp.bind(this)}
-                onMouseMove={this.onMouseMove.bind(this)}
-                onMouseOut={() => (this.isPressing = false)}
+                onMouseDown={this.onMouseDown}
+                onMouseUp={this.onMouseUp}
+                onMouseMove={this.onMouseMove}
+                onMouseOut={() => { this.isPressing = false }}
               >
-                <canvas ref={(canvas) => (this.canvas = canvas)} />
+                <canvas ref={(canvas) => { this.canvas = canvas }} />
                 {this.highlighterRects()}
               </div>
             </div>
@@ -419,7 +422,7 @@ class Device extends Component {
           <DeviceControl
             record={this.record}
             refreshUI={() => this.getSource()}
-            goBack={() => {
+            goBack={async () => {
               runScript(this.props.device, 'input keyevent "KEYCODE_BACK"')
               if (this.record) {
                 const currentActionTime = (new Date()).getTime()

@@ -22,6 +22,9 @@ module.exports = {
     },
   },
   rules: {
+    'react/sort-comp': 'off',
+    'react/destructuring-assignment': 'off',
+    'import/no-extraneous-dependencies': 'off',
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'global-require': 'off',
     semi: [
@@ -53,7 +56,7 @@ module.exports = {
   extends: 'airbnb',
   plugins: [
     'react',
-    'jsx-a11y',
+    // 'jsx-a11y',
     'import',
   ],
 }
