@@ -61,7 +61,6 @@
     "ansi-to-html": "^0.6.9",
     "await-timeout": "^1.1.1",
     "axios": "^0.19.2",
-    "chalk": "^4.1.0",
     "electron-updater": "^4.0.6",
     "esm": "^3.2.25",
     "immutable": "^4.0.0-rc.12",
