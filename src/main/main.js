@@ -1,5 +1,3 @@
-// @ts-check
-
 const Timeout = require('await-timeout')
 const { fork, spawnSync } = require('child_process')
 const {
@@ -16,13 +14,8 @@ const menu = require('./menu')
 const upgrade = require('./upgrade')
 const { emitter } = require('../api/event')
 
-// TODO: 窗口刷新时再次检查
-emitter.on('needAdbUsbPermission', (deviceId) => {
-  mainWindow && mainWindow.webContents.send('needAdbUsbPermission', deviceId)
-})
-
 let mainWindow
-let deviceWin
+let deviceWindow
 let cp
 const baseUrl = process.defaultApp
   ? 'http://localhost:8000'
@@ -39,13 +32,18 @@ if (process.platform !== 'win32') {
   }
 }
 
+// TODO: 窗口刷新时再次检查
+emitter.on('needAdbUsbPermission', (deviceId) => {
+  mainWindow && mainWindow.webContents.send('needAdbUsbPermission', deviceId)
+})
+
 const setupDevice = async function (device) {
   // await installU2ToDevice(device.id)
   await startU2(device.id)
   // FIXME：必须预留一定长度时间
-  await Timeout.set(4500)
+  await Timeout.set(5500)
   await postSession()
-  // await Timeout.set(1000)
+  await Timeout.set(500)
   await runScript(
     device.id,
     'ime set io.appium.uiautomator2.server/io.appium.uiautomator2.handler.TestwaIME',
@@ -59,21 +57,26 @@ const setupDevice = async function (device) {
 
 /**
  *
- * @param {*} _
  * @param {*} device
  * @return {Promise<any>}
  */
-const openDeviceWindow = async function (_, device) {
+const openDeviceWindow = async function (device) {
+  // 不同机型间切换可能需要调整 deviceWindow 尺寸
+  // 目前样式有 bug，直接重新开始
+  if (deviceWindow) {
+    deviceWindow.close()
+    deviceWindow = null
+  }
+  await Timeout.set(100)
   if (!device.screen) {
     console.error(`${device.id} 获取分辨率失败`)
     return
   }
+  // screen 运行时变量
   const display = require('electron').screen.getPrimaryDisplay()
   const [width, height] = device.screen.split('x')
-  startMini(device)
-  await setupDevice(device)
-  if (!deviceWin) {
-    deviceWin = new BrowserWindow({
+  if (!deviceWindow) {
+    deviceWindow = new BrowserWindow({
       title: '脚本录制',
       // parent: mainWindow,
       autoHideMenuBar: true,
@@ -82,7 +85,7 @@ const openDeviceWindow = async function (_, device) {
       x: display.workArea.width + display.workArea.x,
       y: display.workArea.y,
       resizable: false,
-      alwaysOnTop: true,
+      alwaysOnTop: false,
       maximizable: false,
       fullscreenable: false,
       frame: false,
@@ -94,26 +97,26 @@ const openDeviceWindow = async function (_, device) {
         nodeIntegrationInWorker: true,
       },
     })
-    // if (process.defaultApp) deviceWin.webContents.openDevTools()
-    deviceWin.once('closed', () => {
+    // if (process.defaultApp) deviceWindow.webContents.openDevTools()
+    deviceWindow.once('closed', () => {
       mainWindow.webContents.send('recorded')
-      deviceWin = null
+      deviceWindow = null
     })
     // console.log({
     //   mainWinId: mainWindow.id,
-    //   deviceWinId: deviceWin.id,
+    //   deviceWinId: deviceWindow.id,
     // })
-    mainWindow.webContents.send('deviceWinId', deviceWin.id)
+    mainWindow.webContents.send('deviceWinId', deviceWindow.id)
   }
 
   // 等待调整device样式信息300ms后进行显示device页面
   ipcMain.once('displayDevice', async () => {
     await Timeout.set(300)
-    deviceWin.show()
+    deviceWindow.show()
   })
 
-  ipcMain.once('canvasWidth', (_, canvasWidth) => {
-    deviceWin.webContents.send('mainWinId', {
+  ipcMain.once('canvasWidth', (__, canvasWidth) => {
+    deviceWindow.webContents.send('mainWinId', {
       mainWinId: mainWindow.id,
     })
     // 原始拟定高度
@@ -133,7 +136,7 @@ const openDeviceWindow = async function (_, device) {
     // 缩放前屏幕原始高度差值
     const SCREEN_ORIGIN_HEIGHT_DIFF = Math.abs(SCREEN_HEIGHT_DIFF) / scale
 
-    deviceWin.setBounds({
+    deviceWindow.setBounds({
       x: display.workArea.width + display.workArea.x - DEVICE_ORIGIN_WIDTH - 75,
       y: display.workArea.y,
       width: DEVICE_ORIGIN_WIDTH + 75,
@@ -147,7 +150,7 @@ const openDeviceWindow = async function (_, device) {
     //   adb设备实际高度: height,
     //   adb设备实际宽度: width,
     // })
-    deviceWin.webContents.send('changeStyle', {
+    deviceWindow.webContents.send('changeStyle', {
       canvasWidth,
       canvasHeight,
       shellHeight: SHELL_HEIGHT,
@@ -157,7 +160,7 @@ const openDeviceWindow = async function (_, device) {
 
     // test log
     // {
-    //   deviceWin.webContents.send('deviceWinShowed', { width, height })
+    //   deviceWindow.webContents.send('deviceWinShowed', { width, height })
     //   // 屏幕尺寸(屏幕对角线长度)in
     //   const inch = 15.6
     //   // 屏幕分辨率(屏幕宽和高上所拥有像素数)px
@@ -178,8 +181,8 @@ const openDeviceWindow = async function (_, device) {
     //     width: DEVICE_ORIGIN_WIDTH,
     //     height: display.workArea.height,
     //   })
-    //   console.log('设备窗口', deviceWin.getBounds())
-    //   console.log('设备窗口内容区', deviceWin.getContentBounds())
+    //   console.log('设备窗口', deviceWindow.getBounds())
+    //   console.log('设备窗口内容区', deviceWindow.getContentBounds())
     //   console.log('设备窗口屏幕大小指定', {
     //     width: DEVICE_ORIGIN_WIDTH,
     //     height: canvasHeight,
@@ -190,11 +193,14 @@ const openDeviceWindow = async function (_, device) {
     //   })
     // }
   })
-  deviceWin.loadURL(
+  deviceWindow.loadURL(
     `${baseUrl}#/${device.id}?device=${
       device.id
     }&width=${width}&height=${height}&testwa_ui=${process.env.testwa_ui}&deviceId=${device.id}`,
   )
+
+  startMini(device)
+  await setupDevice(device)
 }
 app.commandLine.appendSwitch('enable-experimental-web-platform-features')
 app.once('ready', () => {
@@ -205,17 +211,16 @@ app.once('ready', () => {
     width: 1280,
     height: 768,
     show: true,
-    // backgroundColor: "#2e2c29"
   })
+  trackDevices()
+  startAppium(mainWindow)
   mainWindow.loadURL(baseUrl)
   mainWindow.once('ready-to-show', async () => {
     mainWindow.maximize()
     mainWindow.show()
   })
-  trackDevices()
-  startAppium(mainWindow)
   mainWindow.once('close', () => {
-    deviceWin && deviceWin.close()
+    deviceWindow && deviceWindow.close()
   })
   // @ts-ignore
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu))
@@ -241,35 +246,34 @@ app.once('before-quit', () => {
   process.exit()
 })
 app.once('window-all-closed', app.quit)
-ipcMain.on('openDeviceWindow', openDeviceWindow)
-// start to record
-ipcMain.on('record', async (_, device, id) => {
-  if (deviceWin) {
-    deviceWin.webContents.send('record', id)
+ipcMain.on('openDeviceWindow', (__, device) => openDeviceWindow(device))
+ipcMain.on('startRecording', async (__, device, id) => {
+  if (deviceWindow) {
+    deviceWindow.webContents.send('startRecording', id)
   } else if (device) {
-    await openDeviceWindow('', device)
-    deviceWin.webContents.send('record', id)
+    await openDeviceWindow(device)
+    deviceWindow.webContents.send('startRecording', id)
   }
 })
 
 // forward the recordedActions detail from deviceWindow to mainWindow
-ipcMain.on('recordedActions', (_, data) => mainWindow.webContents.send('recordedActions', data))
+ipcMain.on('recordedActions', (__, data) => mainWindow.webContents.send('recordedActions', data))
 // forward the sendKeys action from deviceWindow to mainWindow
-ipcMain.on('sendKeys', (_, data) => mainWindow.webContents.send('sendKeys', data))
+ipcMain.on('sendKeys', (__, data) => mainWindow.webContents.send('sendKeys', data))
 // forward the expandedPaths action from deviceWindow to mainWindow
-ipcMain.on('expandedPaths', (_, data) => mainWindow.webContents.send('expandedPaths', data))
+ipcMain.on('expandedPaths', (__, data) => mainWindow.webContents.send('expandedPaths', data))
 // forward the swipe action from deviceWindow to mainWindow
-ipcMain.on('selectedElement', (_, data) => mainWindow.webContents.send('selectedElement', data))
+ipcMain.on('selectedElement', (__, data) => mainWindow.webContents.send('selectedElement', data))
 // forward the swipe action from deviceWindow to mainWindow
-ipcMain.on('swiped', (_, data) => mainWindow.webContents.send('swiped', data))
+ipcMain.on('swiped', (__, data) => mainWindow.webContents.send('swiped', data))
 // forward the taped action from deviceWindow to mainWindow
-ipcMain.on('taped', (_, data) => mainWindow.webContents.send('taped', data))
+ipcMain.on('taped', (__, data) => mainWindow.webContents.send('taped', data))
 
-ipcMain.on('getSourceJSONSuccess', (_, data) => {
+ipcMain.on('getSourceJSONSuccess', (__, data) => {
   mainWindow.webContents.send('getSourceJSONSuccess', data)
 })
 
-// loading ui request from deviceWin
+// loading ui request from deviceWindow
 ipcMain.on('getSource', async (e) => {
   try {
     // 获取失败可能因为 appium 挂掉，重试一次
@@ -281,23 +285,21 @@ ipcMain.on('getSource', async (e) => {
         return data
       })
     // render cover layer on deviceWindow
-    deviceWin.webContents.send('getSourceSuccess', sourceXML)
+    deviceWindow.webContents.send('getSourceSuccess', sourceXML)
     // render ui tree on mainWindow
     // FIXME: node环境下的xmlToJSON与浏览器环境下表现不一致
     // mainWindow.webContents.send("getSourceJSONSuccess", xmlToJSON(sourceXML.value))
   } catch (err) {
-    deviceWin.webContents.send('getSourceFailed', err)
+    deviceWindow.webContents.send('getSourceFailed', err)
   }
 })
 
-// stop recording code
 ipcMain.on(
-  'stopRecord',
-  () => deviceWin && deviceWin.webContents.send('stopRecord'),
+  'stopRecording',
+  () => deviceWindow && deviceWindow.webContents.send('stopRecording'),
 )
 
-// play back code
-ipcMain.on('runcode', (_, rawCode) => {
+ipcMain.on('startPlayingBackCode', (__, rawCode) => {
   const path = join(
     __dirname,
     '..',
@@ -320,13 +322,12 @@ ipcMain.on('runcode', (_, rawCode) => {
     cp.on('exit', (code) => {
       console.log(`cp exit with code ${code}`)
       cp = null
-      mainWindow.webContents.send('runed')
+      mainWindow.webContents.send('finishPlayBackCode')
     })
   })
 })
 
-// stop playing back code
-ipcMain.on('stopcode', () => {
+ipcMain.on('stopPlayingBackCode', () => {
   stopAppium()
   setTimeout(() => {
     startAppium(mainWindow)
@@ -338,17 +339,16 @@ ipcMain.on('stopcode', () => {
 })
 
 // close deviceWindow
-ipcMain.on('close', (_) => {
+ipcMain.on('close', (__) => {
   mainWindow.webContents.send('closeDeviceWindow')
-  deviceWin.close()
-  deviceWin = null
+  deviceWindow.close()
+  deviceWindow = null
 })
 
-// minimize deviceWindow
-ipcMain.on('min', (_) => {
-  deviceWin.minimize()
+ipcMain.on('minimizeDeviceWindow', (__) => {
+  deviceWindow.minimize()
 })
 
-ipcMain.on('deviceLeave', (_, deviceId) => {
-  deviceWin && deviceWin.webContents && deviceWin.webContents.send('deviceLeave', deviceId)
+ipcMain.on('deviceLeave', (__, deviceId) => {
+  deviceWindow && deviceWindow.webContents && deviceWindow.webContents.send('deviceLeave', deviceId)
 })

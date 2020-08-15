@@ -119,7 +119,7 @@ export default class Home extends Component {
         })
       })
     }
-    ipcRenderer.send('stopRecord', null)
+    ipcRenderer.send('stopRecording', null)
     this.setState({
       // device: null,
       visible: false,
@@ -200,7 +200,7 @@ export default class Home extends Component {
         description: '请检查是否开启调试模式下USB安装权限！',
       })
     })
-    ipcRenderer.on('runed', () => {
+    ipcRenderer.on('finishPlayBackCode', () => {
       this.setState({
         codeRunning: false,
       })
@@ -214,7 +214,7 @@ export default class Home extends Component {
         this.setState({
           codeRunning: false,
         })
-        ipcRenderer.send('stopcode')
+        ipcRenderer.send('stopPlayingBackCode')
       }
       // TODO: ipcRenderer 可能有延迟
       await Timeout.set(100)
@@ -379,7 +379,7 @@ export default class Home extends Component {
     ipcRenderer.removeAllListeners('closeDeviceWindow')
     ipcRenderer.removeAllListeners('recordedActions')
     ipcRenderer.removeAllListeners('recorded')
-    ipcRenderer.removeAllListeners('runed')
+    ipcRenderer.removeAllListeners('finishPlayBackCode')
     ipcRenderer.removeAllListeners('sendKeys')
     ipcRenderer.removeAllListeners('swiped')
     ipcRenderer.removeAllListeners('taped')
@@ -430,7 +430,7 @@ export default class Home extends Component {
                 },
               })
               this.setState({ activeKey: '应用列表', device })
-              setTimeout(() => getPackages(this.props.dispatch), 500)
+              setTimeout(() => getPackages(this.props.dispatch))
             }}
           />
         )
@@ -613,7 +613,7 @@ export default class Home extends Component {
                         this.setState({
                           codeRunning: false,
                         })
-                        ipcRenderer.send('stopcode')
+                        ipcRenderer.send('stopPlayingBackCode')
                       }}
                     >
                       <img
@@ -661,14 +661,14 @@ export default class Home extends Component {
                     if (this.state.recording === 'pause') {
                       this.setState({ recording: 'process' })
                       ipcRenderer.send(
-                        'record',
+                        'startRecording',
                         null,
                         require('electron').remote.BrowserWindow.getFocusedWindow()
                           .id,
                       )
                     } else {
                       this.setState({ recording: 'pause' })
-                      ipcRenderer.send('stopRecord', null)
+                      ipcRenderer.send('stopRecording', null)
                     }
                   }}
                 >

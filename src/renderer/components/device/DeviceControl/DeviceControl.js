@@ -26,7 +26,7 @@ const DeviceControl = (props) => (
         <Tooltip title="最小化窗口">
           <Button
             onClick={() => {
-              ipcRenderer.send('min')
+              ipcRenderer.send('minimizeDeviceWindow')
             }}
           >
             <img

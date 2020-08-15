@@ -33,12 +33,21 @@ export default class Terminal extends Component {
   render() {
     return (
       <div id={styles['terminal-log-list']}>
-        {this.state.logLines.slice(this.state.logLines.length - 200).map((line, i) => {
+        {this.state.logLines.slice(this.state.logLines.length - 200).map((line = '', i) => {
+          // TODO:
+          let __html
+          try {
+            __html = convert.toHtml(line)
+          } catch (e) {
+            console.error(line)
+            console.error(e)
+            __html = '<span></span>'
+          }
           const container = document.getElementById(styles['terminal-log-list'])
           container.scrollTop = container.scrollHeight
           return (
             <div key={i}>
-              <span dangerouslySetInnerHTML={{ __html: convert.toHtml(line) }} />
+              <span dangerouslySetInnerHTML={{ __html }} />
             </div>
           )
         })}

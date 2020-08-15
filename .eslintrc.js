@@ -22,6 +22,8 @@ module.exports = {
     },
   },
   rules: {
+    'func-names': 'off',
+    'no-unused-expressions': 'off',
     'react/sort-comp': 'off',
     'react/destructuring-assignment': 'off',
     'import/no-extraneous-dependencies': 'off',

@@ -68,13 +68,13 @@ class Device extends Component {
     emitter.on('selectedElement', (selectedElement) => {
       this.setState({ selectedElement })
     })
-    ipcRenderer.on('record', () => {
+    ipcRenderer.on('startRecording', () => {
       this.setState({ lastActionTime: (new Date()).getTime() })
       this.record = true
       this.setState({ loading: true })
       this.getSource()
     })
-    ipcRenderer.on('stopRecord', () => {
+    ipcRenderer.on('stopRecording', () => {
       this.setState({ sourceJSON: null })
       this.record = false
     })
@@ -190,12 +190,11 @@ class Device extends Component {
   }
 
   componentWillUnmount() {
-    ipcRenderer.removeAllListeners('stopRecord')
-    ipcRenderer.removeAllListeners('record')
+    ipcRenderer.removeAllListeners('stopRecording')
+    ipcRenderer.removeAllListeners('startRecording')
     ipcRenderer.removeAllListeners('deviceLeave')
     ipcRenderer.removeAllListeners('getSourceSuccess')
     ipcRenderer.removeAllListeners('getSourceFailed')
-    ipcRenderer.removeAllListeners('record')
     ipcRenderer.removeAllListeners('changeStyle')
     emitter.removeAllListeners('selectedElement')
   }

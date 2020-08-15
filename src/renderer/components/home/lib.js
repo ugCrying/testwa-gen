@@ -72,11 +72,11 @@ export const runCode = (info, recordedActions) => {
     'rawCode',
     rawCode,
   )
-  ipcRenderer.send('runcode', rawCode)
+  ipcRenderer.send('startPlayingBackCode', rawCode)
 }
 export const record = () => {
   ipcRenderer.send(
-    'record',
+    'startRecording',
     device,
     require('electron').remote.BrowserWindow.getFocusedWindow().id,
   )
@@ -135,7 +135,7 @@ const getDeviceApp = () => new Promise((resolve, reject) => {
  * @param {*} dispatch
  */
 export const getPackages = (dispatch) => {
-  getDeviceApp().then(async (packages = []) => {
+  getDeviceApp().then((packages = []) => {
     dispatch({
       type: 'record/packages',
       payload: {

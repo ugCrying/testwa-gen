@@ -134,7 +134,7 @@ class GlobalHeader extends Component {
                     this.props.setState({
                       codeRunning: false,
                     })
-                    ipcRenderer.send('stopcode')
+                    ipcRenderer.send('stopPlayingBackCode')
                   }}
                 >
                   <img
@@ -182,14 +182,14 @@ class GlobalHeader extends Component {
                 if (this.props.state.recording === 'pause') {
                   this.props.setState({ recording: 'process' })
                   ipcRenderer.send(
-                    'record',
+                    'startRecording',
                     null,
                     require('electron').remote.BrowserWindow.getFocusedWindow()
                       .id,
                   )
                 } else {
                   this.props.setState({ recording: 'pause' })
-                  ipcRenderer.send('stopRecord', null)
+                  ipcRenderer.send('stopRecording', null)
                 }
               }}
             >
