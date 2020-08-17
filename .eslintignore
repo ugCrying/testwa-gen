@@ -1,0 +1,4 @@
+static/
+node_modules/
+src/node_modules/
+src/renderer/pages/.umi/

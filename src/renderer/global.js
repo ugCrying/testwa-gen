@@ -1,2 +1,1 @@
-// @ts-ignore
-window.publicPath = "./static/";
+window.publicPath = './static/'

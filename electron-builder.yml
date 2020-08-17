@@ -1,0 +1,39 @@
+productName: TestwaGen
+appId: com.testwa.desktop
+copyright: Copyright © 2020 testwa
+mac:
+  target: pkg
+files:
+- from: dist/renderer
+  to: renderer
+- from: src/main
+  to: main
+- from: src/api
+  to: api
+- from: src/common
+  to: common
+- "!**/{LICENSE,LICENCE,license,*LICENSE,LICENSE*,CHANGELOG*,README*,AUTHORS,.gitmodules,.vscode,.yarnclean}"
+- "!**/*.{png,jpg,JPG,PNG,jpeg,gif,map,un~}"
+- "!static/"
+- "!docs/"
+- "!dist/"
+- "!src/"
+- "!tests/"
+- "!deno*"
+- "!yarn*"
+- "!.git*"
+extraResources:
+- from: node_modules/minicap-prebuilt
+  to: minicap-prebuilt
+- from: node_modules/minitouch-prebuilt
+  to: minitouch-prebuilt
+# FIXME: react 引入的是开发版本
+- node_modules/react
+# FIXME: react 依赖也需要手动引入
+- node_modules/object-assign
+- node_modules/prop-types
+- static/wappium/lib
+- static/wappium/tests/*.txt
+- static/wappium/*.js
+- static/wappium/node_modules
+- static/uiautomator2/apks

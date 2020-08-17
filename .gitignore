@@ -3,9 +3,16 @@ dist/
 node_modules/
 yarn-error.log
 .idea
+.vscode/
+
+# tmp
+src/ui.xml
 
 # umi
 .umi
 .umi-production
 err.log
 out.log
+
+# wappium
+static/wappium

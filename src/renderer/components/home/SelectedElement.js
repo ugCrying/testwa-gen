@@ -1,52 +1,59 @@
-import React, { Component } from "react";
-import _ from "lodash";
-import { Button, Row, Table } from "antd";
-import { ipcRenderer } from "electron";
+import React, { Component } from 'react'
+import _ from 'lodash'
+import { Button, Row, Table } from 'antd'
+import { ipcRenderer } from 'electron'
 
 export default class SelectedElement extends Component {
   constructor(props) {
-    super(props);
+    super(props)
     // this.handleSendKeys = this.handleSendKeys.bind(this);
-    this.state = { selectedElement: {} };
-    this.text = "";
-    ipcRenderer.on("selectedElement", (_, selectedElement) => {
-      this.setState({ selectedElement });
-    });
+    this.state = { selectedElement: {} }
+    this.text = ''
+  }
+
+  componentDidMount() {
+    ipcRenderer.on('selectedElement', (_, selectedElement) => {
+      this.setState({ selectedElement })
+    })
+  }
+
+  componentWillUnmount() {
+    ipcRenderer.removeAllListeners('selectedElement')
   }
 
   render() {
-    const { attributes } = this.state.selectedElement;
-    let attributeColumns = [
+    const { attributes } = this.state.selectedElement
+    const attributeColumns = [
       {
-        title: "属性",
-        dataIndex: "name",
-        key: "name",
-        width: 100
+        title: '属性',
+        dataIndex: 'name',
+        key: 'name',
+        width: 100,
       },
       {
-        title: "值",
-        dataIndex: "value",
-        key: "value"
-      }
-    ];
+        title: '值',
+        dataIndex: 'value',
+        key: 'value',
+      },
+    ]
 
-    let attrArray = _.toPairs(attributes).filter(([key]) => key !== "path");
-    let dataSource = attrArray.map(([key, value]) => ({
+    const attrArray = _.toPairs(attributes).filter(([key]) => key !== 'path')
+    const dataSource = attrArray.map(([key, value]) => ({
       key,
       value,
-      name: key
-    }));
+      name: key,
+    }))
 
     return (
       dataSource.length > 0 && (
         <div>
           <Button
             onClick={() => {
-              localStorage.setItem("tap", !this.state.tap);
-              this.setState({ tap: !this.state.tap });
+              localStorage.setItem('tap', !this.state.tap)
+              this.setState({ tap: !this.state.tap })
             }}
           >
-            {this.state.tap ? "点元素" : "点坐标"}
+            {this.state.tap ? '点元素' : '点坐标'}
           </Button>
 
           <Row>
@@ -59,6 +66,6 @@ export default class SelectedElement extends Component {
           </Row>
         </div>
       )
-    );
+    )
   }
 }

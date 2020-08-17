@@ -1,17 +1,22 @@
+const path = require('path')
+
+function resolve (dir) {
+  return path.join(__dirname, dir)
+}
 export default {
-  disableServiceWorker: true,
-  hashHistory: true,
-  disableHash: true,
+  history: 'hash',
   publicPath: "./",
   outputPath: "../../dist/renderer",
   plugins: [
     [
-      "umi-plugin-dva",
-      {
-        immer: true
-      }
-    ]
+      'umi-plugin-react', {
+        // FIXME: 开启后会导致首屏加载过长
+        // dynamicImport: true,
+        dva: true,
+        antd: true
+    }],
   ],
+  treeShaking: true,
   externals(_, request, callback) {
     let isExternal;
     const load = [
@@ -31,5 +36,13 @@ export default {
       isExternal = `require('${request}')`;
     }
     callback(null, isExternal);
+  },
+  chainWebpack(config, { webpack }) {
+    config.resolve.alias.set('static', resolve('../../static'))
+    config.resolve.alias.set('api', resolve('../api'))
+  },
+  minimizer: 'terserjs',
+  theme: {
+    'primary-color': '#52c41a'
   }
 };

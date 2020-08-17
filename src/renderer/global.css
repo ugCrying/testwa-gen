@@ -3,3 +3,7 @@ html, body {
   border: none;
   outline: none;
 }
+
+.ant-tabs-nav .ant-tabs-tab {
+  margin: 0;
+}

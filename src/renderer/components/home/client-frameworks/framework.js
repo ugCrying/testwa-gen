@@ -1,112 +1,119 @@
-export default class Framework {
+/**
+ * 生成脚本代码基类，要求后代必须实现其方法
+ * 不同的编程语言模版类需要继承该基类
+ */
 
+export default class Framework {
   constructor (host, port, path, https, caps) {
-    this.host = host || "localhost";
-    this.port = port || 4723;
-    this.path = path || "/wd/hub";
-    this.caps = caps || {};
-    this.https = !!https;
-    this.scheme = https ? 'https' : 'http';
-    this.actions = [];
-    this.localVarCount = 0;
-    this.localVarCache = {};
-    this.lastAssignedVar = null;
+    this.host = host || 'localhost'
+    this.port = port || 4723
+    this.path = path || '/wd/hub'
+    this.caps = caps || {}
+    this.https = !!https
+    this.scheme = https ? 'https' : 'http'
+    this.actions = []
+    this.localVarCount = 0
+    this.localVarCache = {}
+    this.lastAssignedVar = null
   }
 
   get serverUrl () {
-    return `${this.scheme}://${this.host}:${this.port}${this.path}`;
+    return `${this.scheme}://${this.host}:${this.port}${this.path}`
   }
 
   get name () {
-    throw new Error("Must implement name getter");
+    throw new Error('Must implement name getter')
   }
 
   get language () {
-    throw new Error("Must implement language getter");
+    throw new Error('Must implement language getter')
   }
 
   addAction (action, params) {
-    this.actions.push({action, params});
+    this.actions.push({ action, params })
   }
 
   wrapWithBoilerplate () {
-    throw new Error("Must implement wrapWithBoilerplate");
+    throw new Error('Must implement wrapWithBoilerplate')
   }
 
   indent (str, spaces) {
-    let lines = str.split("\n");
-    let spaceStr = "";
+    const lines = str.split('\n')
+    let spaceStr = ''
     for (let i = 0; i < spaces; i++) {
-      spaceStr += " ";
+      spaceStr += ' '
     }
     return lines
       .filter((l) => !!l.trim())
       .map((l) => `${spaceStr}${l}`)
-      .join("\n");
+      .join('\n')
   }
 
   getCodeString (includeBoilerplate = false) {
-    let str = "";
-    for (let {action, params} of this.actions) {
-      let genCodeFn = `codeFor_${action}`;
+    let str = ''
+    for (const { action, params } of this.actions) {
+      const genCodeFn = `codeFor_${action}`
       if (!this[genCodeFn]) {
-        throw new Error(`Need to implement 'codeFor_${action}()'`);
+        throw new Error(`Need to implement 'codeFor_${action}()'`)
       }
-      let code = this[genCodeFn](...params);
+      const code = this[genCodeFn](...params)
       if (code) {
-        str += `${code}\n`;
+        str += `${code}\n`
       }
     }
     if (includeBoilerplate) {
-      return this.wrapWithBoilerplate(str);
+      return this.wrapWithBoilerplate(str)
     }
-    return str;
+    return str
   }
 
   getNewLocalVar () {
-    this.localVarCount++;
-    return `el${this.localVarCount}`;
+    this.localVarCount++
+    return `el${this.localVarCount}`
   }
 
   getVarForFind (strategy, locator) {
-    const key = `${strategy}-${locator}`;
-    let wasNew = false;
+    const key = `${strategy}-${locator}`
+    let wasNew = false
     if (!this.localVarCache[key]) {
-      this.localVarCache[key] = this.getNewLocalVar();
-      wasNew = true;
+      this.localVarCache[key] = this.getNewLocalVar()
+      wasNew = true
     }
-    this.lastAssignedVar = this.localVarCache[key];
-    return [this.localVarCache[key], wasNew];
+    this.lastAssignedVar = this.localVarCache[key]
+    return [this.localVarCache[key], wasNew]
   }
 
   getVarName (varName, varIndex) {
     if (varIndex || varIndex === 0) {
-      return `${varName}[${varIndex}]`;
+      return `${varName}[${varIndex}]`
     }
-    return varName;
+    return varName
   }
 
   codeFor_findAndAssign () {
-    throw new Error("Need to implement codeFor_findAndAssign");
+    throw new Error('Need to implement codeFor_findAndAssign')
   }
 
   codeFor_findElement (strategy, locator) {
-    let [localVar, wasNew] = this.getVarForFind(strategy, locator);
+    const [localVar, wasNew] = this.getVarForFind(strategy, locator)
     if (!wasNew) {
       // if we've already found this element, don't print out
       // finding it again
-      return "";
+      return ''
     }
 
-    return this.codeFor_findAndAssign(strategy, locator, localVar);
-
+    return this.codeFor_findAndAssign(strategy, locator, localVar)
   }
 
   codeFor_tap () {
-    throw new Error("Need to implement codeFor_tap");
+    throw new Error('Need to implement codeFor_tap')
   }
 
   codeFor_swipe () {
-    throw new Error("Need to implement codeFor_tap");
+    throw new Error('Need to implement codeFor_tap')
+  }
+
+  codeFor_sleep() {
+    return ''
   }
 }
