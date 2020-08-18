@@ -243,22 +243,53 @@ class Device extends Component {
           * this.ratio
           * (this.touchSize[3] / this.banner.realHeight),
       )
-      if (widthEnd - this.tap.width === 0 && heightEnd - this.tap.height === 0) {
-        this.isMove = false
-      }
-      ipcRenderer.send(
-        // +localStorage.getItem("mainWinId"),
-        this.isMove ? 'swiped' : 'taped',
-        this.isMove ? { ...this.tap, widthEnd, heightEnd } : this.tap,
+      console.log(
+        Math.abs(widthEnd - this.tap.width) <= 10,
+        Math.abs(heightEnd - this.tap.height) <= 10,
       )
+      if (
+        Math.abs(widthEnd - this.tap.width) <= 10
+        && Math.abs(heightEnd - this.tap.height) <= 10
+      ) {
+        this.isMove = false
+        return
+      }
+      // TODO: tap
+      // ipcRenderer.send(
+      //   this.isMove ? 'swiped' : 'taped',
+      //   this.isMove ? { ...this.tap, widthEnd, heightEnd } : this.tap,
+      // )
+      const currentActionTime = (new Date()).getTime()
+      ipcRenderer.send(
+        'recordedActions',
+        [
+          {
+            action: 'sleep',
+            params: [
+              Math.ceil((currentActionTime - this.state.lastActionTime) / 1000),
+            ],
+          },
+          {
+            action: 'swipe',
+            params: [
+              '',
+              '',
+              this.tap.width,
+              this.tap.height,
+              widthEnd,
+              heightEnd,
+            ],
+          },
+        ],
+      )
+      this.setState({
+        lastActionTime: (new Date()).getTime(),
+      })
       // TODO: 为何要延迟 300ms
       setTimeout(() => {
         console.log(this.isMove)
         this.getSource()
       }, 300)
-      console.log('onmouseup loading true')
-      // TODO: loading 控制放到 getSource 方法内？
-      this.setState({ loading: true })
     }
     this.isMove = false
   }
@@ -411,7 +442,9 @@ class Device extends Component {
                 onMouseDown={this.onMouseDown}
                 onMouseUp={this.onMouseUp}
                 onMouseMove={this.onMouseMove}
-                onMouseOut={() => { this.isPressing = false }}
+                onMouseLeave={() => {
+                  this.isPressing = false
+                }}
               >
                 <canvas ref={(canvas) => { this.canvas = canvas }} />
                 {this.highlighterRects()}

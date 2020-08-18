@@ -341,7 +341,9 @@ ipcMain.on('stopPlayingBackCode', () => {
 // close deviceWindow
 ipcMain.on('close', (__) => {
   mainWindow.webContents.send('closeDeviceWindow')
-  deviceWindow.close()
+  if (deviceWindow) {
+    deviceWindow.close()
+  }
   deviceWindow = null
 })
 
