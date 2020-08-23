@@ -43,6 +43,8 @@ class Device extends Component {
       canvasWidth: 300,
       // 上一步操作时间戳
       lastActionTime: null,
+      // 当前页面的 xml
+      sourceXML: null,
     }
     this.keyboard = null
     // 是否处于按压状态
@@ -55,8 +57,6 @@ class Device extends Component {
     this.banner = null
     this.touchSize = []
     this.minitouch = net.connect({ port: 1718 })
-    // 当前页面的 xml
-    this.sourceXML = null
   }
 
   close = () => {
@@ -85,8 +85,8 @@ class Device extends Component {
       }
     })
     ipcRenderer.on('getSourceSuccess', (_, sourceJSON) => {
-      this.sourceXML = sourceJSON.value
       this.setState({
+        sourceXML: sourceJSON.value,
         sourceJSON: xmlToJSON(sourceJSON.value),
         loading: false,
       })
@@ -179,6 +179,7 @@ class Device extends Component {
       this.connectKeyboard()
     }
     this.text = text
+    console.log(text)
     this.keyboard.write(`${text}\n`)
   }
 
@@ -382,7 +383,7 @@ class Device extends Component {
     const recursive = (element, zIndex = 0) => {
       highlighterRects.push(
         <HighlighterRect
-          sourceXML={this.sourceXML}
+          sourceXML={this.state.sourceXML}
           selectedElement={this.state.selectedElement}
           element={element}
           zIndex={zIndex}
@@ -398,6 +399,7 @@ class Device extends Component {
               lastActionTime: (new Date()).getTime(),
             })
           }}
+          refreshUI={() => this.getSource()}
         />,
       )
       for (const childEl of element.children) recursive(childEl, zIndex + 1)
@@ -476,6 +478,9 @@ class Device extends Component {
                 this.setState({
                   lastActionTime: (new Date()).getTime(),
                 })
+                // 回到上级页面后，刷新 UI 树
+                await Timeout.set(300)
+                this.getSource()
               }
             }}
             task={() => runScript(this.props.device, 'input keyevent "KEYCODE_MENU"')}
@@ -486,6 +491,8 @@ class Device extends Component {
                 this.textId = this.state.selectedElement.attributes[
                   'resource-id'
                 ]
+              } else {
+                this.textId = ''
               }
               this.doTypeText(this.text)
             }}

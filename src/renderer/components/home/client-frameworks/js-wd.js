@@ -128,10 +128,19 @@ alive();
   }
 
   codeFor_sendKeys(varName, varIndex, text) {
-    return `await ${this.getVarName(
-      varName,
-      varIndex,
-    )}.sendKeys(${JSON.stringify(text)});`
+    // hack：录制时会传入3个变量，从视图中修改时只传入2个变量
+    let _varName; let _varIndex; let _text
+    const argus = Array.from(arguments)
+    console.log(argus)
+    if (Array.from(arguments).length === 3) {
+      [_varName, _varIndex, _text] = argus
+      return `await ${this.getVarName(
+        _varName,
+        _varIndex,
+      )}.sendKeys(${JSON.stringify(_text)});`
+    }
+    [_varName, _text] = argus
+    return `await ${_varName}.sendKeys(${JSON.stringify(_text)});`
   }
 
   codeFor_back() {
