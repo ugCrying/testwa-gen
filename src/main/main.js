@@ -1,5 +1,5 @@
 const Timeout = require('await-timeout')
-const { fork, spawnSync } = require('child_process')
+const { fork, spawnSync,spawn,exec } = require('child_process')
 const {
   app, Menu, BrowserWindow, ipcMain,
 } = require('electron')
@@ -307,23 +307,52 @@ ipcMain.on('startPlayingBackCode', (__, rawCode) => {
     'static',
     'wappium',
     'tests',
-    'code.js',
+    'code.py',
   )
   console.log(path, '脚本路径')
   require('fs').writeFile(path, rawCode, () => {
-    console.log(
-      'rawCode',
-      rawCode,
-    )
-    cp = fork(path)
-    cp.on('message', (msg) => {
-      mainWindow.webContents.send('log', msg)
+    var cp = spawn('pytest', [path,'--alluredir='+join(
+      __dirname,
+      '..',
+      '..',
+      'static',
+      'wappium',
+      'tests',
+      'my_allure_results',
+    )]);
+    cp.stdout.on('data', function(chunk) {
+      mainWindow.webContents.send('log', chunk.toString())
+    });
+    cp.stderr.on('data', (data) => {
+      mainWindow.webContents.send('log', data)
+    });
+    cp.on('close', function(code) {
+      console.log('close code : ' + code);
     })
     cp.on('exit', (code) => {
       console.log(`cp exit with code ${code}`)
       cp = null
       mainWindow.webContents.send('finishPlayBackCode')
+      exec('allure serve '+join(
+        __dirname,
+        '..',
+        '..',
+        'static',
+        'wappium',
+        'tests',
+        'my_allure_results',
+      ));
     })
+
+    // cp = fork(path)
+    // cp.on('message', (msg) => {
+    //   mainWindow.webContents.send('log', msg)
+    // })
+    // cp.on('exit', (code) => {
+    //   console.log(`cp exit with code ${code}`)
+    //   cp = null
+    //   mainWindow.webContents.send('finishPlayBackCode')
+    // })
   })
 })
 

@@ -55,6 +55,27 @@ export const downCode = (info, recordedActions) => {
  * @param {*} recordedActions
  */
 export const runCode = (info, recordedActions) => {
+  const framework = new frameworks.pythonAllure()
+  framework.caps = {
+    platformName: 'Android',
+    automationName: 'UiAutomator2',
+    deviceName: info.id,
+    udid: info.id,
+    appPackage: info.packageName,
+    appActivity: info.activityName,
+    noReset: 'True',
+  }
+  framework.actions = recordedActions
+  framework.run_num = localStorage.getItem('run_code_num') || 1
+  const rawCode = framework.getCodeString(true)
+  console.log(
+    'rawCode',
+    rawCode,
+  )
+  ipcRenderer.send('startPlayingBackCode', rawCode)
+}
+
+export const runCodejs = (info, recordedActions) => {
   const framework = new frameworks.jsWd()
   framework.caps = {
     platformName: 'Android',

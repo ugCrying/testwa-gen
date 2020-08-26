@@ -6,10 +6,12 @@
 import JsWdFramework from './js-wd'
 import JavaFramework from './java'
 import PythonFramework from './python'
+import PythonAllure from './python-allure'
 // import JsWdIoFramework from "./js-wdio";
 // import RubyFramework from "./ruby";
 const frameworks = {
   python: PythonFramework,
+  pythonAllure: PythonAllure,
   java: JavaFramework,
   jsWd: JsWdFramework,
   // jsWdIo: JsWdIoFramework,
