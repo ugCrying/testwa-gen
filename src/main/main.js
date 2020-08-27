@@ -1,5 +1,7 @@
 const Timeout = require('await-timeout')
-const { fork, spawnSync,spawn,exec } = require('child_process')
+const {
+  fork, spawnSync, spawn, exec,
+} = require('child_process')
 const {
   app, Menu, BrowserWindow, ipcMain,
 } = require('electron')
@@ -299,22 +301,22 @@ ipcMain.on(
   'stopRecording',
   () => deviceWindow && deviceWindow.webContents.send('stopRecording'),
 )
-const runAllureCP=(name,appName)=>{
-  if(allureCP)allureCP.kill()
-  allureCP=exec('allure serve '+join(
+const runAllureCP = (name, appName) => {
+  if (allureCP)allureCP.kill()
+  allureCP = exec(`allure serve ${join(
     __dirname,
     '..',
     '..',
     'static',
     'wappium',
-    'tests',appName,
-    name||''
-  ));
+    'tests', appName,
+    name || '',
+  )}`)
 }
-ipcMain.on('getReport', (__, {name,appName}) => {
-  runAllureCP(name,appName)
+ipcMain.on('getReport', (__, { name, appName }) => {
+  runAllureCP(name, appName)
 })
-ipcMain.on('startPlayingBackCode', (__, {rawCode,name,appName}) => {
+ipcMain.on('startPlayingBackCode', (__, { rawCode, name, appName }) => {
   const path = join(
     __dirname,
     '..',
@@ -326,29 +328,29 @@ ipcMain.on('startPlayingBackCode', (__, {rawCode,name,appName}) => {
   )
   console.log(path, '脚本路径')
   require('fs').writeFile(path, rawCode, () => {
-    var cp = spawn('pytest', [path,'--alluredir='+join(
+    let cp = spawn('pytest', [path, `--alluredir=${join(
       __dirname,
       '..',
       '..',
       'static',
       'wappium',
-      'tests',appName,
-      name||''
-    )]);
-    cp.stdout.on('data', function(chunk) {
+      'tests', appName,
+      name || '',
+    )}`])
+    cp.stdout.on('data', (chunk) => {
       mainWindow.webContents.send('log', chunk.toString())
-    });
+    })
     cp.stderr.on('data', (data) => {
       mainWindow.webContents.send('log', data)
-    });
-    cp.on('close', function(code) {
-      console.log('close code : ' + code);
+    })
+    cp.on('close', (code) => {
+      console.log(`close code : ${code}`)
     })
     cp.on('exit', (code) => {
       console.log(`cp exit with code ${code}`)
       cp = null
       mainWindow.webContents.send('finishPlayBackCode')
-      runAllureCP(name,appName)
+      runAllureCP(name, appName)
     })
 
     // cp = fork(path)
