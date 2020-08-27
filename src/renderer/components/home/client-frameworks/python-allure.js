@@ -34,8 +34,9 @@ ${capStr}
 driver = webdriver.Remote("${this.serverUrl}", caps)
 
 ${code}
-sleep(6)
-driver.quit()`
+def teardown_module():
+  sleep(6)
+  driver.quit()`
   }
 
   codeFor_findAndAssign(strategy, locator, localVar, isArray) {
