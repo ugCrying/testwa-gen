@@ -5,7 +5,8 @@ class PythonFramework extends Framework {
     console.log('python 脚本')
     return 'python'
   }
-index=0
+  index=0;
+  addFun=true;
   getPythonVal(jsonVal) {
     if (typeof jsonVal === 'boolean') {
       return jsonVal ? 'True' : 'False'
@@ -24,6 +25,7 @@ index=0
 # Then you can paste this into a file and simply run with Python
 
 from appium import webdriver
+from time import sleep
 import allure
 import pytest
 caps = {}
@@ -32,6 +34,7 @@ ${capStr}
 driver = webdriver.Remote("${this.serverUrl}", caps)
 
 ${code}
+sleep(6)
 driver.quit()`
   }
 
@@ -49,36 +52,32 @@ driver.quit()`
     if (!suffixMap[strategy]) {
       throw new Error(`Strategy ${strategy} can't be code-gened`)
     }
-    if (isArray) {
-      return `#@allure.serverity("critical")
+    const funHeader=this.addFun?`#@allure.serverity("critical")
 def test_action_${this.index++}():
-  ${localVar} = driver.find_elements_by_${
+  `:' '
+    if (isArray) {
+      return funHeader+`${localVar} = driver.find_elements_by_${
         suffixMap[strategy]
       }(${JSON.stringify(locator)})`
     }
-    return `#@allure.serverity("critical")
-def test_action_${this.index++}():
-  ${localVar} = driver.find_element_by_${
+    return funHeader+`${localVar} = driver.find_element_by_${
       suffixMap[strategy]
     }(${JSON.stringify(locator)})`
   }
 
   codeFor_click(varName, varIndex) {
-    return `#@allure.serverity("critical")
-def test_action_${this.index++}():
-  ${this.getVarName(varName, varIndex)}.click()`
+    this.addFun=true;
+    return `  ${this.getVarName(varName, varIndex)}.click()`
   }
 
   codeFor_clear(varName, varIndex) {
-    return `#@allure.serverity("critical")
-def test_action_${this.index++}():
-  ${this.getVarName(varName, varIndex)}.clear()`
+    this.addFun=true;
+    return `  ${this.getVarName(varName, varIndex)}.clear()`
   }
 
   codeFor_sendKeys(varName, varIndex, text) {
-    return `#@allure.serverity("critical")
-def test_action_${this.index++}():
-  ${this.getVarName(varName, varIndex)}.send_keys(${JSON.stringify(
+    this.addFun=true;
+    return `  ${this.getVarName(varName, varIndex)}.send_keys(${JSON.stringify(
       text,
     )})`
   }
@@ -104,6 +103,12 @@ def test_action_${this.index++}():
   .release() \
   .perform()
     `
+  }
+  codeFor_sleep(s = 1) {
+    this.addFun=false;
+    return `#@allure.serverity("critical")
+def test_action_${this.index++}():
+    sleep(${s})`
   }
 }
 

@@ -49,6 +49,9 @@ export const downCode = (info, recordedActions) => {
   return framework.getCodeString(true)
 }
 
+export const getReport = (info) => {
+  ipcRenderer.send('getReport',info)
+}
 /**
  * 执行（回放）脚本
  * @param {*} info
@@ -72,7 +75,7 @@ export const runCode = (info, recordedActions) => {
     'rawCode',
     rawCode,
   )
-  ipcRenderer.send('startPlayingBackCode', rawCode)
+  ipcRenderer.send('startPlayingBackCode', {rawCode,name:info.name,appName:info.appName})
 }
 
 export const runCodejs = (info, recordedActions) => {

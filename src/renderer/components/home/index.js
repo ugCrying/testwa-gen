@@ -27,7 +27,7 @@ import Login from './auth/Login'
 import styles from './devices.layout.css'
 import { emitter } from '../../lib'
 import {
-  getPackages, runCode, downCode, trackDevices,
+  getPackages, runCode, downCode, trackDevices,getReport
 } from './lib'
 import rxdb from '../../db'
 import SelectedElement from './SelectedElement'
@@ -110,13 +110,22 @@ export default class Home extends Component {
       && this.props.record.recordedActions.length
     ) {
       this.addTime = new Date().getTime().toString()
+      const code={
+        name: name || this.addTime,
+        addTime: this.addTime,
+        info: this.state.device,
+        value: this.props.record.recordedActions,
+      }
       rxdb.then((db) => {
-        db.code.atomicUpsert({
-          name: name || this.addTime,
-          addTime: this.addTime,
-          info: this.state.device,
-          value: this.props.record.recordedActions,
-        })
+        db.code.atomicUpsert(code)
+      })
+      this.props.dispatch({
+        type: 'record/updateRecordedActions',
+        payload: null,
+      })
+      this.props.dispatch({
+        type: 'record/addCode',
+        payload: code,
       })
     }
     ipcRenderer.send('stopRecording', null)
@@ -604,7 +613,7 @@ export default class Home extends Component {
                       && this.props.record.code.value.length)
                       || (this.props.record.recordedActions
                         && this.props.record.recordedActions.length)))
-                  }
+                  }                
                 >
                   {this.state.codeRunning ? (
                     <div
@@ -624,13 +633,14 @@ export default class Home extends Component {
                       停止
                     </div>
                   ) : (
-                    <div
+                    [<div
                       className={styles['button-icon']}
                       onClick={() => {
                         runCode(
                           {
                             ...this.state.device,
                             ...this.props.record.code.info,
+                            name:this.props.record.code.name,
                           },
                           this.props.record.recordedActions
                             || this.props.record.code.value,
@@ -648,7 +658,23 @@ export default class Home extends Component {
                       <div className={styles['button-icon']}>
                         回放
                       </div>
+                    </div>,<span>&nbsp; &nbsp;&nbsp;</span>,
+                    <div
+                      className={styles['button-icon']}
+                      onClick={() => {
+                        getReport(
+                          {
+                            name:this.props.record.code.name,
+                            appName:this.props.record.code.info?this.props.record.code.info.appName:this.state.device.appName,
+                          }
+                        )
+                      }}
+                    >
+                      <div className={styles['button-icon']}>
+                        报告
+                      </div>
                     </div>
+                    ]
                   )}
                 </Button>
                 <Button

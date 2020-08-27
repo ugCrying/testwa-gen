@@ -17,6 +17,7 @@ const { emitter } = require('../api/event')
 let mainWindow
 let deviceWindow
 let cp
+let allureCP
 const baseUrl = process.defaultApp
   ? 'http://localhost:8000'
   : `file://${__dirname}/../renderer/index.html`
@@ -298,8 +299,22 @@ ipcMain.on(
   'stopRecording',
   () => deviceWindow && deviceWindow.webContents.send('stopRecording'),
 )
-
-ipcMain.on('startPlayingBackCode', (__, rawCode) => {
+const runAllureCP=(name,appName)=>{
+  if(allureCP)allureCP.kill()
+  allureCP=exec('allure serve '+join(
+    __dirname,
+    '..',
+    '..',
+    'static',
+    'wappium',
+    'tests',appName,
+    name||''
+  ));
+}
+ipcMain.on('getReport', (__, {name,appName}) => {
+  runAllureCP(name,appName)
+})
+ipcMain.on('startPlayingBackCode', (__, {rawCode,name,appName}) => {
   const path = join(
     __dirname,
     '..',
@@ -317,8 +332,8 @@ ipcMain.on('startPlayingBackCode', (__, rawCode) => {
       '..',
       'static',
       'wappium',
-      'tests',
-      'my_allure_results',
+      'tests',appName,
+      name||''
     )]);
     cp.stdout.on('data', function(chunk) {
       mainWindow.webContents.send('log', chunk.toString())
@@ -333,15 +348,7 @@ ipcMain.on('startPlayingBackCode', (__, rawCode) => {
       console.log(`cp exit with code ${code}`)
       cp = null
       mainWindow.webContents.send('finishPlayBackCode')
-      exec('allure serve '+join(
-        __dirname,
-        '..',
-        '..',
-        'static',
-        'wappium',
-        'tests',
-        'my_allure_results',
-      ));
+      runAllureCP(name,appName)
     })
 
     // cp = fork(path)
