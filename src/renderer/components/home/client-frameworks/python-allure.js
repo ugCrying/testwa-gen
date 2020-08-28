@@ -5,8 +5,11 @@ class PythonFramework extends Framework {
     console.log('python 脚本')
     return 'python'
   }
+
   index=0;
+
   addFun=true;
+
   getPythonVal(jsonVal) {
     if (typeof jsonVal === 'boolean') {
       return jsonVal ? 'True' : 'False'
@@ -53,31 +56,31 @@ def teardown_module():
     if (!suffixMap[strategy]) {
       throw new Error(`Strategy ${strategy} can't be code-gened`)
     }
-    const funHeader=this.addFun?`#@allure.serverity("critical")
+    const funHeader = this.addFun ? `#@allure.serverity("critical")
 def test_action_${this.index++}():
-  `:' '
+  ` : '  '
     if (isArray) {
-      return funHeader+`${localVar} = driver.find_elements_by_${
+      return `${funHeader}${localVar} = driver.find_elements_by_${
         suffixMap[strategy]
       }(${JSON.stringify(locator)})`
     }
-    return funHeader+`${localVar} = driver.find_element_by_${
+    return `${funHeader}${localVar} = driver.find_element_by_${
       suffixMap[strategy]
     }(${JSON.stringify(locator)})`
   }
 
   codeFor_click(varName, varIndex) {
-    this.addFun=true;
+    this.addFun = true
     return `  ${this.getVarName(varName, varIndex)}.click()`
   }
 
   codeFor_clear(varName, varIndex) {
-    this.addFun=true;
+    this.addFun = true
     return `  ${this.getVarName(varName, varIndex)}.clear()`
   }
 
   codeFor_sendKeys(varName, varIndex, text) {
-    this.addFun=true;
+    this.addFun = true
     return `  ${this.getVarName(varName, varIndex)}.send_keys(${JSON.stringify(
       text,
     )})`
@@ -105,11 +108,12 @@ def test_action_${this.index++}():
   .perform()
     `
   }
+
   codeFor_sleep(s = 1) {
-    this.addFun=false;
+    this.addFun = false
     return `#@allure.serverity("critical")
 def test_action_${this.index++}():
-    sleep(${s})`
+  sleep(${s})`
   }
 }
 
