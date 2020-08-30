@@ -34,6 +34,7 @@ extraResources:
 - node_modules/prop-types
 - static/wappium/lib
 - static/wappium/tests/*.txt
+- static/wappium/tests/__init__.py
 - static/wappium/*.js
 - static/wappium/node_modules
 - static/uiautomator2/apks
