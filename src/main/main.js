@@ -305,16 +305,23 @@ ipcMain.on(
   () => deviceWindow && deviceWindow.webContents.send('stopRecording'),
 )
 const runAllureCP = (name, appName) => {
-  if (allureCP)allureCP.kill()
-  allureCP = exec(`allure serve -p 8088 -h 0.0.0.0 ${join(
+  if (allureCP) allureCP.kill()
+  // name 与 appName 可能包含空格，需要用引号连接
+  const p = join(
     __dirname,
     '..',
     '..',
     'static',
     'wappium',
-    'tests', appName,
-    name || '',
-  )}`)
+    'tests',
+    `"${appName}"`,
+    `"${name}"` || '',
+  )
+  // console.log(
+  //   'name, appName',
+  //   name, appName, p,
+  // )
+  allureCP = exec(`allure serve -p 8088 -h 0.0.0.0 ${p}`)
 }
 ipcMain.on('getReport', (__, { name, appName }) => {
   runAllureCP(name, appName)
