@@ -131,8 +131,7 @@ alive();
     // hack：录制时会传入3个变量，从视图中修改时只传入2个变量
     let _varName; let _varIndex; let _text
     const argus = Array.from(arguments)
-    console.log(argus)
-    if (Array.from(arguments).length === 3) {
+    if (argus.length === 3) {
       [_varName, _varIndex, _text] = argus
       return `await ${this.getVarName(
         _varName,
@@ -160,7 +159,7 @@ alive();
     // hack：录制时会传入6个变量，从视图中修改时只传入4个变量
     let _x1; let _x2; let _y1; let _y2
     const argus = Array.from(arguments)
-    if (Array.from(arguments).length === 4) {
+    if (argus.length === 4) {
       [_x1, _y1, _x2, _y2] = argus
     } else {
       [,, _x1, _y1, _x2, _y2] = argus
