@@ -67,7 +67,7 @@ class Singleton(object):
 
     def __new__(cls, *args, **kw):
         if not hasattr(cls, "_instance"):
-            driver = driver1
+            driver = webdriver.Remote(command_executor=EXECUTOR, desired_capabilities=caps)
             orig = super(Singleton, cls)
             cls._instance = orig.__new__(cls, *args, **kw)
             cls._instance.driver = driver
