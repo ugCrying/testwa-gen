@@ -23,7 +23,8 @@ class PythonFramework extends Framework {
         this.caps[k],
       )}`)
       .join('\n')
-    return `# This sample code uses the Appium python client
+    return `#  -*-coding:utf8 -*-
+# This sample code uses the Appium python client
 # pip install Appium-Python-Client
 # Then you can paste this into a file and simply run with Python
 
@@ -31,15 +32,70 @@ from appium import webdriver
 from time import sleep
 import allure
 import pytest
+from selenium.common.exceptions import InvalidSessionIdException
+from appium.webdriver.common.touch_action import TouchAction
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
 caps = {}
 ${capStr}
 
-driver = webdriver.Remote("${this.serverUrl}", caps)
+EXECUTOR = "${this.serverUrl}"
+driver = webdriver.Remote(command_executor=EXECUTOR, desired_capabilities=caps)
 
-${code}
-def teardown_module():
-  sleep(6)
-  driver.quit()`
+def take_screenshot_and_logcat(driver, calling_request):
+    __save_log_type(driver, calling_request, "logcat")
+
+def take_screenshot_and_syslog(driver, calling_request):
+    __save_log_type(driver, calling_request, "syslog")
+
+def __save_log_type(driver, calling_request, type):
+    try:
+        logcat_data = driver.get_log(type)
+    except InvalidSessionIdException:
+        logcat_data = ""
+
+    data_string = ""
+    for data in logcat_data:
+        data_string = data_string + "%s:  %s\n" % (data["timestamp"], data["message"].encode("utf-8"))
+    allure.attach(data_string, "日志", allure.attachment_type.TEXT)
+    allure.attach(driver.get_screenshot_as_png(), "操作截图", allure.attachment_type.PNG)
+
+class Singleton(object):
+    driver = None
+
+    def __new__(cls, *args, **kw):
+        if not hasattr(cls, "_instance"):
+            driver = driver1
+            orig = super(Singleton, cls)
+            cls._instance = orig.__new__(cls, *args, **kw)
+            cls._instance.driver = driver
+        return cls._instance
+
+class DriverClient(Singleton):
+    pass
+
+@allure.feature("testwaCase")
+class TestWaBasic():
+
+    def setup_class(cls):
+        cls.client = DriverClient().driver
+
+    def teardown_class(cls):
+        sleep(6)
+        cls.client.close_app()
+
+    @pytest.fixture(scope='function')
+    def driver(self, request):
+        calling_request = request._pyfuncitem.name
+        driver = DriverClient().driver
+        def fin():
+            take_screenshot_and_logcat(driver, calling_request)
+        request.addfinalizer(fin)
+        return driver
+    
+${code}`
   }
 
   codeFor_findAndAssign(strategy, locator, localVar, isArray) {
@@ -56,9 +112,9 @@ def teardown_module():
     if (!suffixMap[strategy]) {
       throw new Error(`Strategy ${strategy} can't be code-gened`)
     }
-    const funHeader = this.addFun ? `#@allure.serverity("critical")
-def test_action_${this.index++}():
-  ` : '  '
+    const funHeader = this.addFun ? `    @allure.severity("critical")
+    def test_action_${this.index++}():
+        ` : '        '
     if (isArray) {
       return `${funHeader}${localVar} = driver.find_elements_by_${
         suffixMap[strategy]
@@ -71,49 +127,49 @@ def test_action_${this.index++}():
 
   codeFor_click(varName, varIndex) {
     this.addFun = true
-    return `  ${this.getVarName(varName, varIndex)}.click()`
+    return `        ${this.getVarName(varName, varIndex)}.click()`
   }
 
   codeFor_clear(varName, varIndex) {
     this.addFun = true
-    return `  ${this.getVarName(varName, varIndex)}.clear()`
+    return `        ${this.getVarName(varName, varIndex)}.clear()`
   }
 
   codeFor_sendKeys(varName, varIndex, text) {
     this.addFun = true
-    return `  ${this.getVarName(varName, varIndex)}.send_keys(${JSON.stringify(
+    return `        ${this.getVarName(varName, varIndex)}.send_keys(${JSON.stringify(
       text,
     )})`
   }
 
   codeFor_back() {
-    return `#@allure.serverity("critical")
-def test_action_${this.index++}():
-  driver.back()`
+    return `    @allure.severity("critical")
+    def test_action_${this.index++}():
+        driver.back()`
   }
 
   codeFor_tap(varNameIgnore, varIndexIgnore, x, y) {
-    return `#@allure.serverity("critical")
-def test_action_${this.index++}():
-  TouchAction(driver).tap(x=${x}, y=${y}).perform()`
+    return `    @allure.severity("critical")
+    def test_action_${this.index++}():
+        TouchAction(driver).tap(x=${x}, y=${y}).perform()`
   }
 
   codeFor_swipe(varNameIgnore, varIndexIgnore, x1, y1, x2, y2) {
-    return `#@allure.serverity("critical")
-def test_action_${this.index++}():
-  TouchAction(driver) \
-  .press(x=${x1}, y=${y1}) \
-  .move_to(x=${x2}, y=${y2}) \
-  .release() \
-  .perform()
+    return `    @allure.severity("critical")
+    def test_action_${this.index++}():
+        TouchAction(driver) \
+        .press(x=${x1}, y=${y1}) \
+        .move_to(x=${x2}, y=${y2}) \
+        .release() \
+        .perform()
     `
   }
 
   codeFor_sleep(s = 1) {
     this.addFun = false
-    return `#@allure.serverity("critical")
-def test_action_${this.index++}():
-  sleep(${s})`
+    return `    @allure.severity("critical")
+    def test_action_${this.index++}():
+        sleep(${s})`
   }
 }
 
