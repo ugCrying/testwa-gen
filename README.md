@@ -4,6 +4,12 @@
 
 - JDK
 - ADB
+- [Allure](https://docs.qameta.io/allure/#_installing_a_commandline)
+- [Python](https://www.python.org/downloads/)
+
+## 脚本回放依赖安装
+
+`pip install pytest allure-pytest Appium-Python-Client`
 
 ## 开发环境依赖
 
