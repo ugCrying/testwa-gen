@@ -245,6 +245,9 @@ app.once('before-quit', () => {
     cp.kill()
     cp = null
   }
+  if (allureCP) {
+    allureCP.kill()
+  }
   stopAppium()
   process.exit()
 })
@@ -303,7 +306,7 @@ ipcMain.on(
 )
 const runAllureCP = (name, appName) => {
   if (allureCP)allureCP.kill()
-  allureCP = exec(`allure serve ${join(
+  allureCP = exec(`allure serve -p 8088 -h 0.0.0.0 ${join(
     __dirname,
     '..',
     '..',
