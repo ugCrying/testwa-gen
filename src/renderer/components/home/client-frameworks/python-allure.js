@@ -42,7 +42,7 @@ caps = {}
 ${capStr}
 
 EXECUTOR = "${this.serverUrl}"
-driver = webdriver.Remote(command_executor=EXECUTOR, desired_capabilities=caps)
+# driver = webdriver.Remote(command_executor=EXECUTOR, desired_capabilities=caps)
 
 def take_screenshot_and_logcat(driver, calling_request):
     __save_log_type(driver, calling_request, "logcat")
@@ -58,7 +58,7 @@ def __save_log_type(driver, calling_request, type):
 
     data_string = ""
     for data in logcat_data:
-        data_string = data_string + "%s:  %s\n" % (data["timestamp"], data["message"].encode("utf-8"))
+        data_string = data_string + "%s:  %s\\n" % (data["timestamp"], data["message"].encode("utf-8"))
     allure.attach(data_string, "日志", allure.attachment_type.TEXT)
     allure.attach(driver.get_screenshot_as_png(), "操作截图", allure.attachment_type.PNG)
 
@@ -113,7 +113,7 @@ ${code}`
       throw new Error(`Strategy ${strategy} can't be code-gened`)
     }
     const funHeader = this.addFun ? `    @allure.severity("critical")
-    def test_action_${this.index++}():
+    def test_action_${this.index++}(self,driver):
         ` : '        '
     if (isArray) {
       return `${funHeader}${localVar} = driver.find_elements_by_${
@@ -144,19 +144,19 @@ ${code}`
 
   codeFor_back() {
     return `    @allure.severity("critical")
-    def test_action_${this.index++}():
+    def test_action_${this.index++}(self,driver):
         driver.back()`
   }
 
   codeFor_tap(varNameIgnore, varIndexIgnore, x, y) {
     return `    @allure.severity("critical")
-    def test_action_${this.index++}():
+    def test_action_${this.index++}(self,driver):
         TouchAction(driver).tap(x=${x}, y=${y}).perform()`
   }
 
   codeFor_swipe(varNameIgnore, varIndexIgnore, x1, y1, x2, y2) {
     return `    @allure.severity("critical")
-    def test_action_${this.index++}():
+    def test_action_${this.index++}(self,driver):
         TouchAction(driver) \
         .press(x=${x1}, y=${y1}) \
         .move_to(x=${x2}, y=${y2}) \
@@ -168,7 +168,7 @@ ${code}`
   codeFor_sleep(s = 1) {
     this.addFun = false
     return `    @allure.severity("critical")
-    def test_action_${this.index++}():
+    def test_action_${this.index++}(self,driver):
         sleep(${s})`
   }
 }
