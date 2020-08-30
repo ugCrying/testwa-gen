@@ -115,7 +115,7 @@ class RecordActions extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      actionFramework: 'jsWd',
+      actionFramework: 'pythonAllure',
     }
     this.columns = [
       {
@@ -252,7 +252,7 @@ class RecordActions extends Component {
             <div className={styles['script-title']}>
               <div className={styles['script-title-select']}>
                 <Select
-                  defaultValue="jsWd"
+                  defaultValue="pythonAllure"
                   // @ts-ignore
                   onChange={(actionFramework) => this.setState({ actionFramework })}
                   className={InspectorStyles['framework-dropdown']}
