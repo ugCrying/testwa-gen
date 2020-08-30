@@ -91,8 +91,8 @@ export default ({
         localStorage.setItem('lastVariableName', variableName)
         lastActionTime = (new Date()).getTime()
         // 页面交互后刷新最新 UI 树
-        await Timeout.set(300)
-        refreshUI()
+        // await Timeout.set(300)
+        // refreshUI()
       }}
       onMouseOver={() => {
         timer = setTimeout(() => {
