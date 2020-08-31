@@ -128,10 +128,18 @@ alive();
   }
 
   codeFor_sendKeys(varName, varIndex, text) {
-    return `await ${this.getVarName(
-      varName,
-      varIndex,
-    )}.sendKeys(${JSON.stringify(text)});`
+    // hack：录制时会传入3个变量，从视图中修改时只传入2个变量
+    let _varName; let _varIndex; let _text
+    const argus = Array.from(arguments)
+    if (argus.length === 3) {
+      [_varName, _varIndex, _text] = argus
+      return `await ${this.getVarName(
+        _varName,
+        _varIndex,
+      )}.sendKeys(${JSON.stringify(_text)});`
+    }
+    [_varName, _text] = argus
+    return `await ${_varName}.sendKeys(${JSON.stringify(_text)});`
   }
 
   codeFor_back() {
@@ -145,17 +153,28 @@ alive();
     `
   }
 
+  // ms: 500
+  // https://github.com/Magic-Pod/AppiumRegressionCheck/issues/6
   codeFor_swipe(varNameIgnore, varIndexIgnore, x1, y1, x2, y2) {
+    // hack：录制时会传入6个变量，从视图中修改时只传入4个变量
+    let _x1; let _x2; let _y1; let _y2
+    const argus = Array.from(arguments)
+    if (argus.length === 4) {
+      [_x1, _y1, _x2, _y2] = argus
+    } else {
+      [,, _x1, _y1, _x2, _y2] = argus
+    }
     return `await (new wd.TouchAction(driver))
-  .press({x: ${x1}, y: ${y1}})
-  .moveTo({x: ${x2}, y: ${y2}})
+  .press({x: ${_x1}, y: ${_y1}})
+  .wait({ms: 500})
+  .moveTo({x: ${_x2}, y: ${_y2}})
   .release()
-  .perform()
+  .perform();
     `
   }
 
   codeFor_sleep(s = 1) {
-    return `await sleep(${s})`
+    return `await sleep(${s});`
   }
 }
 

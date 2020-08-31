@@ -50,7 +50,7 @@ export const downCode = (info, recordedActions) => {
 }
 
 export const getReport = (info) => {
-  ipcRenderer.send('getReport',info)
+  ipcRenderer.send('getReport', info)
 }
 /**
  * 执行（回放）脚本
@@ -75,7 +75,7 @@ export const runCode = (info, recordedActions) => {
     'rawCode',
     rawCode,
   )
-  ipcRenderer.send('startPlayingBackCode', {rawCode,name:info.name,appName:info.appName})
+  ipcRenderer.send('startPlayingBackCode', { rawCode, name: info.name, appName: info.appName })
 }
 
 export const runCodejs = (info, recordedActions) => {
@@ -130,7 +130,9 @@ export const onSelectAPK = async ({ name, path }) => {
   // @ts-ignore
   db.apk.atomicUpsert({ name, path })
 }
-export const onSelectPackage = ({ packageName, activityName, name }) => {
+export const onSelectPackage = async ({ packageName, activityName, name }) => {
+  // 如果 App 已启动，则强制结束重新启动
+  await client.shell(device.id, `am force-stop ${packageName}`)
   client
     .shell(device.id, `am start -n ${packageName}/${activityName}`)
     .then(adbkit.util.readAll)

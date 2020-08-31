@@ -1,8 +1,12 @@
+/* eslint-disable jsx-a11y/mouse-events-have-key-events */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 /**
  * xml 元素高亮
  */
 import React from 'react'
 import { ipcRenderer } from 'electron'
+import Timeout from 'await-timeout'
 import { getRecordedActions, parseCoordinates } from './lib'
 import { emitter } from '../../lib'
 // @ts-ignore
@@ -20,6 +24,7 @@ export default ({
   clearText,
   updateLastActionTime,
   lastActionTime,
+  refreshUI,
 }) => {
   const {
     x1, y1, x2, y2,
@@ -36,19 +41,23 @@ export default ({
           ? `${styles['highlighter-box']} ${styles['hovered-element-box']}`
           : styles['highlighter-box']
       }
-      onClick={() => {
+      onClick={async () => {
         if (!record) return
+        // 当执行新一次点击事件时，才认为上一次输入结束
         if (text) {
-          const { variableName } = getRecordedActions(element, sourceXML)
+          // TODO: remove localStorage before exit
+          // console.log(localStorage.getItem('lastVariableName'))
+          // const { variableName } = getRecordedActions(element, sourceXML)
           ipcRenderer.send(
             'sendKeys', [
-              {
-                action: 'findAndAssign',
-                params: ['id', textId, `keys${variableName}`],
-              },
+              // {
+              //   action: 'findAndAssign',
+              //   params: ['id', textId, `keys${variableName}`],
+              // },
               {
                 action: 'sendKeys',
-                params: [`keys${variableName}`, '', text],
+                // params: [`keys${variableName}`, '', text],
+                params: [`${localStorage.getItem('lastVariableName')}`, '', text],
               },
             ])
         }
@@ -78,7 +87,12 @@ export default ({
             },
           ],
         )
+        // lastVariableName = variableName
+        localStorage.setItem('lastVariableName', variableName)
         lastActionTime = (new Date()).getTime()
+        // 页面交互后刷新最新 UI 树
+        // await Timeout.set(300)
+        // refreshUI()
       }}
       onMouseOver={() => {
         timer = setTimeout(() => {
