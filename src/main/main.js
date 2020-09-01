@@ -304,9 +304,12 @@ ipcMain.on(
   'stopRecording',
   () => deviceWindow && deviceWindow.webContents.send('stopRecording'),
 )
-const runAllureCP = (name, appName) => {
+let port=1212
+const runAllureCP = (name='', appName='') => {
   if (allureCP) allureCP.kill()
   // name 与 appName 可能包含空格，需要用引号连接
+  name=name.replace(/\s+/, "_")
+  appName=appName.replace(/\s+/g, "_")
   const p = join(
     __dirname,
     '..',
@@ -314,14 +317,17 @@ const runAllureCP = (name, appName) => {
     'static',
     'wappium',
     'tests',
-    `"${appName}"`,
-    `"${name}"` || '',
+    appName,
+    name || '',
   )
-  // console.log(
-  //   'name, appName',
-  //   name, appName, p,
-  // )
-  allureCP = exec(`allure serve -p 8088 -h 0.0.0.0 ${p}`)
+  
+  allureCP = exec(`allure serve -p ${port++} -h localhost ${p}`)
+  allureCP.stdout.on('data', (chunk) => {
+    mainWindow.webContents.send('log', chunk.toString())
+  })
+  allureCP.stderr.on('data', (data) => {
+    mainWindow.webContents.send('log', data)
+  })
 }
 ipcMain.on('getReport', (__, { name, appName }) => {
   runAllureCP(name, appName)
@@ -336,6 +342,9 @@ ipcMain.on('startPlayingBackCode', (__, { rawCode, name, appName }) => {
     'tests',
     'code.py',
   )
+  
+  if(name)name=name.replace(/\s+/g, "_")
+  appName=appName.replace(/\s+/g, "_")
   console.log(path, '脚本路径')
   require('fs').writeFile(path, rawCode, () => {
     let cp = spawn('pytest', [path, `--alluredir=${join(
