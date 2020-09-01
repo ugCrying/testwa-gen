@@ -313,7 +313,7 @@ const runAllureCP = (name = '', appName = '') => {
     appName = `"${appName}"`
   } else {
     // TODO
-    name = name.replace(/\s+/, '_')
+    name = name.replace(/\s+/g, '_')
     appName = appName.replace(/\s+/g, '_')
   }
   const p = join(
