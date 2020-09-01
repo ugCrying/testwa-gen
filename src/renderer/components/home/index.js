@@ -633,7 +633,7 @@ export default class Home extends Component {
                       停止
                     </div>
                   ) : (
-                    [<div
+                    <div
                       className={styles['button-icon']}
                       onClick={() => {
                         runCode(
@@ -658,23 +658,7 @@ export default class Home extends Component {
                       <div className={styles['button-icon']}>
                         回放
                       </div>
-                    </div>,<span>&nbsp; &nbsp;&nbsp;</span>,
-                    <div
-                      className={styles['button-icon']}
-                      onClick={() => {
-                        getReport(
-                          {
-                            name:this.props.record.code.name,
-                            appName:this.props.record.code.info?this.props.record.code.info.appName:this.state.device.appName,
-                          }
-                        )
-                      }}
-                    >
-                      <div className={styles['button-icon']}>
-                        报告
-                      </div>
                     </div>
-                    ]
                   )}
                 </Button>
                 <Button
@@ -718,6 +702,33 @@ export default class Home extends Component {
                 {/* <Button icon="question-circle" size={"small"}>
                   帮助
                 </Button> */}
+                
+                <Button
+                  size="small"
+                  disabled={
+                    !(!this.state.recording
+                    && ((this.props.record.code
+                      && this.props.record.code.value.length)
+                      || (this.props.record.recordedActions
+                        && this.props.record.recordedActions.length)))
+                  }                
+                >
+                    <div
+                      className={styles['button-icon']}
+                      onClick={() => {
+                        getReport(
+                          {
+                            name:this.props.record.code.name,
+                            appName:this.props.record.code.info?this.props.record.code.info.appName:this.state.device.appName,
+                          }
+                        )
+                      }}
+                    >
+                      <div className={styles['button-icon']}>
+                        报告
+                      </div>
+                    </div>
+                </Button>
               </div>
               <div className={styles['header-control-login']}>
                 {/* <p>
