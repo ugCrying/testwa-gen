@@ -1,6 +1,6 @@
 const Timeout = require('await-timeout')
 const {
-  fork, spawnSync, spawn, exec,
+  fork, spawnSync, spawn, exec, execSync,
 } = require('child_process')
 const {
   app, Menu, BrowserWindow, ipcMain,
@@ -211,10 +211,38 @@ app.once('ready', () => {
     webPreferences: {
       nodeIntegration: true,
     },
-    width: 1280,
-    height: 768,
+    width: 1240,
+    height: 848,
+    x: 0,
+    y: 0,
     show: true,
   })
+
+  // let pyVersion
+  // let pytestVersion
+  // exec('python --version', (error, stdout, stderr) => {
+  //   console.log(`stdout: ${stdout}`)
+  //   console.log(`stderr: ${stderr}`)
+  //   if (error !== null) {
+  //     console.log(`exec error: ${error}`)
+  //   }
+  //   pyVersion = stdout || stderr
+  // })
+  // exec('pytest --version', (error, stdout, stderr) => {
+  //   console.log(`stdout: ${stdout}`)
+  //   console.log(`stderr: ${stderr}`)
+  //   if (error !== null) {
+  //     console.log(`exec error: ${error}`)
+  //   }
+  //   pytestVersion = stdout || stderr
+  // })
+  // ipcMain.on('created', () => {
+  //   mainWindow.webContents.send('env', {
+  //     pyVersion,
+  //     pytestVersion,
+  //     env: process.env,
+  //   })
+  // })
   trackDevices()
   startAppium(mainWindow)
   mainWindow.loadURL(baseUrl)
@@ -307,15 +335,9 @@ ipcMain.on(
 let port = 1212
 const runAllureCP = (name = '', appName = '') => {
   if (allureCP) allureCP.kill()
+  name = name.replace(/\s+/g, '_')
+  appName = appName.replace(/\s+/g, '_')
   // name 与 appName 可能包含空格，需要用引号连接
-  if (process.platform !== 'win32') {
-    name = `"${name}"`
-    appName = `"${appName}"`
-  } else {
-    // TODO
-    name = name.replace(/\s+/, '_')
-    appName = appName.replace(/\s+/g, '_')
-  }
   const p = join(
     __dirname,
     '..',
@@ -326,19 +348,20 @@ const runAllureCP = (name = '', appName = '') => {
     appName,
     name || '',
   )
-
-  allureCP = exec(`allure serve -p ${port++} -h localhost ${p}`)
+  // FIXME: 解构用 exec 报错
+  allureCP = require('child_process').exec(`allure serve -p ${port++} -h localhost ${p}`)
   allureCP.stdout.on('data', (chunk) => {
     mainWindow.webContents.send('log', chunk.toString())
   })
   allureCP.stderr.on('data', (data) => {
+    console.log('error', data)
     mainWindow.webContents.send('log', data)
   })
 }
 ipcMain.on('getReport', (__, { name, appName }) => {
   runAllureCP(name, appName)
 })
-ipcMain.on('startPlayingBackCode', (__, { rawCode, name, appName }) => {
+ipcMain.on('startPlayingBackCode', (__, { rawCode, name = '', appName = '' }) => {
   const path = join(
     __dirname,
     '..',
@@ -348,12 +371,13 @@ ipcMain.on('startPlayingBackCode', (__, { rawCode, name, appName }) => {
     'tests',
     'code.py',
   )
-
-  if (name)name = name.replace(/\s+/g, '_')
+  name = name.replace(/\s+/g, '_')
   appName = appName.replace(/\s+/g, '_')
+
   console.log(path, '脚本路径')
   require('fs').writeFile(path, rawCode, () => {
-    let cp = spawn('pytest', [path, `--alluredir=${join(
+    // FIMXE: require('child_process').spawn 后 runAllure 打包运行报错
+    cp = spawn('pytest', [path, `--alluredir=${join(
       __dirname,
       '..',
       '..',

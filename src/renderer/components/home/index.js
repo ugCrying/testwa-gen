@@ -27,7 +27,7 @@ import Login from './auth/Login'
 import styles from './devices.layout.css'
 import { emitter } from '../../lib'
 import {
-  getPackages, runCode, downCode, trackDevices,getReport
+  getPackages, runCode, downCode, trackDevices, getReport,
 } from './lib'
 import rxdb from '../../db'
 import SelectedElement from './SelectedElement'
@@ -110,7 +110,7 @@ export default class Home extends Component {
       && this.props.record.recordedActions.length
     ) {
       this.addTime = new Date().getTime().toString()
-      const code={
+      const code = {
         name: name || this.addTime,
         addTime: this.addTime,
         info: this.state.device,
@@ -613,7 +613,7 @@ export default class Home extends Component {
                       && this.props.record.code.value.length)
                       || (this.props.record.recordedActions
                         && this.props.record.recordedActions.length)))
-                  }                
+                  }
                 >
                   {this.state.codeRunning ? (
                     <div
@@ -640,7 +640,7 @@ export default class Home extends Component {
                           {
                             ...this.state.device,
                             ...this.props.record.code.info,
-                            name:this.props.record.code.name,
+                            name: this.props.record.code.name,
                           },
                           this.props.record.recordedActions
                             || this.props.record.code.value,
@@ -702,7 +702,7 @@ export default class Home extends Component {
                 {/* <Button icon="question-circle" size={"small"}>
                   帮助
                 </Button> */}
-                
+
                 <Button
                   size="small"
                   disabled={
@@ -711,23 +711,23 @@ export default class Home extends Component {
                       && this.props.record.code.value.length)
                       || (this.props.record.recordedActions
                         && this.props.record.recordedActions.length)))
-                  }                
+                  }
                 >
-                    <div
-                      className={styles['button-icon']}
-                      onClick={() => {
-                        getReport(
-                          {
-                            name:this.props.record.code.name,
-                            appName:this.props.record.code.info?this.props.record.code.info.appName:this.state.device.appName,
-                          }
-                        )
-                      }}
-                    >
-                      <div className={styles['button-icon']}>
-                        报告
-                      </div>
+                  <div
+                    className={styles['button-icon']}
+                    onClick={() => {
+                      getReport(
+                        {
+                          name: this.props.record.code.name,
+                          appName: this.props.record.code.info ? this.props.record.code.info.appName : this.state.device.appName,
+                        },
+                      )
+                    }}
+                  >
+                    <div className={styles['button-icon']}>
+                      报告
                     </div>
+                  </div>
                 </Button>
               </div>
               <div className={styles['header-control-login']}>

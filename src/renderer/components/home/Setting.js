@@ -9,24 +9,25 @@ import { connect } from 'dva'
 
 const JAVA_HOME = require('electron').remote.process.env.JAVA_HOME || ''
 const ANDROID_HOME = require('electron').remote.process.env.ANDROID_HOME || ''
-const PYTHON3_PATH = require('electron').remote.process.env.PYTHON3_PATH || ''
+const PYTEST_PATH = require('electron').remote.process.env.PYTEST_PATH || ''
 const ALLURE_PATH = require('electron').remote.process.env.ALLURE_PATH || ''
-if(localStorage.getItem('PYTHON3_PATH')){
-  require('electron').remote.process.env.PATH = require('electron').remote.process.platform !== 'win32'?
-  `${localStorage.getItem('PYTHON3_PATH')}:$PATH`:
-  `${localStorage.getItem('PYTHON3_PATH')};${require('electron').remote.process.env.PATH}`
+
+if (localStorage.getItem('PYTEST_PATH')) {
+  require('electron').remote.process.env.PATH = require('electron').remote.process.platform !== 'win32'
+    ? `${localStorage.getItem('PYTEST_PATH')}:${require('electron').remote.process.env.PATH}`
+    : `${localStorage.getItem('PYTEST_PATH')};${require('electron').remote.process.env.PATH}`
 }
-if(localStorage.getItem('ALLURE_PATH')){
-  require('electron').remote.process.env.PATH = require('electron').remote.process.platform !== 'win32'?
-  `${localStorage.getItem('ALLURE_PATH')}:$PATH`:
-  `${localStorage.getItem('ALLURE_PATH')};${require('electron').remote.process.env.PATH}`
+if (localStorage.getItem('ALLURE_PATH')) {
+  require('electron').remote.process.env.PATH = require('electron').remote.process.platform !== 'win32'
+    ? `${localStorage.getItem('ALLURE_PATH')}:${require('electron').remote.process.env.PATH}`
+    : `${localStorage.getItem('ALLURE_PATH')};${require('electron').remote.process.env.PATH}`
 }
 const Setting = (props) => {
   // JAVA_HOME 路径
   const CURRENT_JAVA_HOME = props.record.JAVA_HOME || localStorage.getItem('JAVA_HOME') || JAVA_HOME
   // ANDROID_HOME 路径
   const CURRENT_ANDROID_HOME = props.record.ANDROID_HOME || localStorage.getItem('ANDROID_HOME') || ANDROID_HOME
-  const CURRENT_PYTHON3_PATH = props.record.PYTHON3_PATH || localStorage.getItem('PYTHON3_PATH') || PYTHON3_PATH
+  const CURRENT_PYTEST_PATH = props.record.PYTEST_PATH || localStorage.getItem('PYTEST_PATH') || PYTEST_PATH
   const CURRENT_ALLURE_PATH = props.record.ALLURE_PATH || localStorage.getItem('ALLURE_PATH') || ALLURE_PATH
 
   return (
@@ -112,29 +113,27 @@ const Setting = (props) => {
           />
         </Form.Item>
         <Form.Item
-          label={
-            `PYTHON3_PATH(可执行文件目录)`
-          }
+          label="PYTEST_PATH(可执行文件目录)"
         >
           <Input
-            value={CURRENT_PYTHON3_PATH||''}
+            value={CURRENT_PYTEST_PATH || ''}
             onClick={() => {
               require('electron').remote.dialog.showOpenDialog(
                 {
                   properties: ['openDirectory'],
-                  defaultPath: PYTHON3_PATH,
+                  defaultPath: PYTEST_PATH,
                 },
-                (PYTHON3_PATH) => {
-                  if (PYTHON3_PATH) {
-                    require('electron').remote.process.env.PYTHON3_PATH = PYTHON3_PATH
-                    require('electron').remote.process.env.PATH = require('electron').remote.process.platform !== 'win32'?
-                    `${PYTHON3_PATH}:$PATH`:
-                    `${PYTHON3_PATH};${require('electron').remote.process.env.PATH}`
-                    localStorage.setItem('PYTHON3_PATH', PYTHON3_PATH[0])
+                (PYTEST_PATH) => {
+                  if (PYTEST_PATH) {
+                    require('electron').remote.process.env.PYTEST_PATH = PYTEST_PATH
+                    require('electron').remote.process.env.PATH = require('electron').remote.process.platform !== 'win32'
+                      ? `${PYTEST_PATH}:${require('electron').remote.process.env.PATH}`
+                      : `${PYTEST_PATH};${require('electron').remote.process.env.PATH}`
+                    localStorage.setItem('PYTEST_PATH', PYTEST_PATH[0])
                     props.dispatch({
                       type: 'record/setting',
                       payload: {
-                        PYTHON3_PATH: PYTHON3_PATH[0],
+                        PYTEST_PATH: PYTEST_PATH[0],
                       },
                     })
                   }
@@ -144,12 +143,10 @@ const Setting = (props) => {
           />
         </Form.Item>
         <Form.Item
-          label={
-            `ALLURE_PATH(可执行文件目录)`
-          }
+          label="ALLURE_PATH(可执行文件目录)"
         >
           <Input
-            value={CURRENT_ALLURE_PATH||''}
+            value={CURRENT_ALLURE_PATH || ''}
             onClick={() => {
               require('electron').remote.dialog.showOpenDialog(
                 {
@@ -159,9 +156,9 @@ const Setting = (props) => {
                 (ALLURE_PATH) => {
                   if (ALLURE_PATH) {
                     require('electron').remote.process.env.ALLURE_PATH = ALLURE_PATH
-                    require('electron').remote.process.env.PATH = require('electron').remote.process.platform !== 'win32'?
-                    `${ALLURE_PATH}:$PATH`:
-                    `${ALLURE_PATH};${require('electron').remote.process.env.PATH}`
+                    require('electron').remote.process.env.PATH = require('electron').remote.process.platform !== 'win32'
+                      ? `${ALLURE_PATH}:${require('electron').remote.process.env.PATH}`
+                      : `${ALLURE_PATH};${require('electron').remote.process.env.PATH}`
                     localStorage.setItem('ALLURE_PATH', ALLURE_PATH[0])
                     props.dispatch({
                       type: 'record/setting',

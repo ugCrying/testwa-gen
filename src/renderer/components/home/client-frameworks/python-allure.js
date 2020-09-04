@@ -173,11 +173,7 @@ ${code}`
     }
     return `    @allure.severity("critical")
     def test_action_${this.index++}(self,driver):
-        TouchAction(driver) \
-        .press(x=${_x1}, y=${_y1}) \
-        .move_to(x=${_x2}, y=${_y2}) \
-        .release() \
-        .perform()
+        TouchAction(driver).press(x=${_x1}, y=${_y1}).wait(ms=500).move_to(x=${_x2}, y=${_y2}).release().perform()
     `
   }
 
