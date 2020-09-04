@@ -332,6 +332,7 @@ ipcMain.on(
   'stopRecording',
   () => deviceWindow && deviceWindow.webContents.send('stopRecording'),
 )
+//allure本身自带端口检测功能，此处的端口策略可选
 let port = 1212
 const runAllureCP = (name = '', appName = '') => {
   if (allureCP) allureCP.kill()
