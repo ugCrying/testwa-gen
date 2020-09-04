@@ -36,7 +36,7 @@ export const codeStop = () => {
  */
 export const downCode = (info, recordedActions) => {
   // FIXME: 为何只提供 python 格式导出？
-  const framework = new frameworks.python()
+  const framework = new frameworks.pythonAllure()
   framework.caps = {
     platformName: 'Android',
     automationName: 'UiAutomator2',
