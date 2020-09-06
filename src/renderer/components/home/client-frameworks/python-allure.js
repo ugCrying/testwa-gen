@@ -173,10 +173,13 @@ ${code}`
     if (argus.length === 4 || argus.length === 5) {
       [_x1, _y1, _x2, _y2, _ms = 800] = argus
     } else {
-      [, _x1, _y1, _x2, _y2, _ms = 800] = argus
+      [,, _x1, _y1, _x2, _y2, _ms = 800] = argus
     }
     console.log(argus)
     console.log(_x1, _y1, _x2, _y2, _ms)
+    console.log(
+      `press(x=${_x1}, y=${_y1}).wait(ms=${_ms}).move_to(x=${_x2}, y=${_y2})`,
+    )
     return `${funHeader}TouchAction(driver).press(x=${_x1}, y=${_y1}).wait(ms=${_ms}).move_to(x=${_x2}, y=${_y2}).release().perform()
     `
   }
