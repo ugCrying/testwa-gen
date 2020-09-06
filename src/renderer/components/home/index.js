@@ -259,6 +259,7 @@ export default class Home extends Component {
                 tap.height,
                 tap.widthEnd,
                 tap.heightEnd,
+                800,
               ],
             },
           ],

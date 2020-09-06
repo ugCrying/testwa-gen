@@ -279,6 +279,7 @@ class Device extends Component {
               this.tap.height,
               widthEnd,
               heightEnd,
+              800,
             ],
           },
         ],
