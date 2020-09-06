@@ -151,9 +151,10 @@ ${code}`
   }
 
   codeFor_back() {
-    return `    @allure.severity("critical")
+    const funHeader = this.addFun ? `    @allure.severity("critical")
     def test_action_${this.index++}(self,driver):
-        driver.back()`
+        ` : '        '
+    return `${funHeader}driver.back()`
   }
 
   codeFor_tap(varNameIgnore, varIndexIgnore, x, y) {
@@ -163,6 +164,9 @@ ${code}`
   }
 
   codeFor_swipe(varNameIgnore, varIndexIgnore, x1, y1, x2, y2, ms = 800) {
+    const funHeader = this.addFun ? `    @allure.severity("critical")
+    def test_action_${this.index++}(self,driver):
+        ` : '        '
     // hack：录制时会传入6个变量，从视图中修改时只传入4或5个变量
     let _x1; let _x2; let _y1; let _y2; let _ms
     const argus = Array.from(arguments)
@@ -173,9 +177,7 @@ ${code}`
     }
     console.log(argus)
     console.log(_x1, _y1, _x2, _y2, _ms)
-    return `    @allure.severity("critical")
-    def test_action_${this.index++}(self,driver):
-        TouchAction(driver).press(x=${_x1}, y=${_y1}).wait(ms=${_ms}).move_to(x=${_x2}, y=${_y2}).release().perform()
+    return `${funHeader}TouchAction(driver).press(x=${_x1}, y=${_y1}).wait(ms=${_ms}).move_to(x=${_x2}, y=${_y2}).release().perform()
     `
   }
 
