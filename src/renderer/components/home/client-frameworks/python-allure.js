@@ -29,12 +29,13 @@ class PythonFramework extends Framework {
 # Then you can paste this into a file and simply run with Python
 
 from appium import webdriver
-from time import sleep
+import time
 import allure
 import pytest
 from selenium.common.exceptions import InvalidSessionIdException
 from appium.webdriver.common.touch_action import TouchAction
 import logging
+import sys
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -43,6 +44,13 @@ ${capStr}
 
 EXECUTOR = "${this.serverUrl}"
 # driver = webdriver.Remote(command_executor=EXECUTOR, desired_capabilities=caps)
+
+def sleep(timeLeft = 1):
+    while timeLeft > 0:
+        print('剩余' + str(timeLeft) + 's进入下一步')
+        sys.stdout.flush()
+        time.sleep(1)
+        timeLeft -= 1
 
 def take_screenshot_and_logcat(driver, calling_request):
     __save_log_type(driver, calling_request, "logcat")

@@ -332,7 +332,7 @@ ipcMain.on(
   'stopRecording',
   () => deviceWindow && deviceWindow.webContents.send('stopRecording'),
 )
-//allure本身自带端口检测功能，此处的端口策略可选
+// allure本身自带端口检测功能，此处的端口策略可选
 let port = 1212
 const runAllureCP = (name = '', appName = '') => {
   if (allureCP) allureCP.kill()
@@ -378,7 +378,7 @@ ipcMain.on('startPlayingBackCode', (__, { rawCode, name = '', appName = '' }) =>
   console.log(path, '脚本路径')
   require('fs').writeFile(path, rawCode, () => {
     // FIMXE: require('child_process').spawn 后 runAllure 打包运行报错
-    cp = spawn('pytest', [path, `--alluredir=${join(
+    cp = spawn('pytest', [path, '--capture=no', `--alluredir=${join(
       __dirname,
       '..',
       '..',
@@ -388,6 +388,9 @@ ipcMain.on('startPlayingBackCode', (__, { rawCode, name = '', appName = '' }) =>
       name || '',
     )}`])
     cp.stdout.on('data', (chunk) => {
+      if (chunk.toString().includes('下一步')) {
+        console.log(chunk.toString())
+      }
       mainWindow.webContents.send('log', chunk.toString())
     })
     cp.stderr.on('data', (data) => {
