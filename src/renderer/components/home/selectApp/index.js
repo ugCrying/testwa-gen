@@ -2,9 +2,7 @@
  * 应用列表
  */
 import React, { Component } from 'react'
-import {
-  Icon, Button, Upload, Spin,
-} from 'antd'
+import { Icon, Button, Upload, Spin } from 'antd'
 import { connect } from 'dva'
 import {
   getApkList,
@@ -53,7 +51,7 @@ class APP extends Component {
       <Spin
         size="large"
         tip="加载应用列表..."
-        spinning={!this.props.record.packages}
+        spinning={!this.props.record.packages && !this.props.record.isOverTime}
       >
         <div className={styles['select-app-wrap']}>
           <div className={styles['title-list']}>
@@ -92,14 +90,14 @@ class APP extends Component {
 
           {/* 手机自带的 APP */}
           <div className={styles['app-list-wrap']}>
-            {this.props.record.packages
-              && this.props.record.packages.map((app, index) => (
+            {this.props.record.packages &&
+              this.props.record.packages.map((app, index) => (
                 <div
                   className={
-                      this.state.className === `${app.name}phone`
-                        ? 'app-item selected'
-                        : styles['app-item']
-                    }
+                    this.state.className === `${app.name}phone`
+                      ? 'app-item selected'
+                      : styles['app-item']
+                  }
                   key={index}
                   onClick={this.selectApp.bind(this, app, 'phone')}
                 >
@@ -130,10 +128,10 @@ class APP extends Component {
             {this.apkList.map((app, index) => (
               <div
                 className={
-                      this.state.className === `${app.name}local`
-                        ? 'app-item selected'
-                        : 'app-item'
-                    }
+                  this.state.className === `${app.name}local`
+                    ? 'app-item selected'
+                    : 'app-item'
+                }
                 key={index}
                 onClick={this.selectApp.bind(this, app, 'local')}
               >

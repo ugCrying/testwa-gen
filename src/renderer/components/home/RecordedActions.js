@@ -3,9 +3,7 @@
  * 操作行为模块
  */
 import React, { Component } from 'react'
-import {
-  Tabs, Table, Form, Popconfirm, Input, Select,
-} from 'antd'
+import { Tabs, Table, Form, Popconfirm, Input, Select } from 'antd'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import { vs } from 'react-syntax-highlighter/dist/styles/hljs'
 import { connect } from 'dva'
@@ -39,7 +37,7 @@ const EditableFormRow = Form.create()(EditableRow)
 class EditableCell extends React.Component {
   state = {
     editing: false,
-  };
+  }
 
   toggleEdit = () => {
     const editing = !this.state.editing
@@ -48,7 +46,7 @@ class EditableCell extends React.Component {
         this.input.focus()
       }
     })
-  };
+  }
 
   save = () => {
     const { record, handleSave } = this.props
@@ -57,7 +55,7 @@ class EditableCell extends React.Component {
       this.toggleEdit()
       handleSave({ ...record, ...values })
     })
-  };
+  }
 
   render() {
     const { editing } = this.state
@@ -77,7 +75,14 @@ class EditableCell extends React.Component {
             {(form) => {
               this.form = form
               return editing ? (
-                <FormItem style={{ margin: 0 }}>
+                <FormItem
+                  style={{
+                    margin: 0,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
                   {form.getFieldDecorator(dataIndex, {
                     rules: [
                       {
@@ -90,13 +95,19 @@ class EditableCell extends React.Component {
                     <Input
                       ref={(node) => (this.input = node)}
                       onPressEnter={this.save}
-                    />,
+                      style={{ width: dataIndex === 'action' ? 150 : 240 }}
+                    />
                   )}
                 </FormItem>
               ) : (
                 <div
                   className="editable-cell-value-wrap"
-                  style={{ paddingRight: 24 }}
+                  style={{
+                    paddingRight: 24,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
                   onClick={this.toggleEdit}
                 >
                   {restProps.children}
@@ -164,7 +175,7 @@ class RecordActions extends Component {
       })
     }
     this.setState({ fresh: true })
-  };
+  }
 
   /**
    * 保存行更改
@@ -184,12 +195,13 @@ class RecordActions extends Component {
       })
     }
     this.setState({ fresh: true })
-  };
+  }
 
   getTableData() {
-    this.codes = this.props.record.code && this.props.record.code.value[0]
-      ? this.props.record.code.value
-      : this.props.record.recordedActions
+    this.codes =
+      this.props.record.code && this.props.record.code.value[0]
+        ? this.props.record.code.value
+        : this.props.record.recordedActions
     return (this.codes || []).map(({ action, params }, index) => ({
       action,
       params: params.filter(Boolean).join(','),
@@ -198,9 +210,10 @@ class RecordActions extends Component {
   }
 
   getCode() {
-    const code = this.props.record.code && this.props.record.code.value[0]
-      ? this.props.record.code.value
-      : this.props.record.recordedActions
+    const code =
+      this.props.record.code && this.props.record.code.value[0]
+        ? this.props.record.code.value
+        : this.props.record.recordedActions
     const framework = new frameworks[this.state.actionFramework]()
     framework.actions = code || []
     return framework.getCodeString()
@@ -254,7 +267,9 @@ class RecordActions extends Component {
                 <Select
                   defaultValue="pythonAllure"
                   // @ts-ignore
-                  onChange={(actionFramework) => this.setState({ actionFramework })}
+                  onChange={(actionFramework) =>
+                    this.setState({ actionFramework })
+                  }
                   className={InspectorStyles['framework-dropdown']}
                 >
                   {Object.keys(frameworks).map((f) => (

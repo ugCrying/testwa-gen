@@ -4,6 +4,7 @@ import { client } from 'api/adb'
 import _ from 'lodash'
 import rxdb from '../../db'
 import frameworks from './client-frameworks'
+import { message } from 'antd'
 
 const request = require('request').defaults({
   timeout: 6000,
@@ -71,11 +72,12 @@ export const runCode = (info, recordedActions) => {
   framework.actions = recordedActions
   framework.run_num = localStorage.getItem('run_code_num') || 1
   const rawCode = framework.getCodeString(true)
-  console.log(
-    'rawCode',
+  console.log('rawCode', rawCode)
+  ipcRenderer.send('startPlayingBackCode', {
     rawCode,
-  )
-  ipcRenderer.send('startPlayingBackCode', { rawCode, name: info.name, appName: info.appName })
+    name: info.name,
+    appName: info.appName,
+  })
 }
 
 export const runCodejs = (info, recordedActions) => {
@@ -92,17 +94,14 @@ export const runCodejs = (info, recordedActions) => {
   framework.actions = recordedActions
   framework.run_num = localStorage.getItem('run_code_num') || 1
   const rawCode = framework.getCodeString(true)
-  console.log(
-    'rawCode',
-    rawCode,
-  )
+  console.log('rawCode', rawCode)
   ipcRenderer.send('startPlayingBackCode', rawCode)
 }
 export const record = () => {
   ipcRenderer.send(
     'startRecording',
     device,
-    require('electron').remote.BrowserWindow.getFocusedWindow().id,
+    require('electron').remote.BrowserWindow.getFocusedWindow().id
   )
   // @ts-ignore
   // ipcRenderer.sendTo(localStorage.getItem("deviceWinId"), "record");
@@ -116,7 +115,7 @@ export const onSelectAPK = async ({ name, path }) => {
   console.log('启动应用')
   client.shell(
     device.id,
-    `monkey -p ${apkData.package} -c android.intent.category.LAUNCHER 1`,
+    `monkey -p ${apkData.package} -c android.intent.category.LAUNCHER 1`
   )
   console.log('获取应用信息')
   fetch(`http://127.0.0.1:50819/packages/${apkData.package}/info`)
@@ -142,33 +141,66 @@ export const onSelectPackage = async ({ packageName, activityName, name }) => {
   device.activityName = activityName
 }
 
-const getDeviceApp = () => new Promise((resolve, reject) => {
-  request.get('/package', async (err, res, packages) => {
-    // 失败轮训
-    // FIXME: 超时次数 / 时间
-    if (err || !_.get(packages, 'value')) {
-      // await Timeout.set(500)
-      return getDeviceApp().then(resolve)
-    }
-    resolve(
-      JSON.parse(packages.value),
-    )
+const getDeviceApp = (timeout, overTime) =>
+  new Promise((resolve, reject) => {
+    request.get('/package', (err, res, packages) => {
+      let isOverTime = overTime.isOverTime
+      // 失败轮训
+      // FIXME: 超时次数 / 时间
+      console.log('packages', packages)
+      if (err || !_.get(packages, 'value')) {
+        if (!isOverTime) {
+          return getDeviceApp(timeout, overTime)
+            .then((res) => {
+              resolve(res)
+            })
+            .catch((err) => {
+              reject(err)
+            })
+        } else {
+          return reject({ packages: undefined, isOverTime: isOverTime, err })
+        }
+      } else {
+        clearTimeout(timeout)
+        return resolve({
+          packages: JSON.parse(packages.value),
+          isOverTime,
+          err,
+        })
+      }
+    })
   })
-})
 
 /**
  * 获取设备下 app
  * @param {*} dispatch
  */
 export const getPackages = (dispatch) => {
-  getDeviceApp().then((packages = []) => {
-    dispatch({
-      type: 'record/packages',
-      payload: {
-        packages,
-      },
+  let overTime = { isOverTime: false }
+  let timeout = setTimeout(() => {
+    overTime.isOverTime = true
+  }, 5000)
+  getDeviceApp(timeout, overTime)
+    .then(({ packages, isOverTime }) => {
+      dispatch({
+        type: 'record/packages',
+        payload: {
+          packages,
+          isOverTime,
+        },
+      })
     })
-  })
+    .catch(({ packages, isOverTime, err }) => {
+      console.log(err)
+      message.error('获取设备APP超时，请点击刷新重试')
+      dispatch({
+        type: 'record/packages',
+        payload: {
+          packages,
+          isOverTime,
+        },
+      })
+    })
 }
 
 /**
@@ -197,26 +229,25 @@ export const getCodes = async (cb) => {
 }
 
 // eslint-disable-next-line no-async-promise-executor
-export const getApkList = () => new Promise(async (resolve, reject) => {
-  const db = await rxdb
-  // @ts-ignore
-  db.apk
-    .find()
-    .exec()
-  db.apk.find().$.subscribe((apkList = []) => {
-    const result = apkList.filter((apk) => {
-      try {
-        fs.statSync(apk.path)
-        return true
-      } catch (e) {
-      // @ts-ignore
-        db.apk.remove(apk)
-        return false
-      }
+export const getApkList = () =>
+  new Promise(async (resolve, reject) => {
+    const db = await rxdb
+    // @ts-ignore
+    db.apk.find().exec()
+    db.apk.find().$.subscribe((apkList = []) => {
+      const result = apkList.filter((apk) => {
+        try {
+          fs.statSync(apk.path)
+          return true
+        } catch (e) {
+          // @ts-ignore
+          db.apk.remove(apk)
+          return false
+        }
+      })
+      resolve(result)
     })
-    resolve(result)
   })
-})
 
 /**
  * 监听设备信息
@@ -235,8 +266,9 @@ export const trackDevices = async (dispatch) => {
     device.cpu = properties['ro.product.cpu.abi']
     device.sdk = properties['ro.build.version.sdk']
     device.release = properties['ro.build.version.release']
-    const screens = new RegExp(/Override size: ([^\r?\n]+)*/g).exec(screen)
-      || new RegExp(/Physical size: ([^\r?\n]+)*/g).exec(screen)
+    const screens =
+      new RegExp(/Override size: ([^\r?\n]+)*/g).exec(screen) ||
+      new RegExp(/Physical size: ([^\r?\n]+)*/g).exec(screen)
     screens
       ? (device.screen = screens[1].trim())
       : console.error(`${device.id} 获取分辨率失败`, screen.toString())
@@ -260,7 +292,7 @@ export const trackDevices = async (dispatch) => {
     console.error(e.message, '获取设备信息失败')
   }
 
-  (await client.trackDevices()).on('changeSet', async (changes) => {
+  ;(await client.trackDevices()).on('changeSet', async (changes) => {
     if (!changes.removed.length && !changes.changed.length) return
     for (const device of changes.removed) {
       console.log(device.id, '离开')
