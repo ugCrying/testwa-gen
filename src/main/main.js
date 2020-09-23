@@ -34,7 +34,7 @@ if (process.platform !== 'win32') {
     Object.assign(process.env, ret)
   }
 }
-
+process.env.ALLURE_PORT=''
 // TODO: 窗口刷新时再次检查
 emitter.on('needAdbUsbPermission', (deviceId) => {
   mainWindow && mainWindow.webContents.send('needAdbUsbPermission', deviceId)
@@ -350,7 +350,7 @@ const runAllureCP = (name = '', appName = '') => {
     name || '',
   )
   // FIXME: 解构用 exec 报错
-  allureCP = require('child_process').exec(`allure serve -p ${port++} -h localhost ${p}`)
+  allureCP = require('child_process').exec(`allure serve -p ${process.env.ALLURE_PORT||port++} -h localhost ${p}`)
   allureCP.stdout.on('data', (chunk) => {
     mainWindow.webContents.send('log', chunk.toString())
   })
