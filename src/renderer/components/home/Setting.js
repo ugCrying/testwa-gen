@@ -11,7 +11,7 @@ const JAVA_HOME = require('electron').remote.process.env.JAVA_HOME || ''
 const ANDROID_HOME = require('electron').remote.process.env.ANDROID_HOME || ''
 const PYTEST_PATH = require('electron').remote.process.env.PYTEST_PATH || ''
 const ALLURE_PATH = require('electron').remote.process.env.ALLURE_PATH || ''
-
+const ALLURE_PORT=require('electron').remote.process.env.ALLURE_PORT = localStorage.getItem('ALLURE_PORT')||''
 if (localStorage.getItem('PYTEST_PATH')) {
   require('electron').remote.process.env.PATH = require('electron').remote.process.platform !== 'win32'
     ? `${localStorage.getItem('PYTEST_PATH')}:${require('electron').remote.process.env.PATH}`
@@ -29,6 +29,7 @@ const Setting = (props) => {
   const CURRENT_ANDROID_HOME = props.record.ANDROID_HOME || localStorage.getItem('ANDROID_HOME') || ANDROID_HOME
   const CURRENT_PYTEST_PATH = props.record.PYTEST_PATH || localStorage.getItem('PYTEST_PATH') || PYTEST_PATH
   const CURRENT_ALLURE_PATH = props.record.ALLURE_PATH || localStorage.getItem('ALLURE_PATH') || ALLURE_PATH
+  const CURRENT_ALLURE_PORT = props.record.ALLURE_PORT || localStorage.getItem('ALLURE_PORT') || ALLURE_PORT
 
   return (
     <Row>
@@ -169,6 +170,25 @@ const Setting = (props) => {
                   }
                 },
               )
+            }}
+          />
+        </Form.Item>
+        
+        <Form.Item label="ALLURE端口">
+          <InputNumber
+            min={1}
+            precision={0}
+            value={props.record.ALLURE_PORT||+CURRENT_ALLURE_PORT||1212}
+            onChange={(value) => {
+              // @ts-ignore
+              localStorage.setItem('ALLURE_PORT', value||'')
+              require('electron').remote.process.env.ALLURE_PORT = value
+              props.dispatch({
+                type: 'record/setting',
+                payload: {
+                  ALLURE_PORT: value,
+                },
+              })
             }}
           />
         </Form.Item>
